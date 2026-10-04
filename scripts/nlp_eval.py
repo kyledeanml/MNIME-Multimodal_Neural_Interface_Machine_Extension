@@ -14,7 +14,7 @@ except ImportError:
 # Ensure paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
-MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "MNIME-Core-1.5B-Q4_K_M.gguf")
+MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "MNIME-Core-V5-Q4_K_M.gguf")
 
 if not os.path.exists(MODEL_PATH):
     print(f"Error: Model not found at {MODEL_PATH}")

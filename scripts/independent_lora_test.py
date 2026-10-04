@@ -97,7 +97,7 @@ def run_lora_injection(model_path: str, lora_path: str = None, lora_scale: float
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Standalone test for GGUF + LoRA Adapter integration.")
-    parser.add_argument("--model", type=str, default="../models/MNIME-Core-1.5B-Q4_K_M.gguf", help="Path to the base GGUF model")
+    parser.add_argument("--model", type=str, default="../models/MNIME-Core-V5-Q4_K_M.gguf", help="Path to the base GGUF model")
     parser.add_argument("--lora", type=str, default="", help="Path to the LoRA adapter GGUF file")
     parser.add_argument("--scale", type=float, default=1.0, help="Scaling factor for the LoRA adapter")
     parser.add_argument("--prompt", type=str, default="Summarize the core capabilities of MNIME in 3 sentences.", help="Prompt to feed the model")

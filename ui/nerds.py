@@ -344,13 +344,13 @@ class StatsBenchmarkWorker(QThread):
             return
 
         from core.app_icon import get_resource_path
-        model_path = get_resource_path(os.path.join("models", "MNIME-Core-1.5B-Q4_K_M.gguf"))
+        model_path = get_resource_path(os.path.join("models", "MNIME-Core-V5-Q4_K_M.gguf"))
         if not os.path.exists(model_path):
             self.log_message.emit(f"Model file not found at: {model_path}", "ERROR")
             self.finished.emit({})
             return
 
-        self.log_message.emit("Loading MNIME-Core-1.5B-Q4_K_M.gguf (auto GPU offload enabled)...", "INFO")
+        self.log_message.emit("Loading MNIME-Core-V5-Q4_K_M.gguf (auto GPU offload enabled)...", "INFO")
         t0_load = time.time()
         try:
             llm = Llama(
@@ -1037,7 +1037,7 @@ class StatsForNerdsDialog(QDialog):
 
         # Initial Welcome Message in Terminal
         self._append_log("MNIME Stats & Performance Telemetry Console ready.", "INFO")
-        self._append_log("Bundled Model: MNIME-Core-1.5B-Q4_K_M.gguf | GPU Layer Offloading: Auto (-1)", "INFO")
+        self._append_log("Bundled Model: MNIME-Core-V5-Q4_K_M.gguf | GPU Layer Offloading: Auto (-1)", "INFO")
 
     def _create_res_item(self, header: str, value: str, val_color: str) -> QVBoxLayout:
         vbox = QVBoxLayout()

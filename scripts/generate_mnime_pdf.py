@@ -626,7 +626,7 @@ def build_body(styles):
         ["License",   "Open Source (see Section 14)"],
         ["Author",    "kyledeanml / KyleDeanAI"],
         ["Repository", "https://github.com/kyledeanml/MNIME"],
-        ["NLP Model",  "KyleDeanAI/MNIME-Core-1.5B-Q4_K_M (HuggingFace)"],
+        ["NLP Model",  "KyleDeanAI/MNIME-Core-V5-Q4_K_M (HuggingFace)"],
         ["Network",   "Fully Offline — Zero external API calls"],
     ]
     story.append(spec_table(ov_data))
@@ -817,7 +817,7 @@ def build_body(styles):
         ]),
         ("4.10", "NLP Chat & RAG", "NLP", [
             ("Interface", "Conversational chat panel with message history"),
-            ("Model", "MNIME-Core-1.5B-Q4_K_M.gguf (Qwen2.5 1.5B fine-tuned)"),
+            ("Model", "MNIME-Core-V5-Q4_K_M.gguf (Qwen2.5 1.5B fine-tuned)"),
             ("RAG", "Queries first run through FAISS semantic search; top-5 chunks fed as context to the model"),
             ("Context Window", "4,096 tokens"),
             ("Max Response", "1,024 tokens"),
@@ -874,7 +874,7 @@ def build_body(styles):
         ["Smart Filename",   "max_tokens=20, thread-locked for safety"],
         ["Chat Response",    "max_tokens=1,024, stop on <|im_end|>"],
         ["Reference Brief",  "max_tokens=1,024, structured comparative analysis prompt"],
-        ["HuggingFace",      "KyleDeanAI/MNIME-Core-1.5B-Q4_K_M"],
+        ["HuggingFace",      "KyleDeanAI/MNIME-Core-V5-Q4_K_M"],
     ]
     story.append(spec_table(nlp_data))
 
@@ -1085,7 +1085,7 @@ def build_body(styles):
     story.append(Paragraph("8.2  Run from Source", S["h2"]))
 
     steps = [
-        ("<b>Download the NLP Model</b>: Go to <font color='#00e5ff'>huggingface.co/KyleDeanAI/MNIME-Core-1.5B-Q4_K_M</font>, download the .gguf file, and place it in the <font color='#39ff14'>models/</font> directory.", None),
+        ("<b>Download the NLP Model</b>: Go to <font color='#00e5ff'>huggingface.co/KyleDeanAI/MNIME-Core-V5-Q4_K_M</font>, download the .gguf file, and place it in the <font color='#39ff14'>models/</font> directory.", None),
         ("<b>Run setup.bat</b>: Creates a Python 3.12+ virtual environment and installs all dependencies from requirements.txt.", "setup.bat"),
         ("<b>Launch</b>: Double-click <font color='#39ff14'>run.bat</font>, or from terminal:", ".venv\\Scripts\\python.exe MNIME.py"),
         ("<b>Pin to Taskbar</b>: Run <font color='#39ff14'>create_shortcut.bat</font> to generate a Desktop shortcut, then right-click → Pin to taskbar.", None),
@@ -1270,7 +1270,7 @@ def build_body(styles):
             "Improved: Ethical reasoning engine actively deconstructs hate tropes and demographic stereotypes using empirical sociology rather than generic refusal templates.",
         ]),
         ("MNIME Final — Bundled NLP Model", [
-            "Changed: The fine-tuned MNIME-Core-1.5B-Q4_K_M.gguf model is now bundled directly inside the application under models/. No external model download required.",
+            "Changed: The fine-tuned MNIME-Core-V5-Q4_K_M.gguf model is now bundled directly inside the application under models/. No external model download required.",
             "Removed: The Settings gear icon and NLP hardware configuration dialog have been removed. Hardware offloading is handled automatically at runtime.",
             "Removed: The finetuning workflow (training/) is no longer part of the repository. The model is shipped as a finished artifact.",
             "Added: Custom animated PyQt6 installer (MNIME_installer.exe).",

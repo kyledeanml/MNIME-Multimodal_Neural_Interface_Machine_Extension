@@ -285,7 +285,7 @@ class CoverPage(Flowable):
             ("Lead Architect:", "Kyle Bauer / kyledeanml (Bellevue College AISD)"),
             ("Interface Subsystem:", "PyQt6 6.7+ Frameless Obsidian Desktop Engine (60 FPS)"),
             ("Document Engine:", "PyMuPDF (C-Accelerated Fitz Core) & Win32 GDI Spooler"),
-            ("Neural Subsystem:", "MNIME-Core 1.5B (GGUF Q4_K_M) + Neural Assimilation Engine"),
+            ("Neural Subsystem:", "MNIME-Core V5 (GGUF Q4_K_M) + Neural Assimilation Engine"),
             ("Vector Persistence:", "FAISS Vector Store + Persistent %LOCALAPPDATA% Global Index")
         ]
 
@@ -438,7 +438,7 @@ def generate_pdf(output_pdf: str, cover_png: str):
          "Includes single-instance named pipe IPC, prompt sanitization, high-DPI Windows print spooling, and Win32 taskbar registration."),
         
         ("Layer 3: Neural & Cognitive Subsystem",
-         "core/nlp_engine.py, core/fusion_engine.py, models/MNIME-Core-1.5B-Q4_K_M.gguf",
+         "core/nlp_engine.py, core/fusion_engine.py, models/MNIME-Core-V5-Q4_K_M.gguf",
          "Singleton inference coordinator powered by llama.cpp. Executes quantized 1.5B parameter language modeling, dynamic LoRA adapter attachment, "
          "and the Neural Assimilation Engine for background asynchronous weight delta ingestion and TIES model merging."),
         

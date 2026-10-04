@@ -255,7 +255,7 @@ class CoverPage(Flowable):
         # Metadata rows
         meta_items = [
             ("Author & Lead:", "Kyle Bauer / kyledeanml (Bellevue College AISD)"),
-            ("Primary Engine:", "PyQt6 / PyMuPDF / llama.cpp (MNIME-Core 1.5B GGUF)"),
+            ("Primary Engine:", "PyQt6 / PyMuPDF / llama.cpp (MNIME-Core V5 GGUF)"),
             ("Packaging:", "PyInstaller (Modern Animated)"),
             ("Source Dataset:", "IDE Logs, Git Commits (040+), Transcripts & Pytest Suite"),
             ("Generation Source:", f"Dynamic Artifact generated from CHANGE_LOG.txt")
@@ -511,7 +511,7 @@ def generate_pdf(changelog_path: str, output_pdf_path: str, cover_png_path: str 
         [Paragraph("<b>Operating System</b>", styles["card_label"]), Paragraph(meta.get("target_os", "Windows 11 (x64)"), styles["card_val"]),
          Paragraph("<b>Runtime</b>", styles["card_label"]), Paragraph("Python 3.12.8 (64-bit)", styles["card_val"])],
         [Paragraph("<b>Framework</b>", styles["card_label"]), Paragraph("PyQt6 v6.7+ with OpenGL QPainter", styles["card_val"]),
-         Paragraph("<b>Local Model</b>", styles["card_label"]), Paragraph("MNIME-Core 1.5B (GGUF Q4_K_M)", styles["card_val"])],
+         Paragraph("<b>Local Model</b>", styles["card_label"]), Paragraph("MNIME-Core V5 (GGUF Q4_K_M)", styles["card_val"])],
         [Paragraph("<b>Document Engine</b>", styles["card_label"]), Paragraph("PyMuPDF 1.24+ / pypdf / pdf2docx", styles["card_val"]),
          Paragraph("<b>Print Subsystem</b>", styles["card_label"]), Paragraph("Native Win32 GDI (ctypes, PrintDlgW)", styles["card_val"])],
         [Paragraph("<b>Workspace URI</b>", styles["card_label"]), Paragraph(meta.get("workspace", "b:\\Desktop\\BASSD\\..."), styles["card_val"]),
