@@ -317,7 +317,7 @@ MNIME includes a telemetry dashboard and benchmarking suite (`ui/nerds.py` & `be
   </a>
 </p>
 
-> **MNIME Build Process & Change Log** — Interactive document outlining the complete engineering lifecycle from initial repository genesis through 5D vector mathematics, local neural engine integration, dual-installer packaging, and 22 forensic IDE conversation sessions.
+> **MNIME Build Process & Change Log** — Interactive document outlining the complete engineering lifecycle from initial repository genesis through 5D vector mathematics, local neural engine integration, dual-installer packaging, and forensic IDE conversation sessions.
 
 ---
 
