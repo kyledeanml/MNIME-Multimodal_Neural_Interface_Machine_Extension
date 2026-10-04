@@ -17,7 +17,7 @@ if not os.path.exists('version_info.txt'):
   ]
 )''')
 
-datas = [('MN.ico', '.'), ('models/*', 'models')]
+datas = [('MN.ico', '.'), ('models', 'models')]
 binaries = []
 hiddenimports = [
     'pymupdf',
