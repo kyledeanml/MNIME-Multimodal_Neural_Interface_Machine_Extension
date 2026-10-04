@@ -172,7 +172,7 @@ build_app.bat
   </a>
 </p>
 
-> **Project Architecture & Subsystem Schematics** — Interactive 4-page system architecture manual detailing the 4-layer decoupled topology, 60 FPS non-blocking `QThread` concurrency, the Neural Assimilation Engine (TIES model merging), and dual-tier FAISS vector memory.
+> **Project Architecture & Subsystem Schematics** — 4-page system architecture manual detailing the 4-layer decoupled topology, 60 FPS non-blocking `QThread` concurrency, the Neural Assimilation Engine (TIES model merging), and dual-tier FAISS vector memory.
 
 <details>
 <summary><b>Expand Repository Directory Tree</b></summary>
