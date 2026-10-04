@@ -158,97 +158,99 @@ build_app.bat
 
 ## Project Architecture
 
-```
-MNIME/
-├── core/                  # Core processing engine
-│   ├── __init__.py
-│   ├── app_icon.py        # Win32 icons & window properties
-│   ├── file_item.py       # Data model & thumbnail caching
-│   ├── ipc.py             # Single-instance IPC mechanism
-│   ├── logging_setup.py   # Application logging setup
-│   ├── nlp_engine.py      # GGUF model integration via llama-cpp
-│   ├── pdf_engine.py      # PyMuPDF engine, DOCX & image conversion
-│   ├── print_engine.py    # High-DPI printing & rendering
-│   ├── search_engine.py   # FAISS vector indexing & RAG retrieval
-│   ├── text_safety.py     # Prompt parsing & text sanitization
-│   ├── version.py         # Application version constants
-│   ├── windows_integration.py # Windows taskbar & OS integrations
-│   └── worker.py          # Asynchronous QThread background worker
-├── models/                # Local GGUF model directory
-│   └── MNIME-Core-1.5B-Q4_K_M.gguf
-├── ui/                    # Desktop GUI components (PyQt6)
-│   ├── __init__.py
-│   ├── action_bar.py      # Action buttons & task progress bar
-│   ├── carousel_view.py   # Horizontal file gallery slider
-│   ├── cursor_fx.py       # Custom particle cursor effects
-│   ├── document_viewer.py # Canvas renderer for documents
-│   ├── file_card.py       # Interactive card widget for queued files
-│   ├── file_dialog.py     # Dark metallic custom file browser
-│   ├── icons.py           # Vector SVG icon manager
-│   ├── image_editor.py    # Image visual editing interface
-│   ├── main_window.py     # Primary application window coordinator
-│   ├── merge_particles.py # Physics-based vortex & particle VFX
-│   ├── minimize_animation.py # Window minimize animations
-│   ├── nlp_view.py        # Local RAG & NLP chat console
-│   ├── output_view.py     # Real-time execution log console
-│   ├── pdf_editor.py      # Visual PDF page editor suite
-│   ├── reader_dialog.py   # Independent frameless document reader
-│   ├── nerds.py           # Real-time telemetry & performance HUD
-│   └── tabs_bar.py        # Application navigation bar
-├── docs/                  # Media & cover artwork assets
-│   ├── changelog_cover.png# Interactive change log preview cover
-│   ├── paper_cover.png    # Research paper preview cover
-│   └── spec_cover.png     # Specification sheet preview cover
-├── paper/                 # Research paper LaTeX source & PDF
-│   ├── MNIME_paper.pdf    # Compiled research paper
-│   ├── MNIME_paper.tex    # LaTeX manuscript source
-│   ├── acl.sty            # ACL formatting style sheet
-│   ├── acl_natbib.bst     # ACL bibliography style sheet
-│   ├── mnime_refs.bib     # Citation database
-│   └── template_ref.tex   # Reference template
-├── scripts/               # Utility & PDF generation scripts
-│   ├── fetch_models.py           # Automated model downloader
-│   ├── generate_changelog_pdf.py # Dynamic Change Log PDF & cover generator
-│   └── generate_mnime_pdf.py     # Specification manual PDF generator
-├── tests/                 # Automated test suite
-│   ├── test_ipc_parse.py
-│   ├── test_nlp_conversational_fallback.py
-│   ├── test_nlp_indexing.py
-│   ├── test_nlp_sanitize.py
-│   ├── test_pdf_engine.py
-│   ├── test_print_engine.py
-│   ├── test_stats_telemetry.py
-│   └── test_windows_integration.py
-├── training/              # Neural fine-tuning & datasets
-│   ├── clean_v4_dataset.py
-│   ├── generate_v4_philosophy_dataset.py
-│   ├── generate_v5_antibias_dataset.py
-│   ├── mnime_v3_dataset_clean.jsonl
-│   ├── mnime_v4_philosophy_dataset_clean.jsonl
-│   ├── mnime_v5_antibias_dataset_clean.jsonl
-│   └── train_mnime.py
-├── CHANGE_LOG.txt         # Comprehensive forensic build & session change log
-├── MNIME_Change_Log.pdf   # Interactive compiled change log & build history
-├── MNIME_paper.pdf        # Research paper PDF
-├── MNIME_Spec_Manual.pdf  # Specification & user manual PDF
-├── MN.ico                 # Multi-resolution application icon
-├── MNIME.py               # Application entry point
-├── custom_installer.py    # Standalone PyQt6 installer UI
-├── MNIME.spec             # Main application PyInstaller spec
-├── MNIME_installer.spec   # Custom installer PyInstaller spec
-├── benchmark.py           # Standalone empirical NLP benchmarking tool
-├── build_app.bat          # Master compilation & packaging script
-├── install_mnime.bat      # One-click local installer script
-├── run.bat                # Launch application script
-├── run_tests.bat          # Test runner script
-├── setup.bat              # Virtual environment initialization script
-├── update_changelog.bat   # Script to update changelog
-├── pyproject.toml         # Build system configuration
-├── requirements.txt       # Python dependency specifications
-├── version_info.txt       # Version build details
-├── LICENSE                # MIT Open Source License
-└── README.md              # Project documentation
-```
+<pre><code>
+<font color=&#x27;#00e5ff&#x27;&gt;<b>MNIME/</b></font>
+├── <font color=&#x27;#00e5ff&#x27;&gt;<b>core/</b></font>                   <font color='#888888'># Core processing engine</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;__init__.py</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;app_icon.py</font>         <font color='#888888'># Win32 icons & window properties</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;file_item.py</font>        <font color='#888888'># Data model & thumbnail caching</font>
+│   ├── <font color=\'#39ff14\'>fusion_engine.py</font>      <font color=\'#888888\'># Neural Assimilation Engine (Weight Fusion)</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;ipc.py</font>              <font color='#888888'># Single-instance IPC mechanism</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;logging_setup.py</font>    <font color='#888888'># Application logging setup</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;nlp_engine.py</font>       <font color='#888888'># GGUF model integration via llama-cpp</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;pdf_engine.py</font>       <font color='#888888'># PyMuPDF engine, DOCX & image conversion</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;print_engine.py</font>     <font color='#888888'># High-DPI printing & rendering</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;search_engine.py</font>    <font color='#888888'># FAISS vector indexing & RAG retrieval</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;text_safety.py</font>      <font color='#888888'># Prompt parsing & text sanitization</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;version.py</font>          <font color='#888888'># Application version constants</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;windows_integration.py</font>  <font color='#888888'># Windows taskbar & OS integrations</font>
+│   └── <font color=&#x27;#39ff14&#x27;&gt;worker.py</font>           <font color='#888888'># Asynchronous QThread background worker</font>
+├── <font color=&#x27;#00e5ff&#x27;&gt;<b>models/</b></font>                 <font color='#888888'># Local GGUF model directory</font>
+│   └── <font color=&#x27;#ffd700&#x27;&gt;MNIME-Core-1.5B-Q4_K_M.gguf</font>
+├── <font color=&#x27;#00e5ff&#x27;&gt;<b>ui/</b></font>                     <font color='#888888'># Desktop GUI components (PyQt6)</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;__init__.py</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;action_bar.py</font>       <font color='#888888'># Action buttons & task progress bar</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;carousel_view.py</font>    <font color='#888888'># Horizontal file gallery slider</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;cursor_fx.py</font>        <font color='#888888'># Custom particle cursor effects</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;document_viewer.py</font>  <font color='#888888'># Canvas renderer for documents</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;file_card.py</font>        <font color='#888888'># Interactive card widget for queued files</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;file_dialog.py</font>      <font color='#888888'># Dark metallic custom file browser</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;icons.py</font>            <font color='#888888'># Vector SVG icon manager</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;image_editor.py</font>     <font color='#888888'># Image visual editing interface</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;main_window.py</font>      <font color='#888888'># Primary application window coordinator</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;merge_particles.py</font>  <font color='#888888'># Physics-based vortex & particle VFX</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;minimize_animation.py</font>  <font color='#888888'># Window minimize animations</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;nlp_view.py</font>         <font color='#888888'># Local RAG & NLP chat console</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;output_view.py</font>      <font color='#888888'># Real-time execution log console</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;pdf_editor.py</font>       <font color='#888888'># Visual PDF page editor suite</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;reader_dialog.py</font>    <font color='#888888'># Independent frameless document reader</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;nerds.py</font>            <font color='#888888'># Real-time telemetry & performance HUD</font>
+│   └── <font color=&#x27;#39ff14&#x27;&gt;tabs_bar.py</font>         <font color='#888888'># Application navigation bar</font>
+├── <font color=&#x27;#00e5ff&#x27;&gt;<b>docs/</b></font>                   <font color='#888888'># Media & cover artwork assets</font>
+│   ├── <font color=&#x27;#ff00ff&#x27;&gt;changelog_cover.png</font> <font color='#888888'># Interactive change log preview cover</font>
+│   ├── <font color=&#x27;#ff00ff&#x27;&gt;paper_cover.png</font>     <font color='#888888'># Research paper preview cover</font>
+│   └── <font color=&#x27;#ff00ff&#x27;&gt;spec_cover.png</font>      <font color='#888888'># Specification sheet preview cover</font>
+├── <font color=&#x27;#00e5ff&#x27;&gt;<b>paper/</b></font>                  <font color='#888888'># Research paper LaTeX source & PDF</font>
+│   ├── <font color=&#x27;#ff00ff&#x27;&gt;MNIME_paper.pdf</font>     <font color='#888888'># Compiled research paper</font>
+│   ├── <font color=&#x27;#ffd700&#x27;&gt;MNIME_paper.tex</font>     <font color='#888888'># LaTeX manuscript source</font>
+│   ├── <font color=&#x27;#ffd700&#x27;&gt;acl.sty</font>             <font color='#888888'># ACL formatting style sheet</font>
+│   ├── <font color=&#x27;#ffd700&#x27;&gt;acl_natbib.bst</font>      <font color='#888888'># ACL bibliography style sheet</font>
+│   ├── <font color=&#x27;#ffd700&#x27;&gt;mnime_refs.bib</font>      <font color='#888888'># Citation database</font>
+│   └── <font color=&#x27;#ffd700&#x27;&gt;template_ref.tex</font>    <font color='#888888'># Reference template</font>
+├── <font color=&#x27;#00e5ff&#x27;&gt;<b>scripts/</b></font>                <font color='#888888'># Utility & PDF generation scripts</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;fetch_models.py</font>            <font color='#888888'># Automated model downloader</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;generate_changelog_pdf.py</font>  <font color='#888888'># Dynamic Change Log PDF & cover generator</font>
+│   └── <font color=&#x27;#39ff14&#x27;&gt;generate_mnime_pdf.py</font>      <font color='#888888'># Specification manual PDF generator</font>
+├── <font color=&#x27;#00e5ff&#x27;&gt;<b>tests/</b></font>                  <font color='#888888'># Automated test suite</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;test_ipc_parse.py</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;test_nlp_conversational_fallback.py</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;test_nlp_indexing.py</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;test_nlp_sanitize.py</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;test_pdf_engine.py</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;test_print_engine.py</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;test_stats_telemetry.py</font>
+│   └── <font color=&#x27;#39ff14&#x27;&gt;test_windows_integration.py</font>
+├── <font color=&#x27;#00e5ff&#x27;&gt;<b>training/</b></font>               <font color='#888888'># Neural fine-tuning & datasets</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;clean_v4_dataset.py</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;generate_v4_philosophy_dataset.py</font>
+│   ├── <font color=&#x27;#39ff14&#x27;&gt;generate_v5_antibias_dataset.py</font>
+│   ├── <font color=&#x27;#ffd700&#x27;&gt;mnime_v3_dataset_clean.jsonl</font>
+│   ├── <font color=&#x27;#ffd700&#x27;&gt;mnime_v4_philosophy_dataset_clean.jsonl</font>
+│   ├── <font color=&#x27;#ffd700&#x27;&gt;mnime_v5_antibias_dataset_clean.jsonl</font>
+│   └── <font color=&#x27;#39ff14&#x27;&gt;train_mnime.py</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;CHANGE_LOG.txt</font>          <font color='#888888'># Comprehensive forensic build & session change log</font>
+├── <font color=&#x27;#ff00ff&#x27;&gt;MNIME_Change_Log.pdf</font>    <font color='#888888'># Interactive compiled change log & build history</font>
+├── <font color=&#x27;#ff00ff&#x27;&gt;MNIME_paper.pdf</font>         <font color='#888888'># Research paper PDF</font>
+├── <font color=&#x27;#ff00ff&#x27;&gt;MNIME_Spec_Manual.pdf</font>   <font color='#888888'># Specification & user manual PDF</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;MN.ico</font>                  <font color='#888888'># Multi-resolution application icon</font>
+├── <font color=&#x27;#39ff14&#x27;&gt;MNIME.py</font>                <font color='#888888'># Application entry point</font>
+├── <font color=&#x27;#39ff14&#x27;&gt;custom_installer.py</font>     <font color='#888888'># Standalone PyQt6 installer UI</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;MNIME.spec</font>              <font color='#888888'># Main application PyInstaller spec</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;MNIME_installer.spec</font>    <font color='#888888'># Custom installer PyInstaller spec</font>
+├── <font color=&#x27;#39ff14&#x27;&gt;benchmark.py</font>            <font color='#888888'># Standalone empirical NLP benchmarking tool</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;build_app.bat</font>           <font color='#888888'># Master compilation & packaging script</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;install_mnime.bat</font>       <font color='#888888'># One-click local installer script</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;run.bat</font>                 <font color='#888888'># Launch application script</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;run_tests.bat</font>           <font color='#888888'># Test runner script</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;setup.bat</font>               <font color='#888888'># Virtual environment initialization script</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;update_changelog.bat</font>    <font color='#888888'># Script to update changelog</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;pyproject.toml</font>          <font color='#888888'># Build system configuration</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;requirements.txt</font>        <font color='#888888'># Python dependency specifications</font>
+├── <font color=&#x27;#ffd700&#x27;&gt;version_info.txt</font>        <font color='#888888'># Version build details</font>
+├── LICENSE                 <font color='#888888'># MIT Open Source License</font>
+└── <font color=&#x27;#ffd700&#x27;&gt;README.md</font>               <font color='#888888'># Project documentation</font>
+</code></pre>
+
 
 ---
 
