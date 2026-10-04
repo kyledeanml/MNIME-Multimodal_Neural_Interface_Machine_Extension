@@ -899,3 +899,11 @@ END OF CHANGE LOG - MNIME v2.1 RELEASE BUILD
 - Paper: training section corrected to match train_mnime.py (10 examples, r=16, alpha=16, attention+MLP, batch 2x4, 60 steps).
 - Restored training/ scripts locally (git-ignored).
 
+[2026-10-03] Session 25: MNIME V3 Massive Dataset & Evaluation Framework
+- Created a separate parallel workspace (`MNIME_V3_Training`) to safeguard the V2.1 production release during massive training scale-up.
+- Developed `build_v3_dataset.py` to download `databricks-dolly-15k`, filter for document QA/extraction, format to Alpaca JSONL, and inject MNIME identity weights (50x).
+- Built `clean_dataset.py` to purge AI refusals and low-effort responses, yielding a pristine 4,792-entry dataset.
+- Shared `training/mnime_v3_dataset_clean.jsonl` in the main repo (updated `.gitignore` to allow tracking).
+- Built `scripts/nlp_eval.py` to empirically benchmark models with precise Token-level F1 and ROUGE-L metrics against ground-truth datasets.
+- Updated `README.md` and `MNIME_paper.tex` to officially document the release of the V3 massive dataset.
+

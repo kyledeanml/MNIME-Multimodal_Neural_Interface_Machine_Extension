@@ -51,7 +51,8 @@ paper/
 *.gguf
 AGENTS.md
 # Training — excluded entirely now that the GGUF is bundled in models/
-training/
+training/*
+!training/mnime_v3_dataset_clean.jsonl
 unsloth_compiled_cache/
 models/
 version_info.txt

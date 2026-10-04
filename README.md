@@ -77,6 +77,7 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
 
 `MNIME-Core-1.5B-Q4_K_M.gguf` is a fine-tuned version of `Qwen2.5-1.5B-Instruct`, quantized to Q4_K_M, specialized for high-density document synthesis, extraction, and cross-referencing.
 
+- **V3 Massive Training Dataset**: We have released `training/mnime_v3_dataset_clean.jsonl` (4.7k high-quality, filtered document Q&A and extraction pairs) for training V3 architectures. This dataset merges Databricks Dolly 15k subsets with identity-preserving weights, strictly filtered for AI refusals.
 - **Model Download**: Download the model from [KyleDeanAI/MNIME-Core-1.5B-Q4_K_M](https://huggingface.co/KyleDeanAI/MNIME-Core-1.5B-Q4_K_M) and place it inside the `models/` directory.
 - **Hardware Acceleration**: Automatically offloads layers to available GPU VRAM (NVIDIA CUDA / Vulkan / Metal) via `llama-cpp-python`.
 
