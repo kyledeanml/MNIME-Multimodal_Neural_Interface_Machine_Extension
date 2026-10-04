@@ -77,7 +77,9 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
 
 `MNIME-Core-1.5B-Q4_K_M.gguf` is a fine-tuned version of `Qwen2.5-1.5B-Instruct`, quantized to Q4_K_M, specialized for high-density document synthesis, extraction, and cross-referencing.
 
-- **V3 Massive Training Dataset**: We have released `training/mnime_v3_dataset_clean.jsonl` (4.7k high-quality, filtered document Q&A and extraction pairs) for training V3 architectures. This dataset merges Databricks Dolly 15k subsets with identity-preserving weights, strictly filtered for AI refusals.
+- **V3 Massive Training Dataset**: We have released `training/mnime_v3_dataset_clean.jsonl` (5,482 high-quality, filtered document Q&A and extraction pairs) for training V3 architectures. This dataset merges Databricks Dolly 15k subsets with identity-preserving weights, strictly filtered for AI refusals.
+- **V4 Cloud Philosophy Dataset**: We have also drafted `training/mnime_v4_philosophy_dataset_clean.jsonl` (15,000 synthetic examples) engineered for the forthcoming GCP cloud fine-tuning phase. It integrates advanced philosophical instruction (Stoicism, Existentialism) with rigorous prompt-injection immunity and hallucination traps.
+- **V5 Ethics & Empathy Alignment**: To eliminate systemic bigotry and prejudice, we constructed `training/mnime_v5_antibias_dataset_clean.jsonl` (20,000 synthetic examples). This equips MNIME to actively deconstruct hate tropes via sociological rigor and empirical logic rather than relying on generic refusals.
 - **Model Download**: Download the model from [KyleDeanAI/MNIME-Core-1.5B-Q4_K_M](https://huggingface.co/KyleDeanAI/MNIME-Core-1.5B-Q4_K_M) and place it inside the `models/` directory.
 - **Hardware Acceleration**: Automatically offloads layers to available GPU VRAM (NVIDIA CUDA / Vulkan / Metal) via `llama-cpp-python`.
 

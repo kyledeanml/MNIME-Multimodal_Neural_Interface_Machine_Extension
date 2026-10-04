@@ -170,6 +170,12 @@ Phase 10: Interactive Change Log System & Forensic Documentation (October 3,
     compilation.
   - Linked interactive badges and 300 DPI cover preview artwork into README.md.
 
+Phase 11: V3 & V4 Massive Dataset Generation and Training (October 3, 2026)
+  - V3 Fine-Tuning Pipeline: Generated a 5,482-example synthetic dataset (`mnime_v3_dataset_clean.jsonl`) for robust local LoRA fine-tuning using Qwen2.5-1.5B-Instruct on an RTX 3060.
+  - Bypassed PyTorch 2.5/Unsloth torchao dependency bugs by rewiring `train_mnime.py` to use pure HuggingFace `trl`, `peft`, and `bitsandbytes` (4-bit NF4).
+  - V4 Cloud Upgrade Preparation: Drafted an expansive 15,000-example philosophical and empathic conversation dataset (`mnime_v4_philosophy_dataset_clean.jsonl`), systematically scrubbed of AI slop and hardened against prompt injections, ready for deployment to a GCP T4 VM instance.
+  - V5 Anti-Bias Architecture: Developed a 20,000-example dataset (`mnime_v5_antibias_dataset_clean.jsonl`) dedicated to bias mitigation and hate elimination by training the model to employ sociological rigor and logical deconstruction to refute prejudice.
+
 
 3. DETAILED IDE SESSIONS LOG & ROOT CAUSE ANALYSES
 --------------------------------------------------------------------------------
