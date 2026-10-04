@@ -270,6 +270,13 @@ $\alpha=16$ to all attention and MLP projection matrices
 
 \paragraph{V5 Ethics \& Empathy Alignment.} To ensure the highest standards of safety and inclusivity, the V5 phase (\texttt{training/mnime\_v5\_antibias\_dataset\_clean.jsonl}) provides an additional 20,000 synthetic examples targeting bias mitigation and hate elimination. This dataset trains the model to actively deconstruct prejudiced statements and refuse bigoted inquiries by employing sociological logic and empirical evidence rather than opaque, unhelpful refusal templates.
 
+\subsection{Synthetic Dataset Generation Methodology}
+
+To achieve the vast scale required for the V4 and V5 alignment phases without relying on expensive human annotation, we engineered a programmatic synthetic generation pipeline. Using highly-structured Python heuristics, our pipeline deterministically generates tens of thousands of instruction-input-output pairs. 
+
+For the \textbf{V4 Philosophy} dataset, the pipeline dynamically maps core philosophical frameworks (e.g., Stoicism, Existentialism) against simulated user emotional distress prompts. It then generates empathic, Socratic, or framework-specific responses. Concurrently, a secondary pipeline explicitly injects adversarial robustness checks—such as generating fake literary queries or simulated jailbreak attempts—to hardcode hallucination rejection into the model weights.
+
+For the \textbf{V5 Ethics} dataset, the generation scripts randomize common prejudiced tropes and systemic bias inquiries. The deterministic output templates counter these with rigorous sociological deconstructions, teaching the model to identify the flaw in the bigoted premise and respond with empirical inclusivity. All generated datasets undergo an automated "slop" parsing phase, stripping out generic AI refusal phrases (e.g., "As an AI language model...") to preserve the model's grounded, humanistic voice.
 \subsection{Training Configuration}
 
 While initial attempts leveraged the \texttt{unsloth}~\cite{unsloth2024} framework, critical PyTorch dependency conflicts required a comprehensive pipeline restructure. The finalized V3 local training pipeline bypasses Unsloth entirely, employing standard HuggingFace architectures via \texttt{trl}, \texttt{peft}, and \texttt{bitsandbytes} (4-bit NF4 precision). The local V3 training was conducted on a dedicated workstation equipped with an AMD Ryzen 9 7950X 16-Core processor, 64\,GB DDR5 6000\,MHz RAM, and an NVIDIA GeForce RTX 3060 Ventus 12\,GB GPU. Subsequent V4 and V5 alignment phases target deployment on Google Cloud Platform T4/L4 instances.
