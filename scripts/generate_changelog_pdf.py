@@ -99,7 +99,7 @@ class NumberedCanvas(pdfgen_canvas.Canvas):
         self.drawString(MARGIN, 3.5 * mm, "Source: CHANGE_LOG.txt   |   Bellevue College AISD   |   kyledeanml/MNIME")
 
         self.setFillColor(ACCENT_BLUE)
-        self.drawRightString(w - MARGIN, 3.5 * mm, "Windows 11 (x64)   |   Release 2.1")
+        self.drawRightString(w - MARGIN, 3.5 * mm, "Windows 11 (x64)   |   Release 5.0")
         self.restoreState()
 
 
@@ -126,7 +126,7 @@ class GlowLine(Flowable):
 
 class CoverPage(Flowable):
     """High-aesthetic front cover with interactive styling and 5D Penteract projection."""
-    def __init__(self, w: float, h: float, version: str = "2.1", date_str: str = "October 2026"):
+    def __init__(self, w: float, h: float, version: str = "5.0", date_str: str = "October 2026"):
         super().__init__()
         self.w = w
         self.h = h
@@ -463,7 +463,7 @@ def generate_pdf(changelog_path: str, output_pdf_path: str, cover_png_path: str 
 
     # 1. COVER PAGE
     meta = parsed.get("metadata", {})
-    ver = meta.get("version", "2.1")
+    ver = meta.get("version", "5.0")
     story.append(CoverPage(PAGE_W, PAGE_H, version=ver, date_str=meta.get("created", "October 2026")))
     story.append(NextPageTemplate("content"))
     story.append(PageBreak())

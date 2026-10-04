@@ -166,7 +166,7 @@ build_app.bat
 
 <p align="center">
   <a href="MNIME_Architecture.pdf">
-    <img src="docs/architecture_cover.png?v=1" alt="MNIME Project Architecture & Schematics" width="480">
+    <img src="docs/architecture_cover.png?v=2" alt="MNIME Project Architecture & Schematics" width="480">
   </a>
 </p>
 

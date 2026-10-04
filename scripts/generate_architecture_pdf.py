@@ -99,7 +99,7 @@ class NumberedCanvas(pdfgen_canvas.Canvas):
         self.drawString(MARGIN, 3.5 * mm, "Source: Architecture Blueprint   |   Bellevue College AISD   |   kyledeanml/MNIME")
 
         self.setFillColor(ACCENT_BLUE)
-        self.drawRightString(w - MARGIN, 3.5 * mm, "Windows 11 (x64)   |   Release 2.1")
+        self.drawRightString(w - MARGIN, 3.5 * mm, "Windows 11 (x64)   |   Release 5.0")
         self.restoreState()
 
 
@@ -154,7 +154,7 @@ class SectionTag(Flowable):
 
 class CoverPage(Flowable):
     """High-aesthetic front cover with interactive styling and 5D Penteract projection."""
-    def __init__(self, w: float, h: float, version: str = "2.1", date_str: str = "October 2026"):
+    def __init__(self, w: float, h: float, version: str = "5.0", date_str: str = "October 2026"):
         super().__init__()
         self.w = w
         self.h = h
@@ -407,7 +407,7 @@ def generate_pdf(output_pdf: str, cover_png: str):
     # ═════════════════════════════════════════════════════════════════════════
     # PAGE 1: COVER
     # ═════════════════════════════════════════════════════════════════════════
-    story.append(CoverPage(PAGE_W, PAGE_H, version="2.1"))
+    story.append(CoverPage(PAGE_W, PAGE_H, version="5.0"))
     story.append(NextPageTemplate("content"))
     story.append(PageBreak())
 
@@ -652,7 +652,7 @@ def generate_pdf(output_pdf: str, cover_png: str):
         [Paragraph("<b>DEEP DIVE C — WINDOWS 11 INTEGRATION & ZERO-CLOUD ASSURANCE</b>", styles["card_title"])],
         [Paragraph(
             "MNIME conforms strictly to Windows 11 platform standards while maintaining absolute cryptographic data isolation:<br/><br/>"
-            "• <b>Win32 Taskbar & Shell Integration:</b> Sets explicit <code>AppUserModelID</code> (<code>MNIME.DocumentSuite.2.1</code>) via Win32 ctypes, "
+            "• <b>Win32 Taskbar & Shell Integration:</b> Sets explicit <code>AppUserModelID</code> (<code>MNIME.Desktop</code>) via Win32 ctypes, "
             "preventing grouped grouping with generic python.exe taskbar icons and embedding native multi-resolution ICO assets.<br/>"
             "• <b>Named Pipe IPC Protocol:</b> A local IPC server running on the main Qt thread intercepts subsequent launches of MNIME, forwarding CLI file paths to "
             "the running instance and bringing the window to foreground without spinning duplicate processes.<br/>"
