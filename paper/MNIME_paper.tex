@@ -89,7 +89,7 @@ core contributions:
     \item A \textbf{ten-mode multimodal processing pipeline} covering
     PDF merge, edit, compress, convert, and intelligent bookmark generation,
     executed via native C-level routines for minimal latency.
-    \item \textbf{MNIME-Core}, a fine-tuned 1.5B-parameter GGUF model
+    \item \textbf{MNIME-Core-V5}, a fine-tuned GGUF model
     specialized for document reasoning, cross-referencing, and
     retrieval-augmented conversational question answering over user-loaded
     corpora.
@@ -102,7 +102,7 @@ core contributions:
 Figure~\ref{fig:architecture} illustrates the high-level architecture.
 Section~\ref{sec:related} reviews related work.
 Section~\ref{sec:system} details the system design.
-Section~\ref{sec:model} describes the MNIME-Core fine-tuning.
+Section~\ref{sec:model} describes the MNIME-Core-V5 fine-tuning.
 Section~\ref{sec:eval} presents projected performance characteristics.
 Section~\ref{sec:conclusion} concludes.
 
@@ -233,7 +233,7 @@ index shifts, avoiding widget teardown/rebuild for even 5,000 loaded files.
 Thumbnails and SVG icons are rasterized once and cached, eliminating CPU
 resampling during scroll events.
 
-\section{MNIME-Core Fine-Tuning}
+\section{MNIME-Core-V5 Fine-Tuning}
 \label{sec:model}
 
 \subsection{Base Model and Quantization}
@@ -249,17 +249,17 @@ between model quality and memory footprint ($\approx$1.0\,GB).
 
 
 
-To ensure MNIME-Core remains highly responsive, accurate, and empathetic, we structured the fine-tuning process across a multi-stage, hybrid compute pipeline. This separates foundational QA alignment (trained locally) from expansive philosophical, ethical, and anti-bias instruction (trained via high-compute cloud instances and fused locally).
+To ensure MNIME-Core-V5 remains highly responsive, accurate, and empathetic, we structured the fine-tuning process across a multi-stage, hybrid compute pipeline. This separates foundational QA alignment (trained locally) from expansive philosophical, ethical, and anti-bias instruction (trained via high-compute cloud instances and fused locally).
 
 \paragraph{Stage 1: Foundational V3 Local Training.} The foundational V3 phase aligns the base \texttt{Qwen2.5-1.5B-Instruct} weights to MNIME's core identity, focusing on closed QA, document summarization, and information extraction. Using a highly filtered 5,482-example subset of Databricks Dolly 15k (\path{training/mnime_v3_dataset_clean.jsonl}), the model was trained locally on an NVIDIA RTX 3060 (12\,GB VRAM). The pipeline employs HuggingFace \texttt{trl}, \texttt{peft}, and \texttt{bitsandbytes} to execute 4-bit NF4 Low-Rank Adaptation (LoRA)~\cite{hu2021lora}.
 
 \paragraph{Stage 2: V4 Philosophy \& Robustness Cloud Upgrade.} Following the foundational local training, the model weights were elevated through a cloud fine-tuning phase on Google Cloud Platform (GCP) accelerators. The V4 phase utilized a synthetically engineered 15,000-example dataset (\path{training/mnime_v4_philosophy_dataset_clean.jsonl}) designed to impart ontological discourse (Stoicism, Existentialism) and conversational empathy. Concurrently, adversarial prompt injections and hallucination traps were embedded directly into the training corpus to hardcode resilience against jailbreaks. The resulting adapter was merged back into the base matrix in full fp16 precision.
 
-\paragraph{Stage 3: V5 Ethics, Empathy, \& Anti-Bias Alignment.} The culminating alignment phase directly eliminates prejudice, stereotypes, and systemic bigotry. Using a 20,000-example synthetic dataset (\path{training/mnime_v5_antibias_dataset_clean.jsonl}), MNIME-Core was trained to actively deconstruct prejudiced statements using sociological evidence and empirical logic rather than relying on evasive, generic AI refusal templates. All training examples were algorithmically scrubbed of superficial chatbot phraseology to ensure the final MNIME persona remains grounded, authentically humanistic, and intellectually rigorous.
+\paragraph{Stage 3: V5 Ethics, Empathy, \& Anti-Bias Alignment.} The culminating alignment phase directly eliminates prejudice, stereotypes, and systemic bigotry. Using a 20,000-example synthetic dataset (\path{training/mnime_v5_antibias_dataset_clean.jsonl}), MNIME-Core-V5 was trained to actively deconstruct prejudiced statements using sociological evidence and empirical logic rather than relying on evasive, generic AI refusal templates. All training examples were algorithmically scrubbed of superficial chatbot phraseology to ensure the final MNIME persona remains grounded, authentically humanistic, and intellectually rigorous.
 
 \subsection{The Neural Assimilation Engine}
 
-To ensure MNIME is not merely a static interface but an actively evolving cognitive architecture, the application integrates a \textit{Neural Assimilation Engine} (NAE). While MNIME-Core operates as a resilient logical scribe, users can asynchronously digest and fuse external, specialized domain weights into the core matrix. 
+To ensure MNIME is not merely a static interface but an actively evolving cognitive architecture, the application integrates a \textit{Neural Assimilation Engine} (NAE). While MNIME-Core-V5 operates as a resilient logical scribe, users can asynchronously digest and fuse external, specialized domain weights into the core matrix. 
 
 Operating directly on full-precision (fp16/bf16) HuggingFace \texttt{safetensors} representations, the NAE utilizes streaming tensor-level fusion techniques (such as TIES-merging and linear task-vector interpolation). The engine isolates parameter deltas ($\Delta W = W_{\text{donor}} - W_{\text{base}}$), applies magnitude density pruning, resolves sign conflicts through majority voting, and assimilates the high-value specialized weights without overwriting core reasoning pathways or inducing catastrophic forgetting. Once fused, the resulting matrix is converted directly to multi-precision GGUF targets (including Q8\_0 and Q4\_K\_M) for immediate local execution.
 
@@ -288,7 +288,7 @@ Inference context & 4,096 tokens \\
 Quantization & Q4\_K\_M (post-training) \\
 \bottomrule
 \end{tabular}
-\caption{MNIME-Core training and deployment configuration.}
+\caption{MNIME-Core-V5 training and deployment configuration.}
 \label{tab:training}
 \end{table}
 
@@ -437,16 +437,16 @@ following published LoRA scaling results~\cite{hu2021lora}.
 \midrule
 GPT-4o-mini$^\ast$             & 0.61 & 0.79 & No \\
 Qwen2.5-1.5B (base)$^\ast$     & 0.38 & 0.51 & Yes \\
-\textbf{MNIME-Core} (proj.)    & \textbf{0.54} & \textbf{0.71} & \textbf{Yes} \\
+\textbf{MNIME-Core-V5} (proj.) & \textbf{0.54} & \textbf{0.71} & \textbf{Yes} \\
 \bottomrule
 \end{tabular}
 \caption{\textit{(Projected)} Theoretical NLP quality on cross-referencing (XRef) and
 document-grounded QA (DocQA). $^\ast$Published benchmark figures;
-MNIME-Core values are theoretical projections extrapolated from LoRA fine-tuning scaling results.}
+MNIME-Core-V5 values are theoretical projections extrapolated from LoRA fine-tuning scaling results.}
 \label{tab:nlp_quality}
 \end{table}
 
-Projected MNIME-Core performance represents $\approx$88\% of
+Projected MNIME-Core-V5 performance represents $\approx$88\% of
 GPT-4o-mini's cross-referencing quality and $\approx$90\% of its
 document QA F1, with zero network dependency.
 The expected improvement over the base model is grounded in published
@@ -458,7 +458,7 @@ at comparable parameter counts and step budgets.
 
 In lightweight mode (NLP disabled), overall process memory footprint stabilizes
 at $\approx$1.0\,GB, encompassing the PyQt6 desktop framework and C-accelerated
-document processing engines. When MNIME-Core is activated, total process working
+document processing engines. When MNIME-Core-V5 is activated, total process working
 set increases to $\approx$1.8--1.9\,GB, with $\approx$800--900\,MB dedicated to
 quantized weights and tensor contexts.
 Based on published \texttt{llama-cpp-python} throughput for Q4\_K\_M 1.5B models,
@@ -468,7 +468,7 @@ $\approx$2.4\,s (CPU-only), with sustained generation at $\approx$48\,tokens/s (
 \paragraph{Empirical Validation.}
 To validate these projections, direct on-device empirical benchmarks were
 conducted on the reference workstation (AMD Ryzen 9 7950X, 64\,GB DDR5 6000\,MHz RAM,
-NVIDIA GeForce RTX 3060 Ventus 12\,GB) using the bundled MNIME-Core model.
+NVIDIA GeForce RTX 3060 Ventus 12\,GB) using the bundled MNIME-Core-V5 model.
 The measured empirical performance validated the feasibility of sub-2B local AI:
 the model achieved a prompt-context evaluation throughput of \textbf{495.89\,tokens/s}
 (151.24\,ms for 75 tokens), a first-token latency of \textbf{0.08\,s}, and a sustained
@@ -493,7 +493,7 @@ MNIME provides these users with modern AI document assistance without
 requiring any privacy trade-offs.
 
 \paragraph{Fine-Tuning Payoff.}
-The projected 16-point ROUGE-L improvement of MNIME-Core over the
+The projected 16-point ROUGE-L improvement of MNIME-Core-V5 over the
 Qwen2.5-1.5B base model on cross-referencing (Table~\ref{tab:nlp_quality})
 is consistent with published LoRA fine-tuning results at comparable
 rank and step budgets~\cite{hu2021lora}, suggesting that
@@ -503,7 +503,7 @@ This aligns with findings in instruction tuning
 literature~\cite{wei2022flan,ouyang2022instructgpt}.
 
 \paragraph{Limitations.}
-MNIME-Core's 1.5B parameter count limits its reasoning depth on complex
+MNIME-Core-V5's 1.5B base parameter count limits its reasoning depth on complex
 multi-hop questions relative to frontier models.
 While runtime inference supports up to 4,096 tokens, training sequence length
 was constrained to 2,048 tokens, requiring chunked retrieval for longer documents.
@@ -521,14 +521,14 @@ formal accuracy benchmark suites remain a priority for subsequent work.
 \label{sec:conclusion}
 
 We have presented \textbf{MNIME}, a fully local, offline multimodal document
-processing system that integrates a fine-tuned 1.5B-parameter LLM with a
+processing system that integrates the fine-tuned MNIME-Core-V5 model with a
 high-throughput C-accelerated PDF engine and a premium PyQt6 desktop
 interface.
 MNIME demonstrates that competitive document AI---including semantic search,
 cross-referencing, and conversational RAG---is achievable entirely on-device
 on consumer hardware, without any external API calls.
 
-Theoretical performance projections suggest that MNIME-Core should
+Theoretical performance projections suggest that MNIME-Core-V5 should
 achieve approximately 88--90\% of GPT-4o-mini's NLP quality on
 document-specific tasks after LoRA fine-tuning, while the O(1) carousel
 architecture is designed to maintain 60\,FPS responsiveness with up to
