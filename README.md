@@ -83,6 +83,12 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
 - **Model Download**: Download the model from [KyleDeanAI/MNIME-Core-1.5B-Q4_K_M](https://huggingface.co/KyleDeanAI/MNIME-Core-1.5B-Q4_K_M) and place it inside the `models/` directory.
 - **Hardware Acceleration**: Automatically offloads layers to available GPU VRAM (NVIDIA CUDA / Vulkan / Metal) via `llama-cpp-python`.
 
+### The Neural Assimilation Engine
+MNIME isn't just a static interface—it's designed to evolve. At its foundation, MNIME-Core acts as a highly disciplined logical scribe and assistant. However, with the built-in **Neural Assimilation Engine**, users have the power to transform MNIME into virtually anything.
+
+By simply dragging and dropping a customized donor model (e.g., a heavily trained medical diagnoser, a master Python coder, or a creative writing engine) into MNIME, the Assimilation Engine runs a background asynchronous fusion process. Using advanced weight-fusion techniques (like TIES-merging), it isolates the high-value parameter deltas of the new model and safely injects them into MNIME's core matrix without overwriting its fundamental logical resilience or causing catastrophic forgetting. You aren't just switching models; you are feeding and growing a singular, ultra-customized brain tailored exactly to your specific workflow.
+
+
 ---
 
 ## Setup & Installation
