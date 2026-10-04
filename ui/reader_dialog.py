@@ -1,10 +1,11 @@
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, 
     QMessageBox, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem,
-    QSplitter, QTreeWidget, QTreeWidgetItem, QComboBox, QFileDialog
+    QSplitter, QTreeWidget, QTreeWidgetItem, QComboBox, QWidget,
+    QFrame, QGraphicsDropShadowEffect
 )
-from PyQt6.QtCore import Qt, QRectF, QRect, QPoint, pyqtSignal
-from PyQt6.QtGui import QPixmap, QPainter, QColor, QPen, QImage
+from PyQt6.QtCore import Qt, QRectF, QPoint, pyqtSignal, QTimer
+from PyQt6.QtGui import QPixmap, QPainter, QColor, QFont, QPen, QImage
 import os
 
 
@@ -66,7 +67,6 @@ class ReaderPageView(QGraphicsView):
         )
 
         if fit_view:
-            from PyQt6.QtCore import QTimer
             QTimer.singleShot(10, self._fit_to_view)
 
     def _fit_to_view(self):
@@ -148,15 +148,12 @@ class ReaderDialog(QDialog):
             self.page_label.setText("No document loaded. Click 'Add Files' to open a PDF or image.")
 
     def _setup_ui(self):
-        from PyQt6.QtWidgets import QFrame, QGraphicsDropShadowEffect
         central_layout = QVBoxLayout(self)
         central_layout.setContentsMargins(10, 10, 10, 10)
         
         class WatermarkFrame(QFrame):
             def paintEvent(self, event):
                 super().paintEvent(event)
-                from PyQt6.QtGui import QPainter, QFont, QPen, QColor
-                from PyQt6.QtCore import Qt
                 painter = QPainter(self)
                 painter.setRenderHint(QPainter.RenderHint.Antialiasing)
                 font = QFont("Segoe UI Black", 80, QFont.Weight.Black)
@@ -261,7 +258,6 @@ class ReaderDialog(QDialog):
         splitter.addWidget(left_widget)
         
         # Right: Viewer
-        from PyQt6.QtWidgets import QWidget
         right_widget = QWidget() # simple container
         right_layout = QVBoxLayout(right_widget)
         right_layout.setContentsMargins(0, 0, 0, 0)
@@ -455,7 +451,6 @@ class ReaderDialog(QDialog):
 
             self._render_page(render_scale=new_scale, fit_view=False)
 
-            from PyQt6.QtCore import QTimer
             def restore_scroll():
                 h_bar.setValue(int(h_ratio * h_bar.maximum()))
                 v_bar.setValue(int(v_ratio * v_bar.maximum()))
