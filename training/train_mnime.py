@@ -34,7 +34,7 @@ def formatting_prompts_func(examples):
 def main():
     # 2. Load Model & Tokenizer
     model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name = "unsloth/Qwen2.5-1.5B-Instruct",
+        model_name = "v4_out/MNIME-Core-V4-merged",
         max_seq_length = max_seq_length,
         dtype = dtype,
         load_in_4bit = load_in_4bit,
@@ -56,7 +56,7 @@ def main():
     )
 
     # 4. Data Preparation
-    dataset = load_dataset("json", data_files="mnime_dataset.jsonl", split="train")
+    dataset = load_dataset("json", data_files="mnime_v5_antibias_dataset_clean.jsonl", split="train")
     assert isinstance(dataset, Dataset)
     dataset = dataset.map(formatting_prompts_func, batched = True)
 
@@ -82,7 +82,7 @@ def main():
             weight_decay = 0.01,
             lr_scheduler_type = "linear",
             seed = 3407,
-            output_dir = "outputs",
+            output_dir = "v5_out",
             dataloader_num_workers = 0, # FORCE single process dataloader on windows
         ),
     )
@@ -90,8 +90,8 @@ def main():
     trainer.train()
 
     # 6. Export to GGUF
-    print("Exporting model to MNIME-Core-1.5B-Q4_K_M.gguf...")
-    model.save_pretrained_gguf("MNIME-Core", tokenizer, quantization_method = "q4_k_m")
+    print("Exporting model to MNIME-Core-V5-Q4_K_M.gguf...")
+    model.save_pretrained_gguf("MNIME-Core-V5", tokenizer, quantization_method = "q4_k_m")
     print("Done! Model exported successfully.")
 
 

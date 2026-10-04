@@ -102,12 +102,20 @@ class InstallWorker(QThread):
         
         if not DRY_RUN:
             # Uninstaller and Registry Registration
-            desktop = os.path.join(os.environ.get('USERPROFILE', ''), 'Desktop', 'MNIME.lnk')
+            import winreg
+            try:
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders") as key:
+                    desktop_dir = winreg.QueryValueEx(key, "Desktop")[0]
+                    desktop_dir = os.path.expandvars(desktop_dir)
+            except Exception:
+                desktop_dir = os.path.join(os.environ.get('USERPROFILE', ''), 'Desktop')
+            desktop = os.path.join(desktop_dir, 'MNIME.lnk')
             start_menu = os.path.join(os.environ.get('APPDATA', ''), 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'MNIME.lnk')
             target = os.path.join(install_dir, 'MNIME.exe')
             icon = os.path.join(install_dir, 'MN.ico')
             display_icon = icon if os.path.exists(icon) else f"{target},0"
             uninst_bat = os.path.join(install_dir, 'uninstall.bat')
+            uninst_vbs = os.path.join(install_dir, 'uninstall.vbs')
             
             # Write uninstaller script into install directory
             localapp = os.environ.get('LOCALAPPDATA', '')
@@ -141,6 +149,8 @@ class InstallWorker(QThread):
                 "\r\n"
                 ":: Remove shortcuts\r\n"
                 f"if exist \"{desktop}\" del /f /q \"{desktop}\" >nul 2>&1\r\n"
+                f"if exist \"%USERPROFILE%\\Desktop\\MNIME.lnk\" del /f /q \"%USERPROFILE%\\Desktop\\MNIME.lnk\" >nul 2>&1\r\n"
+                f"if exist \"%USERPROFILE%\\OneDrive\\Desktop\\MNIME.lnk\" del /f /q \"%USERPROFILE%\\OneDrive\\Desktop\\MNIME.lnk\" >nul 2>&1\r\n"
                 f"if exist \"{start_menu}\" del /f /q \"{start_menu}\" >nul 2>&1\r\n"
                 "\r\n"
                 ":: Remove application logs\r\n"
@@ -168,6 +178,8 @@ class InstallWorker(QThread):
             try:
                 with open(uninst_bat, "w", encoding="utf-8") as f:
                     f.write(uninstaller_content)
+                with open(uninst_vbs, "w", encoding="utf-8") as f:
+                    f.write('Set WshShell = CreateObject("WScript.Shell")\nWshShell.Run chr(34) & "' + uninst_bat + '" & chr(34), 0\nSet WshShell = Nothing\n')
             except Exception:
                 pass
                 
@@ -177,12 +189,11 @@ class InstallWorker(QThread):
                 import winreg
                 with winreg.CreateKey(winreg.HKEY_CURRENT_USER, key_path) as key:
                     winreg.SetValueEx(key, "DisplayName", 0, winreg.REG_SZ, "MNIME")
-                    winreg.SetValueEx(key, "DisplayVersion", 0, winreg.REG_SZ, "2.1")
                     winreg.SetValueEx(key, "Publisher", 0, winreg.REG_SZ, "MNIME")
                     winreg.SetValueEx(key, "InstallLocation", 0, winreg.REG_SZ, install_dir)
                     winreg.SetValueEx(key, "DisplayIcon", 0, winreg.REG_SZ, f"{display_icon},0" if display_icon.endswith('.ico') else display_icon)
-                    winreg.SetValueEx(key, "UninstallString", 0, winreg.REG_SZ, f'"{uninst_bat}"')
-                    winreg.SetValueEx(key, "QuietUninstallString", 0, winreg.REG_SZ, f'"{uninst_bat}"')
+                    winreg.SetValueEx(key, "UninstallString", 0, winreg.REG_SZ, f'wscript.exe "{uninst_vbs}"')
+                    winreg.SetValueEx(key, "QuietUninstallString", 0, winreg.REG_SZ, f'wscript.exe "{uninst_vbs}"')
                     winreg.SetValueEx(key, "EstimatedSize", 0, winreg.REG_DWORD, max(1, total_size_bytes // 1024))
                     winreg.SetValueEx(key, "InstallDate", 0, winreg.REG_SZ, time.strftime("%Y%m%d"))
                     winreg.SetValueEx(key, "NoModify", 0, winreg.REG_DWORD, 1)
@@ -206,11 +217,10 @@ class InstallWorker(QThread):
                 try:
                     cmd = (
                         f'reg add "HKCU\\{key_path}" /v "DisplayName" /t REG_SZ /d "MNIME" /f & '
-                        f'reg add "HKCU\\{key_path}" /v "DisplayVersion" /t REG_SZ /d "2.1" /f & '
                         f'reg add "HKCU\\{key_path}" /v "Publisher" /t REG_SZ /d "MNIME" /f & '
                         f'reg add "HKCU\\{key_path}" /v "InstallLocation" /t REG_SZ /d "{install_dir}" /f & '
                         f'reg add "HKCU\\{key_path}" /v "DisplayIcon" /t REG_SZ /d "{display_icon}" /f & '
-                        f'reg add "HKCU\\{key_path}" /v "UninstallString" /t REG_SZ /d "\"{uninst_bat}\"" /f & '
+                        f'reg add "HKCU\\{key_path}" /v "UninstallString" /t REG_SZ /d "wscript.exe \\"{uninst_vbs}\\"" /f & '
                         f'reg add "HKCU\\{key_path}" /v "EstimatedSize" /t REG_DWORD /d {max(1, total_size_bytes // 1024)} /f & '
                         f'reg add "HKCU\\{key_path}" /v "NoModify" /t REG_DWORD /d 1 /f & '
                         f'reg add "HKCU\\{key_path}" /v "NoRepair" /t REG_DWORD /d 1 /f & '

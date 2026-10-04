@@ -49,7 +49,7 @@ image processing with an integrated, fine-tuned large language model (LLM)
 running entirely on-device.
 Built with Python and PyQt6, MNIME combines a C-accelerated PDF engine
 (PyMuPDF), a FAISS-backed semantic retrieval layer with persistent global memory caching, and
-\texttt{MNIME-Core-1.5B-Q4\_K\_M}, a quantized 1.5B-parameter model
+\texttt{MNIME-Core-V5-Q4\_K\_M}, a quantized 1.5B-parameter model
 fine-tuned from Qwen2.5-1.5B-Instruct featuring dynamic LoRA adapter injection for document-centric reasoning tasks
 including cross-referencing, semantic bookmarking, and conversational
 retrieval-augmented generation (RAG).
@@ -179,7 +179,7 @@ maintaining 60 FPS UI responsiveness with real-time progress indicators.
 \subsection{NLP and RAG Engine}
 
 The NLP engine (\texttt{core/nlp\_engine.py}) loads
-\texttt{MNIME-Core-1.5B-Q4\_K\_M.gguf} via \texttt{llama-cpp-python}
+\texttt{MNIME-Core-V5-Q4\_K\_M.gguf} via \texttt{llama-cpp-python}
 with automatic NVIDIA GPU layer offloading (\texttt{n\_gpu\_layers=-1}).
 On systems without a GPU, the model runs fully in CPU mode with
 acceptable latency for conversational interaction.
@@ -593,8 +593,8 @@ Two installation channels are available:
     (Inno Setup wizard) or \texttt{MNIME\_installer.exe} (custom animated
     PyQt6 installer), available in the \texttt{installer/} directory.
     \item \textbf{Source}: Clone the repository, download
-    \texttt{MNIME-Core-1.5B-Q4\_K\_M.gguf} from Hugging Face
-    (\url{https://huggingface.co/KyleDeanAI/MNIME-Core-1.5B-Q4_K_M}),
+    \texttt{MNIME-Core-V5-Q4\_K\_M.gguf} from Hugging Face
+    (\url{https://huggingface.co/KyleDeanAI/MNIME-Core-V5-Q4_K_M}),
     place it in \texttt{models/}, then run \texttt{setup.bat} followed by
     \texttt{run.bat}.
 \end{enumerate}

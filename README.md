@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/Python-3.10%2B-00e5ff.svg?style=flat-square" alt="Python Version">
   <img src="https://img.shields.io/badge/Platform-Windows%2011%20%7C%2010-00e5ff.svg?style=flat-square" alt="Platform">
   <img src="https://img.shields.io/badge/UI-PyQt6-00e5ff.svg?style=flat-square" alt="UI Framework">
-  <img src="https://img.shields.io/badge/Model-MNIME--Core--1.5B--Q4__K__M-00e5ff.svg?style=flat-square" alt="Model">
+  <img src="https://img.shields.io/badge/Model-MNIME--Core--V5--Q4__K__M-00e5ff.svg?style=flat-square" alt="Model">
 </p>
 
 A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engine built in. Engineered with Python and PyQt6, MNIME runs 100% locally and offline on your machine with zero cloud dependencies or data uploads, delivering conversation and document intelligence directly over your files.
@@ -49,7 +49,7 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
 - **Semantic Bookmarks**: Intelligently analyze PDF typography and leverage the bundled NLP engine to generate context-aware chapter summaries.
 
 ### 2. Local Intelligence & RAG Engine
-- **Local NLP Engine**: Query across all open documents locally using the fine-tuned `MNIME-Core-1.5B-Q4_K_M.gguf` model with zero network traffic.
+- **Local NLP Engine**: Query across all open documents locally using the fine-tuned `MNIME-Core-V5-Q4_K_M.gguf` model with zero network traffic.
 - **LoRA Adapter Loading**: Load an optional LoRA adapter (`.gguf`) on top of the base model from the **LORA** button in the NLP view (right-click to remove). The model reloads in the background.
 - **Semantic Search (RAG)**: Fast vector search powered by FAISS embeddings (`bge-small-en-v1.5`).
 - **Persistent Global Vector Store**: Every indexed document is also saved to a global FAISS store in `%LOCALAPPDATA%\MNIME\global_vector_store`. Chat queries pull relevant passages from it, so documents from earlier sessions can inform answers.
@@ -75,7 +75,7 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
 
 ## Fine-Tuned NLP Model — MNIME-Core
 
-`MNIME-Core-1.5B-Q4_K_M.gguf` is an advanced multi-stage aligned model derived from `Qwen2.5-1.5B-Instruct`, specialized for high-density document synthesis, cross-referencing, philosophical reasoning, and empathetic anti-bias dialogue.
+`MNIME-Core-V5-Q4_K_M.gguf` is an advanced multi-stage aligned model derived from `Qwen2.5-1.5B-Instruct`, specialized for high-density document synthesis, cross-referencing, philosophical reasoning, and empathetic anti-bias dialogue.
 
 ### Multi-Stage Alignment Evolution
 MNIME-Core represents the culmination of a three-stage progressive alignment pipeline combining local LoRA adaptation, high-compute cloud fine-tuning, and full-precision tensor assimilation:
@@ -83,7 +83,7 @@ MNIME-Core represents the culmination of a three-stage progressive alignment pip
 - **Stage 1 (V3 Foundational Synthesis & Extraction)**: Trained locally on `training/mnime_v3_dataset_clean.jsonl` (5,482 curated pairs merging Databricks Dolly 15k subsets with identity-preserving weights). Establishes deep document comprehension, closed QA, structured entity extraction, and prompt grounding.
 - **Stage 2 (V4 Philosophical Depth & Adversarial Robustness)**: Trained on high-VRAM cloud compute using `training/mnime_v4_philosophy_dataset_clean.jsonl` (15,000 synthetic examples). Embeds ontological reasoning (Stoicism, Existentialism), dialectical resilience, prompt-injection immunity, and hallucination counter-traps.
 - **Stage 3 (V5 Ethics, Empathy, & Anti-Bias Alignment)**: Synthesized and aligned using `training/mnime_v5_antibias_dataset_clean.jsonl` (20,000 examples). Rather than issuing evasive, canned refusal templates, MNIME-Core actively and objectively deconstructs hate tropes and demographic stereotypes using sociological evidence, empirical logic, and empathetic dialectics.
-- **Model Distribution & Formats**: Available in multiple precision targets, including full fp16 HuggingFace checkpoints, high-fidelity `MNIME-Core-V5-Q8_0.gguf` (1.64 GB), and production-optimized `MNIME-Core-1.5B-Q4_K_M.gguf` (~1.0 GB) for ultra-fast local inference.
+- **Model Distribution & Formats**: Available in multiple precision targets, including full fp16 HuggingFace checkpoints, high-fidelity `MNIME-Core-V5-Q8_0.gguf` (1.64 GB), and production-optimized `MNIME-Core-V5-Q4_K_M.gguf` (~1.0 GB) for ultra-fast local inference.
 - **Hardware Acceleration**: Automatically offloads computation layers to available GPU VRAM (NVIDIA CUDA / Vulkan / Metal) via `llama-cpp-python`, with graceful CPU fallback.
 
 ### The Neural Assimilation Engine (NAE)
@@ -118,9 +118,9 @@ install_mnime.bat
 ### Option B — Run from Source
 
 **1. Clone & Place Model**
-Download `MNIME-Core-1.5B-Q4_K_M.gguf` from [Hugging Face](https://huggingface.co/KyleDeanAI/MNIME-Core-1.5B-Q4_K_M) into the `models/` folder:
+Download `MNIME-Core-V5-Q4_K_M.gguf` from [Hugging Face](https://huggingface.co/KyleDeanAI/MNIME-Core-V5-Q4_K_M) into the `models/` folder:
 ```cmd
-models/MNIME-Core-1.5B-Q4_K_M.gguf
+models/MNIME-Core-V5-Q4_K_M.gguf
 ```
 
 **2. Virtual Environment Setup**
@@ -201,7 +201,7 @@ MNIME/
 │   ├── windows_integration.py  # Windows taskbar & OS integrations
 │   └── worker.py           # Asynchronous QThread background worker
 ├── models/                 # Local GGUF model directory
-│   └── MNIME-Core-1.5B-Q4_K_M.gguf
+│   └── MNIME-Core-V5-Q4_K_M.gguf
 ├── ui/                     # Desktop GUI components (PyQt6)
 │   ├── __init__.py
 │   ├── action_bar.py       # Action buttons & task progress bar

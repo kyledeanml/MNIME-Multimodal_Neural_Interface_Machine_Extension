@@ -24,7 +24,7 @@ combines
 multimodal document processing (PDF merging, splitting, OCR, heuristic
 bookmarking,
 high-resolution image editing, and native raster printing) with an embedded,
-quantized local neural language model (MNIME-Core 1.5B via llama.cpp/GGUF) for
+quantized local neural language model (MNIME-Core V5 via llama.cpp/GGUF) for
 offline semantic search, summarization, and query extraction.
 
 Key Technologies:
@@ -90,7 +90,7 @@ Phase 4: Local Neural Integration & Rebrand to MNIME (October 1 - October 2,
   - Transitioned project identity from OMNIME to MNIME (Multimodal Neural
     Interface
     Machine Extension).
-  - Integrated an offline neural language model (MNIME-Core 1.5B Q4_K_M GGUF):
+  - Integrated an offline neural language model (MNIME-Core V5 Q4_K_M GGUF):
       * Built core/nlp_engine.py with hardware-aware offloading.
       * Implemented Flash Attention, KV-cache quantization, and memory locking
         (mlock)
@@ -175,6 +175,11 @@ Phase 11: V3 & V4 Massive Dataset Generation and Training (October 3, 2026)
   - Bypassed PyTorch 2.5/Unsloth torchao dependency bugs by rewiring `train_mnime.py` to use pure HuggingFace `trl`, `peft`, and `bitsandbytes` (4-bit NF4).
   - V4 Cloud Upgrade Preparation: Drafted an expansive 15,000-example philosophical and empathic conversation dataset (`mnime_v4_philosophy_dataset_clean.jsonl`), systematically scrubbed of AI slop and hardened against prompt injections, ready for deployment to a GCP T4 VM instance.
   - V5 Anti-Bias Architecture: Developed a 20,000-example dataset (`mnime_v5_antibias_dataset_clean.jsonl`) dedicated to bias mitigation and hate elimination by training the model to employ sociological rigor and logical deconstruction to refute prejudice.
+
+Phase 12: V5 Model Integration and Research Alignment (October 4, 2026)
+  - V5 Model Deployment: Swapped default NLP model in core/nlp_engine.py to MNIME-Core-V5-Q4_K_M.gguf.
+  - Installer Enhancements: Removed versioning from DisplayVersion, silenced uninstall.bat terminal flash via VBS wrapper, and improved robust Desktop shortcut cleanup.
+  - Documentation & Paper Updates: Applied V5 model metrics, architecture details, and results to MNIME_paper.tex and README.md.
 
 
 3. DETAILED IDE SESSIONS LOG & ROOT CAUSE ANALYSES

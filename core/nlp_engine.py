@@ -21,7 +21,7 @@ class NLPEngine:
 
     def __init__(self):
         # Check for bundled model
-        bundled_model = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "MNIME-Core-1.5B-Q4_K_M.gguf")
+        bundled_model = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "MNIME-Core-V5-Q4_K_M.gguf")
         default_path = bundled_model if os.path.exists(bundled_model) else ""
 
         settings = QSettings("MNIME", "MNIMEApp")
