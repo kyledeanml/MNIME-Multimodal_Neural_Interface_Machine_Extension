@@ -386,8 +386,20 @@ def generate_pdf(output_pdf: str, cover_png: str):
     frame_cover = Frame(0, 0, PAGE_W, PAGE_H, id="cover_frame", topPadding=0, bottomPadding=0, leftPadding=0, rightPadding=0)
     frame_content = Frame(MARGIN, MARGIN, CONTENT_W, PAGE_H - 2 * MARGIN, id="content_frame", topPadding=14 * mm, bottomPadding=10 * mm, leftPadding=0, rightPadding=0)
 
+    def draw_content_bg(canvas, document):
+        canvas.saveState()
+        w, h = canvas._pagesize
+        canvas.setFillColor(BG_DARK)
+        canvas.rect(0, 0, w, h, fill=1, stroke=0)
+        canvas.setFillColor(BORDER_COLOR)
+        canvas.setFillAlpha(0.25)
+        for x in range(int(MARGIN), int(w - MARGIN), 20):
+            for y in range(int(MARGIN), int(h - MARGIN), 20):
+                canvas.circle(x, y, 0.45, fill=1, stroke=0)
+        canvas.restoreState()
+
     template_cover = PageTemplate(id="cover", frames=[frame_cover])
-    template_content = PageTemplate(id="content", frames=[frame_content])
+    template_content = PageTemplate(id="content", frames=[frame_content], onPage=draw_content_bg)
     doc.addPageTemplates([template_cover, template_content])
 
     story = []
