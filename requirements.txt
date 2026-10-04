@@ -209,3 +209,5 @@ zstandard==0.23.0
 winsdk
 
 reportlab==5.0.1
+torchvision==0.29.1
+torchaudio==2.11.0
