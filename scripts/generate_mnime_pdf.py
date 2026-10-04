@@ -314,7 +314,7 @@ class CoverPage(Flowable):
         c.drawCentredString(cx, pill_y + 5, "v5.0")
 
         # Stats row
-        stats = [("100%", "Offline"), ("4.0x", "Retina"), ("60 FPS", "UI"), ("1.5B", "NLP Params")]
+        stats = [("100%", "Offline"), ("4.0x", "Retina"), ("60 FPS", "UI"), ("V5", "NLP Core")]
         stat_w = w / len(stats)
         sy = h * 0.31
         for i, (val, label) in enumerate(stats):
@@ -817,7 +817,7 @@ def build_body(styles):
         ]),
         ("4.10", "NLP Chat & RAG", "NLP", [
             ("Interface", "Conversational chat panel with message history"),
-            ("Model", "MNIME-Core-V5-Q4_K_M.gguf (Qwen2.5 1.5B fine-tuned)"),
+            ("Model", "MNIME-Core-V5-Q4_K_M.gguf (Fine-tuned V5 model)"),
             ("RAG", "Queries first run through FAISS semantic search; top-5 chunks fed as context to the model"),
             ("Context Window", "4,096 tokens"),
             ("Max Response", "1,024 tokens"),
@@ -1320,8 +1320,8 @@ def build_body(styles):
     attr_data = [
         ["Component", "Author / Source"],
         ["MNIME Application",           "kyledeanml / KyleDeanAI"],
-        ["MNIME-Core NLP Model",         "KyleDeanML — fine-tuned from Qwen2.5-1.5B-Instruct"],
-        ["Base Model (Qwen2.5-1.5B)",   "Alibaba Cloud — Qwen Team"],
+        ["MNIME-Core-V5 NLP Model",      "KyleDeanML — fine-tuned V5 multi-stage alignment"],
+        ["Base Model (Qwen2.5)",        "Alibaba Cloud — Qwen Team"],
         ["PyMuPDF",                     "Artifex Software"],
         ["llama-cpp-python",            "Andrei Betlen"],
         ["FAISS",                       "Meta AI Research"],
