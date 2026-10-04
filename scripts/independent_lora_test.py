@@ -17,13 +17,12 @@ except ImportError:
     print("Please run: pip install llama-cpp-python")
     exit(1)
 
-def digest_with_lora(model_path: str, lora_path: str = None, lora_scale: float = 1.0, prompt: str = "Hello, what can you do?"):
+def run_lora_injection(model_path: str, lora_path: str = None, lora_scale: float = 1.0, prompt: str = "Hello, what can you do?"):
     """
-    Acts as the 'stomach organ': takes in the base model and the 'tiny portion' (LoRA adapter),
-    digests them together, and outputs a response.
+    Handles runtime LoRA adapter injection: loads base model and dynamically applies LoRA micro-weights.
     """
     print("==================================================")
-    print(">>> ORGAN INITIALIZATION: GGUF + LoRA DIGESTION")
+    print(">>> INITIALIZATION: GGUF + LoRA RUNTIME INJECTION")
     print("==================================================")
     print(f"Base Model Path: {model_path}")
     if lora_path:
@@ -101,7 +100,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, default="../models/MNIME-Core-1.5B-Q4_K_M.gguf", help="Path to the base GGUF model")
     parser.add_argument("--lora", type=str, default="", help="Path to the LoRA adapter GGUF file")
     parser.add_argument("--scale", type=float, default=1.0, help="Scaling factor for the LoRA adapter")
-    parser.add_argument("--prompt", type=str, default="Explain how a stomach digests food in 3 sentences.", help="Prompt to feed the model")
+    parser.add_argument("--prompt", type=str, default="Summarize the core capabilities of MNIME in 3 sentences.", help="Prompt to feed the model")
     
     args = parser.parse_args()
     
@@ -110,7 +109,7 @@ if __name__ == "__main__":
     model_abs_path = os.path.abspath(os.path.join(script_dir, args.model))
     lora_abs_path = os.path.abspath(os.path.join(script_dir, args.lora)) if args.lora else ""
     
-    digest_with_lora(
+    run_lora_injection(
         model_path=model_abs_path,
         lora_path=lora_abs_path,
         lora_scale=args.scale,

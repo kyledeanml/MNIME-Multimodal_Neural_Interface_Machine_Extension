@@ -70,7 +70,7 @@ def ingest_to_memory(cache_path: str, new_texts: list[str], sources: list[str]):
         vectorstore = FAISS.load_local(cache_path, embeddings, allow_dangerous_deserialization=True)
         vectorstore.add_documents(new_docs)
     else:
-        print("      No existing memory found. Initializing new memory cortex...")
+        print("      No existing index found. Initializing new persistent vector store...")
         vectorstore = FAISS.from_documents(new_docs, embeddings)
 
     # 4. Save to disk
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         
     if args.demo:
         print("==================================================")
-        print(">>> ORGAN INITIALIZATION: PERSISTENT MEMORY CORTEX")
+        print(">>> INITIALIZATION: PERSISTENT GLOBAL VECTOR STORE")
         print("==================================================")
         
         # Clear for clean demo

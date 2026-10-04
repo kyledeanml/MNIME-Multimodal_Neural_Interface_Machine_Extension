@@ -295,7 +295,7 @@ class SearchEngine:
 
         # Update global persistent memory cache
         if progress_callback:
-            progress_callback(95, "Updating Global Memory Cortex...")
+            progress_callback(95, "Updating Persistent Vector Store...")
         try:
             cache_path = SearchEngine.get_global_cache_path()
             if os.path.exists(os.path.join(cache_path, "index.faiss")):
