@@ -272,10 +272,7 @@ $\alpha=16$ to all attention and MLP projection matrices
 
 \subsection{Training Configuration}
 
-Training was conducted using the \texttt{unsloth}~\cite{unsloth2024}
-framework on a dedicated local workstation equipped with an AMD Ryzen 9 7950X
-16-Core processor, 64\,GB DDR5 6000\,MHz RAM, and an NVIDIA GeForce RTX 3060
-Ventus 12\,GB GPU.
+While initial attempts leveraged the \texttt{unsloth}~\cite{unsloth2024} framework, critical PyTorch dependency conflicts required a comprehensive pipeline restructure. The finalized V3 local training pipeline bypasses Unsloth entirely, employing standard HuggingFace architectures via \texttt{trl}, \texttt{peft}, and \texttt{bitsandbytes} (4-bit NF4 precision). The local V3 training was conducted on a dedicated workstation equipped with an AMD Ryzen 9 7950X 16-Core processor, 64\,GB DDR5 6000\,MHz RAM, and an NVIDIA GeForce RTX 3060 Ventus 12\,GB GPU. Subsequent V4 and V5 alignment phases target deployment on Google Cloud Platform T4/L4 instances.
 Key hyperparameters and system specifications are summarized in Table~\ref{tab:training}.
 
 \begin{table}[h!]
