@@ -311,7 +311,7 @@ class CoverPage(Flowable):
         c.roundRect(pill_x, pill_y, pill_w, pill_h, 8, fill=1, stroke=1)
         c.setFillColor(ACCENT_CYAN)
         c.setFont("Helvetica-Bold", 8)
-        c.drawCentredString(cx, pill_y + 5, "FINAL RELEASE — v2.1")
+        c.drawCentredString(cx, pill_y + 5, "v2.1")
 
         # Stats row
         stats = [("100%", "Offline"), ("4.0x", "Retina"), ("60 FPS", "UI"), ("1.5B", "NLP Params")]
@@ -619,7 +619,7 @@ def build_body(styles):
     ov_data = [
         ["Attribute", "Value"],
         ["Full Name", "Multimodal Neural Interface Machine Extension"],
-        ["Version",   "Final Release (v2.1)"],
+        ["Version",   "v2.1"],
         ["Platform",  "Windows 10 / 11 (64-bit)"],
         ["Language",  "Python 3.12+"],
         ["UI Framework", "PyQt6 6.11"],
