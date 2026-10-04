@@ -1,7 +1,13 @@
 import os
 import gc
 import shutil
-import glob
+
+# Directories never touched by the purger (environments, VCS, model weights, training data).
+EXCLUDED_DIRS = {
+    ".git", ".venv", "venv", "build_env", "node_modules",
+    "models", "training", "unsloth_compiled_cache", "paper",
+}
+TEMP_SUFFIXES = (".tmp", ".tmp.pdf")
 
 class SystemCleaner:
     """
@@ -16,30 +22,33 @@ class SystemCleaner:
         else:
             self.root_dir = os.path.abspath(root_dir)
 
+    def _walk_project(self):
+        """os.walk over the project, pruning excluded directories in place."""
+        for root, dirs, files in os.walk(self.root_dir):
+            dirs[:] = [d for d in dirs if d not in EXCLUDED_DIRS]
+            yield root, dirs, files
+
     def purge_temp_files(self) -> dict:
-        """Finds and removes temporary files like *.tmp, *.tmp.pdf, build_log.txt, etc."""
-        patterns = [
-            "*.tmp",
-            "*.tmp.pdf",
-            "build_log.txt",
-            "*.log",
-            "temp_*",
-        ]
+        """Removes *.tmp / *.tmp.pdf in project folders and the root build_log.txt."""
+        candidates = []
+        for root, _dirs, files in self._walk_project():
+            for name in files:
+                if name.lower().endswith(TEMP_SUFFIXES):
+                    candidates.append(os.path.join(root, name))
+        build_log = os.path.join(self.root_dir, "build_log.txt")
+        if os.path.isfile(build_log):
+            candidates.append(build_log)
+
         removed_files = []
         bytes_reclaimed = 0
-
-        for pattern in patterns:
-            search_path = os.path.join(self.root_dir, "**", pattern)
-            for file_path in glob.glob(search_path, recursive=True):
-                if ".git" in file_path:
-                    continue
-                try:
-                    file_size = os.path.getsize(file_path)
-                    os.remove(file_path)
-                    removed_files.append(file_path)
-                    bytes_reclaimed += file_size
-                except Exception:
-                    pass
+        for file_path in candidates:
+            try:
+                file_size = os.path.getsize(file_path)
+                os.remove(file_path)
+                removed_files.append(file_path)
+                bytes_reclaimed += file_size
+            except OSError:
+                pass
 
         return {
             "files_removed": len(removed_files),
@@ -50,29 +59,52 @@ class SystemCleaner:
     def purge_python_cache(self) -> int:
         """Removes __pycache__ directories across the repository."""
         pycache_count = 0
-        for root, dirs, files in os.walk(self.root_dir):
+        for root, dirs, _files in self._walk_project():
             if "__pycache__" in dirs:
-                pycache_dir = os.path.join(root, "__pycache__")
+                dirs.remove("__pycache__")
                 try:
-                    shutil.rmtree(pycache_dir)
+                    shutil.rmtree(os.path.join(root, "__pycache__"))
                     pycache_count += 1
-                except Exception:
+                except OSError:
                     pass
         return pycache_count
 
     def flush_memory(self):
-        """Forces Python garbage collection and attempts to release VRAM if torch/CUDA is active."""
+        """
+        Releases model memory: unloads the llama.cpp model (which owns the GPU/VRAM
+        allocation), drops the in-memory global vector store, runs garbage collection,
+        and clears torch's CUDA cache if torch is present (used by embeddings).
+        """
+        import sys
+        nlp_mod = sys.modules.get("core.nlp_engine")
+        if nlp_mod is not None and getattr(nlp_mod.NLPEngine, "_instance", None) is not None:
+            try:
+                nlp_mod.NLPEngine._instance.unload_model()
+            except Exception:
+                pass
+        search_mod = sys.modules.get("core.search_engine")
+        if search_mod is not None:
+            search_mod.SearchEngine.release_global_store()
+
         gc.collect()
-        try:
-            import torch
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-                torch.cuda.ipc_collect()
-        except ImportError:
-            pass
+        torch = sys.modules.get("torch")
+        if torch is not None:
+            try:
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                    torch.cuda.ipc_collect()
+            except Exception:
+                pass
+
+    def on_app_exit(self):
+        """Called from the main window on close: free memory, then remove temp files."""
+        import sys
+        self.flush_memory()
+        if not getattr(sys, "frozen", False):
+            self.purge_temp_files()
 
     def purge_all_resources(self) -> dict:
-        """Executes a full system resource cleanup sweep."""
+        """Executes a full system resource cleanup sweep (developer use)."""
         temp_results = self.purge_temp_files()
         cache_count = self.purge_python_cache()
         self.flush_memory()

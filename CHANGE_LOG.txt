@@ -886,8 +886,16 @@ FILES TOUCHED:
 END OF CHANGE LOG - MNIME v2.1 RELEASE BUILD
 ================================================================================
 
-[2026-10-03] Session 23: MNIME - Memory Cortex & Stomach Integration
+[2026-10-03] Session 23: MNIME - Persistent Vector Store & LoRA Adapter Support
 - Integrated LoRA (Low-Rank Adaptation) adapter support in NLP engine.
-- Implemented Global Persistent Memory Cortex using FAISS for cross-session vector caching.
+- Implemented persistent global FAISS vector store for cross-session vector caching.
 - Updated README.md, MNIME_paper.tex, and MNIME_Spec_Manual.pdf to document new capabilities.
+
+[2026-10-03] Session 24: MNIME - Feature Integration & Documentation Accuracy
+- LoRA: added LORA button to NLP view (click to load .gguf, right-click to remove); reload runs on a background thread.
+- Vector store: chat queries now retrieve up to 2 extra passages from the global store (deduplicated); index cached in memory.
+- Vector store moved to %LOCALAPPDATA%\MNIME\global_vector_store with one-time migration from models/global_memory_cache.
+- Added core/system_cleaner.py: on exit unloads llama.cpp model, releases global store, removes *.tmp/*.tmp.pdf (env/model/training dirs excluded).
+- Paper: training section corrected to match train_mnime.py (10 examples, r=16, alpha=16, attention+MLP, batch 2x4, 60 steps).
+- Restored training/ scripts locally (git-ignored).
 

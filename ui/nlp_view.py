@@ -291,11 +291,19 @@ class NLPView(QWidget):
             QPushButton:hover { background-color: #0077b6; color: #ffffff; }
         """)
         self.start_over_btn.clicked.connect(self.start_over_clicked.emit)
+
+        self.lora_btn = QPushButton()
+        self.lora_btn.setStyleSheet(self.start_over_btn.styleSheet())
+        self.lora_btn.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.lora_btn.clicked.connect(self._choose_lora)
+        self.lora_btn.customContextMenuRequested.connect(lambda _pos: self._clear_lora())
+        self._refresh_lora_label()
         
         top_layout = QHBoxLayout()
         top_layout.addWidget(self.status_label)
         top_layout.addWidget(self.progress_bar)
         top_layout.addStretch()
+        top_layout.addWidget(self.lora_btn)
         top_layout.addWidget(self.start_over_btn)
         
         self.history_view = ClickableTextBrowser()
@@ -316,6 +324,37 @@ class NLPView(QWidget):
         layout.addLayout(top_layout)
         layout.addWidget(self.history_view)
         layout.addWidget(self.query_input)
+
+    def _refresh_lora_label(self):
+        import os
+        path = NLPEngine.get_instance().lora_path
+        if path and os.path.exists(path):
+            self.lora_btn.setText("LORA: ON")
+            self.lora_btn.setToolTip(f"Adapter: {path}\nClick to change, right-click to remove.")
+        else:
+            self.lora_btn.setText("LORA: OFF")
+            self.lora_btn.setToolTip("Click to load a LoRA adapter (.gguf).")
+
+    def _choose_lora(self):
+        from ui.file_dialog import CustomFileDialog
+        dialog = CustomFileDialog(self)
+        if not dialog.exec():
+            return
+        files = [f for f in (dialog.selected_files or []) if f.lower().endswith(".gguf")]
+        if not files:
+            self.status_label.setText("LoRA adapter must be a .gguf file.")
+            return
+        NLPEngine.get_instance().set_lora(files[0])
+        self.status_label.setText("Reloading model with LoRA adapter...")
+        self._refresh_lora_label()
+
+    def _clear_lora(self):
+        engine = NLPEngine.get_instance()
+        if not engine.lora_path:
+            return
+        engine.set_lora("")
+        self.status_label.setText("LoRA adapter removed. Reloading base model...")
+        self._refresh_lora_label()
 
     def _on_history_double_clicked(self):
         if not self.expanded_dialog:
@@ -482,8 +521,15 @@ class NLPView(QWidget):
                 return
 
         # ── Normal Document Query Flow ──
-        # 1. Semantic Search
+        # 1. Semantic Search (open documents + persistent global vector store)
         context_docs = SearchEngine.search(self.vectorstore, query, k=5)
+        seen = {d["content"] for d in context_docs}
+        for hit in SearchEngine.search_global_memory(query, k=6):
+            if hit["content"] not in seen:
+                context_docs.append(hit)
+                seen.add(hit["content"])
+            if len(context_docs) >= 7:
+                break
         
         # 2. LLM Generation
         self.query_worker = NLPQueryWorker(query, context_docs, getattr(self, 'fallback_state', 0))

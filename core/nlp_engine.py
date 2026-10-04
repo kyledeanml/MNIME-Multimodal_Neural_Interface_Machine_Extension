@@ -88,13 +88,17 @@ class NLPEngine:
         QSettings("MNIME", "MNIMEApp").setValue("gguf_model_path", path)
         self.reload_model()
 
-    def set_lora(self, path: str, scale: float = 1.0):
-        self.lora_path = path
+    def set_lora(self, path: str, scale: float = 1.0, background: bool = True):
+        """Set (or clear, with path="") the LoRA adapter and reload the model."""
+        self.lora_path = path or ""
         self.lora_scale = scale
         settings = QSettings("MNIME", "MNIMEApp")
-        settings.setValue("gguf_lora_path", path)
+        settings.setValue("gguf_lora_path", self.lora_path)
         settings.setValue("gguf_lora_scale", scale)
-        self.reload_model()
+        if background:
+            self.reload_model_async()
+        else:
+            self.reload_model()
 
     def reload_model(self):
         """Reload the model synchronously. Call reload_model_async() to run on a background thread."""

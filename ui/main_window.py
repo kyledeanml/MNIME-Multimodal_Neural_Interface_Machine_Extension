@@ -864,6 +864,11 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         from PyQt6.QtWidgets import QApplication
+        try:
+            from core.system_cleaner import SystemCleaner
+            SystemCleaner().on_app_exit()
+        except Exception:
+            pass
         QApplication.quit()
         event.accept()
 

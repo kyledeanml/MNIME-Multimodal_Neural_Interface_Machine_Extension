@@ -50,10 +50,10 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
 
 ### 2. Local Intelligence & RAG Engine
 - **Local NLP Engine**: Query across all open documents locally using the fine-tuned `MNIME-Core-1.5B-Q4_K_M.gguf` model with zero network traffic.
-- **Dynamic LoRA Adapter Injection**: Surgically inject Low-Rank Adaptation (LoRA) adapters at runtime to dynamically augment the base GGUF model's capabilities without reloading the entire weight matrix.
+- **LoRA Adapter Loading**: Load an optional LoRA adapter (`.gguf`) on top of the base model from the **LORA** button in the NLP view (right-click to remove). The model reloads in the background.
 - **Semantic Search (RAG)**: Fast vector search powered by FAISS embeddings (`bge-small-en-v1.5`).
-- **Persistent Global Vector Store**: Automatically permanently caches every document loaded into MNIME into a persistent global FAISS vectorstore, enabling cross-session historical recall and long-term knowledge retention.
-- **System Resource Purger**: Systematically purges temporary file artifacts (`*.tmp`, `*.tmp.pdf`), flushes Python byte-caches, and triggers explicit VRAM/RAM garbage collection cycles to prevent system memory bloat.
+- **Persistent Global Vector Store**: Every indexed document is also saved to a global FAISS store in `%LOCALAPPDATA%\MNIME\global_vector_store`. Chat queries pull relevant passages from it, so documents from earlier sessions can inform answers.
+- **System Resource Purger**: On exit, unloads the LLM (freeing VRAM), releases the vector store from memory, and removes leftover `*.tmp` / `*.tmp.pdf` files.
 - **Document Cross-Referencing**: Highlight sections in a document to synthesize an automated comparative brief against other open files.
 - **Translucent Pop-Out Console**: Double-click the NLP console to spawn a magnetic, translucent floating chat window synchronized with the primary window.
 

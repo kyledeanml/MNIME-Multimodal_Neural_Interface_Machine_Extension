@@ -159,12 +159,24 @@ class SearchEngine:
                     )
         return cls._embedding_model
 
+    _global_vstore = None
+
     @staticmethod
     def get_global_cache_path() -> str:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        path = os.path.abspath(os.path.join(script_dir, "..", "models", "global_memory_cache"))
-        if not os.path.exists(path):
-            os.makedirs(path, exist_ok=True)
+        """Persistent global vector store location (user-writable, survives reinstalls)."""
+        base = os.environ.get("LOCALAPPDATA") or os.path.join(os.path.expanduser("~"), ".mnime")
+        path = os.path.join(base, "MNIME", "global_vector_store")
+        os.makedirs(path, exist_ok=True)
+
+        # One-time migration from the old in-repo location.
+        legacy = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "global_memory_cache"))
+        if not os.path.exists(os.path.join(path, "index.faiss")) and os.path.exists(os.path.join(legacy, "index.faiss")):
+            import shutil
+            for name in ("index.faiss", "index.pkl"):
+                src = os.path.join(legacy, name)
+                if os.path.exists(src):
+                    shutil.copy2(src, os.path.join(path, name))
+            log.info("Migrated global vector store from %s to %s", legacy, path)
         return path
 
     @staticmethod
@@ -305,8 +317,9 @@ class SearchEngine:
             else:
                 global_vstore = FAISS.from_documents(docs_to_index, emb)
                 global_vstore.save_local(cache_path)
+            SearchEngine._global_vstore = global_vstore
         except Exception as e:
-            log.exception("Failed to update global memory cache: %s", e)
+            log.exception("Failed to update global vector store: %s", e)
 
         if progress_callback:
             progress_callback(100, "Index Ready!")
@@ -334,25 +347,28 @@ class SearchEngine:
     @staticmethod
     def search_global_memory(query: str, k: int = 5) -> List[Dict[str, Any]]:
         """
-        Searches the global persistent memory cache.
+        Searches the persistent global vector store.
         Returns a list of dicts with 'content' and 'source'.
         """
-        cache_path = SearchEngine.get_global_cache_path()
-        if not os.path.exists(os.path.join(cache_path, "index.faiss")):
-            return []
-            
-        emb = SearchEngine.get_embeddings()
         try:
-            from langchain_community.vectorstores import FAISS
-            global_vstore = FAISS.load_local(cache_path, emb, allow_dangerous_deserialization=True)
-            hits = global_vstore.similarity_search(query, k=k)
-            results = []
-            for hit in hits:
-                results.append({
-                    "content": hit.page_content,
-                    "source": hit.metadata.get("source", "Unknown")
-                })
-            return results
+            if SearchEngine._global_vstore is None:
+                cache_path = SearchEngine.get_global_cache_path()
+                if not os.path.exists(os.path.join(cache_path, "index.faiss")):
+                    return []
+                from langchain_community.vectorstores import FAISS
+                SearchEngine._global_vstore = FAISS.load_local(
+                    cache_path, SearchEngine.get_embeddings(), allow_dangerous_deserialization=True
+                )
+            hits = SearchEngine._global_vstore.similarity_search(query, k=k)
+            return [
+                {"content": hit.page_content, "source": hit.metadata.get("source", "Unknown")}
+                for hit in hits
+            ]
         except Exception as e:
-            log.exception("Failed to search global memory cache: %s", e)
+            log.exception("Failed to search global vector store: %s", e)
             return []
+
+    @staticmethod
+    def release_global_store():
+        """Drop the in-memory copy of the global store (it stays on disk)."""
+        SearchEngine._global_vstore = None
