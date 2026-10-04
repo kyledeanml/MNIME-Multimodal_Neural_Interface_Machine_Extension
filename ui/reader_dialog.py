@@ -48,7 +48,7 @@ class ReaderPageView(QGraphicsView):
         # zoomed way out, and avoids re-renders for trivial zoom changes.
         return max(scale, 1.0)
 
-    def set_page(self, page, pixmap, render_scale: float = 1.0):
+    def set_page(self, page, pixmap, render_scale: float = 1.0, fit_view: bool = True):
         """Display *pixmap* (rendered at *render_scale* px/pt) for *page*."""
         self.current_page = page
         self._render_scale = render_scale
@@ -65,8 +65,9 @@ class ReaderPageView(QGraphicsView):
             QRectF(0, 0, pixmap.width() * inv, pixmap.height() * inv)
         )
 
-        from PyQt6.QtCore import QTimer
-        QTimer.singleShot(10, self._fit_to_view)
+        if fit_view:
+            from PyQt6.QtCore import QTimer
+            QTimer.singleShot(10, self._fit_to_view)
 
     def _fit_to_view(self):
         if self.scene() and not self.scene().sceneRect().isEmpty():
@@ -84,9 +85,17 @@ class ReaderPageView(QGraphicsView):
             self.scale(factor, factor)
             self.zoom_changed.emit()
         else:
+            v_bar = self.verticalScrollBar()
+            
+            can_scroll_vert = v_bar.isVisible() and v_bar.maximum() > v_bar.minimum()
+            
+            if can_scroll_vert:
+                super().wheelEvent(event)
+                return
+                
             if event.angleDelta().y() > 0:
                 self.prev_page_requested.emit()
-            else:
+            elif event.angleDelta().y() < 0:
                 self.next_page_requested.emit()
             event.accept()
 
@@ -191,16 +200,6 @@ class ReaderDialog(QDialog):
         main_layout.setContentsMargins(16, 8, 16, 16)
         main_layout.setSpacing(8)
         
-        # Add a proper QSizeGrip overlay to handle bottom-right resizing natively
-        from PyQt6.QtWidgets import QSizeGrip
-        size_grip_layout = QHBoxLayout()
-        size_grip_layout.setContentsMargins(0, 0, 0, 0)
-        size_grip_layout.addStretch()
-        self.size_grip = QSizeGrip(self.container_frame)
-        self.size_grip.setFixedSize(16, 16)
-        self.size_grip.setStyleSheet("background: transparent;")
-        size_grip_layout.addWidget(self.size_grip)
-        
         # Unified Tools & Title Bar
         top_bar = QHBoxLayout()
         top_bar.setContentsMargins(0, 0, 0, 10)
@@ -290,9 +289,6 @@ class ReaderDialog(QDialog):
         splitter.addWidget(right_widget)
         splitter.setSizes([250, 800])
         main_layout.addWidget(splitter, 1)
-        
-        # Add the size grip layout to the very bottom
-        main_layout.addLayout(size_grip_layout)
 
         self.installEventFilter(self)
 
@@ -408,7 +404,7 @@ class ReaderDialog(QDialog):
             self.page_idx = page
             self._render_page()
 
-    def _render_page(self, render_scale: float | None = None):
+    def _render_page(self, render_scale: float | None = None, fit_view: bool = True):
         """Render the current page at *render_scale* px/pt.
 
         If *render_scale* is None the method picks a sensible default:
@@ -441,7 +437,7 @@ class ReaderDialog(QDialog):
 
         img = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format.Format_RGB888)
         qpixmap = QPixmap.fromImage(img)
-        self.view.set_page(page, qpixmap, render_scale=render_scale)
+        self.view.set_page(page, qpixmap, render_scale=render_scale, fit_view=fit_view)
 
     def _on_zoom_changed(self):
         """Re-render the current page at the resolution matching the new zoom."""
@@ -457,7 +453,7 @@ class ReaderDialog(QDialog):
             h_ratio = h_bar.value() / max(h_bar.maximum(), 1)
             v_ratio = v_bar.value() / max(v_bar.maximum(), 1)
 
-            self._render_page(render_scale=new_scale)
+            self._render_page(render_scale=new_scale, fit_view=False)
 
             from PyQt6.QtCore import QTimer
             def restore_scroll():
@@ -567,10 +563,6 @@ class ReaderDialog(QDialog):
         except OSError as e:
             QMessageBox.warning(self, "Print Error", f"Could not hand the file to Windows: {e}")
 
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        if hasattr(self, 'size_grip'):
-            self.size_grip.move(self.width() - self.size_grip.width(), self.height() - self.size_grip.height())
 
     def eventFilter(self, obj, event):
         if event.type() == event.Type.MouseMove:
@@ -593,7 +585,8 @@ class ReaderDialog(QDialog):
 
     def _get_edge(self, pos: QPoint) -> Qt.Edge:
         edge = Qt.Edge(0)
-        margin = 15
+        # 10px layout margin + 8px grab area
+        margin = 18
         
         if pos.x() <= margin:
             edge |= Qt.Edge.LeftEdge
@@ -610,12 +603,7 @@ class ReaderDialog(QDialog):
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             edge = self._get_edge(event.pos())
-            # For corners, we'll let the user resize via QSizeGrip or handle them individually.
-            # startSystemResize only works reliably with single edge values in some Qt environments.
-            if edge == Qt.Edge.BottomEdge | Qt.Edge.RightEdge:
-                # Bottom-right is handled natively by QSizeGrip if they click exactly on it
-                pass 
-            elif edge != Qt.Edge(0):
+            if edge != Qt.Edge(0):
                 self.windowHandle().startSystemResize(edge)
             else:
                 self.windowHandle().startSystemMove()

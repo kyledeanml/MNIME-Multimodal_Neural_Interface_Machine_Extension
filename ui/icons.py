@@ -205,6 +205,16 @@ SVG_ICONS = {
             <line x1="15" y1="11" x2="18" y2="11" stroke-width="1.5"></line>
         </svg>
     """,
+    "crossref": """
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="8" height="11" rx="1.5"></rect>
+            <rect x="14" y="10" width="8" height="11" rx="1.5"></rect>
+            <polyline points="12 4 15 4 15 7"></polyline>
+            <line x1="11" y1="8" x2="15" y2="4"></line>
+            <polyline points="12 20 9 20 9 17"></polyline>
+            <line x1="13" y1="16" x2="9" y2="20"></line>
+        </svg>
+    """,
     "file-text": """
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>

@@ -80,7 +80,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['matplotlib', 'tensorflow', 'nltk', 'IPython', 'spacy'],
+    excludes=['matplotlib', 'tensorflow', 'nltk', 'IPython', 'spacy', 'torchvision'],
     noarchive=False,
     optimize=0,
 )

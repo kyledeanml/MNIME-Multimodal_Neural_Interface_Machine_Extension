@@ -82,81 +82,6 @@ if sys.platform == "win32":
         pass
 
 
-class ReaderBezelWidget(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setFixedSize(160, 24)
-        
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 2)
-        layout.setSpacing(0)
-        
-        self.reader_btn = QPushButton("READER")
-        self.reader_btn.setFixedHeight(20)
-        self.reader_btn.setStyleSheet("""
-            QPushButton {
-                background-color: transparent;
-                color: #00d2ff;
-                font-family: 'Segoe UI Black', sans-serif;
-                font-weight: 900;
-                font-size: 11px;
-                letter-spacing: 1px;
-                border: 1px solid rgba(0, 210, 255, 50);
-                border-radius: 4px;
-                padding: 0 10px;
-            }
-            QPushButton:hover {
-                background-color: rgba(0, 210, 255, 20);
-                border: 1px solid rgba(0, 210, 255, 150);
-            }
-        """)
-        
-        self.setCursor(get_custom_cursor())
-        self.reader_btn.setCursor(get_custom_cursor())
-        layout.addStretch()
-        layout.addWidget(self.reader_btn)
-        layout.addStretch()
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.reader_btn.click()
-            event.accept()
-        else:
-            super().mousePressEvent(event)
-
-    def paintEvent(self, event):
-        from PyQt6.QtGui import QPainter, QPainterPath, QColor, QLinearGradient, QPen
-        from PyQt6.QtCore import Qt
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        width = self.width()
-        height = self.height()
-        
-        path = QPainterPath()
-        path.moveTo(0, height)
-        path.cubicTo(15, height, 20, 0, 35, 0)
-        path.lineTo(width - 35, 0)
-        path.cubicTo(width - 20, 0, width - 15, height, width, height)
-        path.lineTo(0, height)
-        
-        grad = QLinearGradient(0, 0, 0, height)
-        grad.setColorAt(0, QColor(28, 33, 43, 230))
-        grad.setColorAt(1, QColor(28, 33, 43, 230))
-        
-        painter.fillPath(path, grad)
-        
-        pen = QPen(QColor(255, 255, 255, 40))
-        pen.setWidthF(1.5)
-        painter.setPen(pen)
-        
-        stroke_path = QPainterPath()
-        stroke_path.moveTo(0, height)
-        stroke_path.cubicTo(15, height, 20, 0, 35, 0)
-        stroke_path.lineTo(width - 35, 0)
-        stroke_path.cubicTo(width - 20, 0, width - 15, height, width, height)
-        painter.drawPath(stroke_path)
-
 class MainWindow(QMainWindow):
     """MNIME main application window featuring a free-floating dark metallic interface."""
 
@@ -180,6 +105,8 @@ class MainWindow(QMainWindow):
         self._temp_roots: List[str] = []
         self._drag_pos: QPoint = None
         self._active_reader = None
+        self._active_crossref = None
+        self._crossref_index_cache = {}
 
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -201,19 +128,9 @@ class MainWindow(QMainWindow):
         # It must run AFTER show() so it can override Qt's OLE DnD registration.
         # See showEvent().
 
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        if hasattr(self, 'bezel') and self.bezel:
-            # Center horizontally, position at the top (extending above the container padding)
-            self.bezel.move((self.width() - self.bezel.width()) // 2, 0)
-            self.bezel.raise_()
-
     def showEvent(self, event):
         """Register WM_DROPFILES AFTER Qt has finished its internal OLE DnD setup."""
         super().showEvent(event)
-        if hasattr(self, 'bezel') and self.bezel:
-            self.bezel.move((self.width() - self.bezel.width()) // 2, 0)
-            self.bezel.raise_()
         if not self._dnd_registered:
             # Defer by one event-loop cycle so RegisterDragDrop has fully completed
             from PyQt6.QtCore import QTimer
@@ -497,7 +414,7 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         central_widget.setMouseTracking(True)
         base_layout = QVBoxLayout(central_widget)
-        base_layout.setContentsMargins(10, 24, 10, 10) # 24px padding for the extended bezel effect
+        base_layout.setContentsMargins(10, 10, 10, 10)
 
         class WatermarkFrame(QFrame):
             def __init__(self, parent=None):
@@ -570,14 +487,6 @@ class MainWindow(QMainWindow):
         top_bar = QHBoxLayout()
         top_bar.setContentsMargins(0, 0, 0, 0)
         top_bar.setSpacing(8)
-        
-        # Centered bezel extension for the READER button
-        self.bezel = ReaderBezelWidget(central_widget)
-        self.bezel.reader_btn.clicked.connect(lambda: self._open_reader())
-        # Position initialization will be handled by resizeEvent, but let's set it safely here
-        self.bezel.move((self.width() - self.bezel.width()) // 2, 0)
-        self.bezel.show()
-        self.bezel.raise_()
         
         # 2. Free-floating Tabs Bar inline with window controls
         self.tabs_bar = TabsBar(self)
@@ -762,11 +671,62 @@ class MainWindow(QMainWindow):
             self.file_items, 
             parent=None, 
             update_callback=self._on_reader_files_updated,
-            initial_index=initial_idx
+            initial_index=initial_idx,
+            crossref_callback=self._open_cross_reference,
         )
         self._active_reader = dialog
         dialog.finished.connect(lambda: setattr(self, "_active_reader", None))
         self._bring_to_foreground(dialog)
+
+    # ------------------------------------------------------------------
+    # Cross-referencing
+    # ------------------------------------------------------------------
+
+    CROSSREF_SOURCE_EXTS = (".pdf", ".txt", ".md", ".py", ".json", ".csv", ".js", ".ts", ".html", ".css", ".cpp", ".c", ".h", ".java")
+
+    def _open_cross_reference(self, source_path: Optional[str] = None):
+        """Open the cross-reference window for *source_path* (or the first usable file in the queue).
+
+        Every other PDF/text file in the queue becomes a reference target.
+        """
+        from ui.document_viewer import DocumentViewer
+
+        source_item = None
+        if isinstance(source_path, str) and source_path:
+            abs_path = os.path.abspath(source_path)
+            source_item = next((i for i in self.file_items if os.path.abspath(i.file_path) == abs_path), None)
+        if source_item is None:
+            source_item = next((i for i in self.file_items if i.extension in self.CROSSREF_SOURCE_EXTS), None)
+
+        if source_item is None:
+            QMessageBox.information(
+                self, "Cross-Reference",
+                "Add a PDF or text document to MNIME first. It will be the source you highlight from."
+            )
+            return
+        if source_item.extension not in self.CROSSREF_SOURCE_EXTS:
+            QMessageBox.information(self, "Cross-Reference", "Cross-referencing works with PDFs and text documents.")
+            return
+
+        others = [i for i in self.file_items if i is not source_item and i.extension in self.CROSSREF_SOURCE_EXTS]
+        if not others:
+            QMessageBox.information(
+                self, "Cross-Reference",
+                "Add at least one more PDF or text document. MNIME compares the passage you "
+                "highlight in the source against the other files in the queue."
+            )
+            return
+
+        if self._active_crossref is not None:
+            try:
+                self._active_crossref.close()
+            except RuntimeError:
+                pass
+
+        viewer = DocumentViewer(source_item, others, run_reference=self._run_reference, parent=None)
+        self._active_crossref = viewer
+        viewer.finished.connect(lambda: setattr(self, "_active_crossref", None))
+        self._bring_to_foreground(viewer)
 
     def handle_external_open(self, file_paths: List[str]):
         """Handle opening files passed via CLI or IPC from an external process."""
@@ -878,7 +838,14 @@ class MainWindow(QMainWindow):
 
     def _on_mode_changed(self, mode: ToolMode):
         """Handle tab switching and update UI action text and badge."""
-        self.current_mode = mode
+        # Launcher tab: opens the Reader without changing the active tool
+        if mode == ToolMode.READER:
+            target = self.file_items[0].file_path if self.file_items else None
+            self._open_reader(target)
+            return
+
+        if mode != ToolMode.STATS:
+            self.current_mode = mode
         if mode == ToolMode.COMBINE_PDF:
             self.action_bar.set_action_title("MERGE")
         elif mode == ToolMode.JPG_TO_PDF:
@@ -898,9 +865,7 @@ class MainWindow(QMainWindow):
         elif mode == ToolMode.NLP:
             self.action_bar.set_action_title("START NLP")
         elif mode == ToolMode.REFERENCE:
-            self.action_bar.set_action_title("OPEN READER")
-            target = self.file_items[0].file_path if self.file_items else None
-            self._open_reader(target)
+            self.action_bar.set_action_title("CROSS-REFERENCE")
         elif mode == ToolMode.BOOKMARK:
             self.action_bar.set_action_title("BOOKMARK")
         elif mode == ToolMode.STATS:
@@ -1002,8 +967,10 @@ class MainWindow(QMainWindow):
             return "Images (*.jpg *.jpeg *.png *.webp *.bmp);;All Files (*.*)"
         elif self.current_mode == ToolMode.TXT_TO_PDF:
             return "Text Files (*.txt);;All Files (*.*)"
-        elif self.current_mode in [ToolMode.PDF_TO_JPG, ToolMode.COMPRESS_PDF, ToolMode.PDF_TO_DOCX, ToolMode.SPLIT_PDF, ToolMode.BOOKMARK, ToolMode.NLP, ToolMode.REFERENCE]:
+        elif self.current_mode in [ToolMode.PDF_TO_JPG, ToolMode.COMPRESS_PDF, ToolMode.PDF_TO_DOCX, ToolMode.SPLIT_PDF, ToolMode.BOOKMARK, ToolMode.NLP]:
             return "PDF Files (*.pdf);;All Files (*.*)"
+        elif self.current_mode == ToolMode.REFERENCE:
+            return "Documents (*.pdf *.txt *.md);;PDF Files (*.pdf);;Text Files (*.txt *.md);;All Files (*.*)"
         return "All Files (*.*)"
 
     def _open_file_dialog(self):
@@ -1102,6 +1069,7 @@ class MainWindow(QMainWindow):
     def _clear_files(self):
         """Clear all files from the queue and reset the view."""
         self.file_items.clear()
+        self._crossref_index_cache.clear()
         self.carousel.set_items(self.file_items)
         self.action_bar.update_count(0)
         self.action_bar.hide_progress()
@@ -1112,6 +1080,7 @@ class MainWindow(QMainWindow):
             self.particle_overlay.clear_all()
 
     def _on_file_removed(self, item: FileItem):
+        self._crossref_index_cache.clear()
         self.action_bar.update_count(len(self.file_items))
 
     def _on_files_reordered(self):
@@ -1150,7 +1119,7 @@ class MainWindow(QMainWindow):
         """Execute the primary operation depending on active tab."""
         if not self.file_items:
             if self.current_mode == ToolMode.REFERENCE:
-                self._open_reader()
+                self._open_cross_reference()
                 return
             QMessageBox.warning(self, "No Files", "Please add at least one document before running this tool.")
             return
@@ -1223,8 +1192,7 @@ class MainWindow(QMainWindow):
             return
             
         if self.current_mode == ToolMode.REFERENCE:
-            target = self.file_items[0].file_path if self.file_items else None
-            self._open_reader(target)
+            self._open_cross_reference()
             return
 
         temp_dir = self._new_temp_dir()
@@ -1321,39 +1289,71 @@ class MainWindow(QMainWindow):
         QTimer.singleShot(1000, worker.start)
 
     def _run_reference(self, text: str, viewer: DocumentViewer):
-        self.action_bar.show_progress(0, "Synthesizing brief...")
-        other_files = [f for f in self.file_items if f != viewer.file_item]
-        
-        def _reference_task(progress_callback=None):
-            if other_files:
-                from core.nlp_engine import NLPEngine
-                nlp = NLPEngine.get_instance()
-                nlp.check_model()
-                
-                if not nlp.is_loaded:
-                    return f"NLP Engine Unavailable.\n\n{nlp.error}\n\nTry clicking the Reload NLP button in the tabs bar."
-                    
-                from core.search_engine import SearchEngine
-                from PyQt6.QtCore import QSettings
-                
-                settings = QSettings("MNIME", "MNIMEApp")
-                smart_sampling = str(settings.value("nlp_smart_indexing", "true")).lower() == "true"
-                vectorstore = SearchEngine.build_index(other_files, use_smart_sampling=smart_sampling, progress_callback=progress_callback)
-                context_docs = SearchEngine.search(vectorstore, text, k=5)
-                return NLPEngine.get_instance().synthesize_reference(text, context_docs)
-            return "No other documents available to reference against."
-
+        """Search the viewer's reference files for *text* and ask the NLP model for a comparative brief."""
         if self._reference_worker is not None and self._reference_worker.isRunning():
             return  # A synthesis is already in flight
 
+        other_files = list(viewer.reference_items)
+        cache_key = tuple(sorted(os.path.abspath(f.file_path) for f in other_files))
+        cache = self._crossref_index_cache
+
+        def _reference_task(progress_callback=None):
+            if not other_files:
+                return "No other documents available to reference against."
+
+            from core.search_engine import SearchEngine
+            from PyQt6.QtCore import QSettings
+
+            vectorstore = cache.get(cache_key)
+            if vectorstore is None:
+                settings = QSettings("MNIME", "MNIMEApp")
+                smart_sampling = str(settings.value("nlp_smart_indexing", "true")).lower() == "true"
+                vectorstore = SearchEngine.build_index(
+                    other_files, use_smart_sampling=smart_sampling, progress_callback=progress_callback
+                )
+                cache.clear()  # keep only the most recent file set in memory
+                cache[cache_key] = vectorstore
+
+            if progress_callback:
+                progress_callback(96, "Finding related passages...")
+            passages = SearchEngine.search(vectorstore, text, k=5)
+
+            from core.nlp_engine import NLPEngine
+            nlp = NLPEngine.get_instance()
+            if progress_callback:
+                progress_callback(98, "Loading NLP model..." if not nlp.is_loaded else "Writing comparative brief...")
+            nlp.check_model(auto_load=True)
+            if not nlp.is_loaded:
+                return {
+                    "brief": "",
+                    "passages": passages,
+                    "note": f"NLP model unavailable ({nlp.error}). Showing the matching passages only.",
+                }
+            if progress_callback:
+                progress_callback(99, "Writing comparative brief...")
+            brief = nlp.synthesize_reference(text, passages)
+            return {"brief": brief, "passages": passages}
+
+        self.action_bar.show_progress(0, "Cross-referencing...")
         self._reference_worker = TaskWorker(_reference_task)
+        self._reference_worker.progress.connect(lambda pct, msg: self._on_reference_progress(pct, msg, viewer))
         self._reference_worker.finished.connect(lambda res: self._on_reference_finished(res, viewer))
         self._reference_worker.error.connect(lambda err: self._on_reference_finished(f"Error: {err}", viewer))
         self._reference_worker.start()
 
-    def _on_reference_finished(self, result: str, viewer: DocumentViewer):
+    def _on_reference_progress(self, pct: int, msg: str, viewer: DocumentViewer):
+        self.action_bar.show_progress(pct, msg)
+        try:
+            viewer.set_progress(pct, msg)
+        except RuntimeError:
+            pass  # viewer window was closed
+
+    def _on_reference_finished(self, result, viewer: DocumentViewer):
         self.action_bar.hide_progress()
-        viewer.set_result(result)
+        try:
+            viewer.set_result(result)
+        except RuntimeError:
+            pass  # viewer window was closed
 
     def _on_worker_progress(self, pct: int, msg: str):
         self.action_bar.show_progress(pct, msg)

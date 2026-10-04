@@ -135,27 +135,21 @@ set "UNINST_BAT=%INSTALL_DIR%\uninstall.bat"
     echo.
     echo :: Remove shortcuts
     echo if exist "%DESKTOP_LNK%" del /f /q "%DESKTOP_LNK%" ^>nul 2^>^&1
+    echo if exist "%USERPROFILE%\Desktop\MNIME.lnk" del /f /q "%USERPROFILE%\Desktop\MNIME.lnk" ^>nul 2^>^&1
+    echo if exist "%USERPROFILE%\OneDrive\Desktop\MNIME.lnk" del /f /q "%USERPROFILE%\OneDrive\Desktop\MNIME.lnk" ^>nul 2^>^&1
+    echo if exist "%PUBLIC%\Desktop\MNIME.lnk" del /f /q "%PUBLIC%\Desktop\MNIME.lnk" ^>nul 2^>^&1
     echo if exist "%STARTMENU_LNK%" del /f /q "%STARTMENU_LNK%" ^>nul 2^>^&1
     echo.
     echo :: Remove application logs
     echo if exist "%LOCALAPPDATA%\MNIME" rmdir /s /q "%LOCALAPPDATA%\MNIME" ^>nul 2^>^&1
     echo.
-    echo :: Refresh Windows Explorer icon cache
+    echo :: Refresh Windows Explorer icon cache and shell notifications
     echo ie4uinit.exe -show ^>nul 2^>^&1
+    echo powershell -NoProfile -ExecutionPolicy Bypass -Command "$code = '[DllImport(\"shell32.dll\")] public static extern void SHChangeNotify(int eventId, int flags, IntPtr item1, IntPtr item2);'; $type = Add-Type -MemberDefinition $code -Name ShellNotifier -Namespace Win32 -PassThru -ErrorAction SilentlyContinue; if($type){$type::SHChangeNotify(0x08000000, 0x1000, [IntPtr]::Zero, [IntPtr]::Zero)}" ^>nul 2^>^&1
     echo.
     echo :: Clean up application files via detached background cleanup
     echo set "TARGET_DIR=%INSTALL_DIR%"
-    echo set "TEMP_CLEANUP=%%TEMP%%\mnime_uninstall_%%RANDOM%%.bat"
-    echo (
-    echo     echo @echo off
-    echo     echo :wait_loop
-    echo     echo timeout /t 1 /nobreak ^^>nul
-    echo     echo rmdir /s /q "%%TARGET_DIR%%" ^^>nul 2^^>^^^&1
-    echo     echo if exist "%%TARGET_DIR%%" goto wait_loop
-    echo     echo del "%%%%~f0" ^^>nul 2^^>^^^&1
-    echo ^) ^> "%%TEMP_CLEANUP%%"
-    echo.
-    echo start "" /b cmd /c "%%TEMP_CLEANUP%%"
+    echo start "" /b powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 1; Remove-Item -LiteralPath '%%TARGET_DIR%%' -Recurse -Force -ErrorAction SilentlyContinue"
     echo echo MNIME has been successfully uninstalled.
     echo timeout /t 2 /nobreak ^>nul
 ) > "%UNINST_BAT%"

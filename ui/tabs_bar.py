@@ -11,7 +11,8 @@ from PyQt6.QtCore import pyqtSignal, Qt, QTimer
 
 class ToolMode(Enum):
     EDIT_IMAGE = "EDIT"
-    REFERENCE = "REFERENCE"
+    READER = "READER"
+    REFERENCE = "CROSS-REFERENCE"
     BOOKMARK = "BOOKMARK"
     COMBINE_PDF = "MERGE"
     SPLIT_PDF = "SPLIT"
@@ -44,7 +45,7 @@ class TabsBar(QWidget):
         self.button_group = QButtonGroup(self)
         self.button_group.setExclusive(True)
 
-        left_tabs = [ToolMode.EDIT_IMAGE, ToolMode.BOOKMARK, ToolMode.REFERENCE]
+        left_tabs = [ToolMode.EDIT_IMAGE, ToolMode.BOOKMARK, ToolMode.READER, ToolMode.REFERENCE]
         center_tabs = [
             ToolMode.JPG_TO_PDF,
             ToolMode.TXT_TO_PDF,
@@ -74,7 +75,8 @@ class TabsBar(QWidget):
                 ToolMode.COMPRESS_PDF: "minimize",
                 ToolMode.PDF_TO_JPG: "images",
                 ToolMode.PDF_TO_DOCX: "document",
-                ToolMode.REFERENCE: "book",
+                ToolMode.READER: "book",
+                ToolMode.REFERENCE: "crossref",
                 ToolMode.NLP: "message",
                 ToolMode.RELOAD_NLP: "refresh",
                 ToolMode.STATS: "stats",
@@ -96,8 +98,10 @@ class TabsBar(QWidget):
             btn.setIcon(get_icon(icon_map.get(mode, "document"), "#00e5ff"))
             if mode == ToolMode.STATS:
                 btn.setToolTip("Stats (Telemetry & Benchmark)")
-            elif mode == ToolMode.REFERENCE:
+            elif mode == ToolMode.READER:
                 btn.setToolTip("Reader (Document & PDF Viewer)")
+            elif mode == ToolMode.REFERENCE:
+                btn.setToolTip("Cross-Reference (Compare a highlighted passage against your other files)")
             else:
                 btn.setToolTip(mode.value)
             
@@ -269,7 +273,8 @@ class TabsBar(QWidget):
                 self._buttons[self.current_mode].setChecked(True)
             return
             
-        if mode == ToolMode.STATS:
+        # Launcher buttons: open a window but keep the active tool mode selected
+        if mode in (ToolMode.STATS, ToolMode.READER):
             self.mode_changed.emit(mode)
             if self.current_mode in self._buttons:
                 self._buttons[self.current_mode].setChecked(True)
@@ -277,8 +282,6 @@ class TabsBar(QWidget):
 
         if self.current_mode != mode:
             self.current_mode = mode
-            self.mode_changed.emit(mode)
-        elif mode == ToolMode.REFERENCE:
             self.mode_changed.emit(mode)
 
     def set_mode(self, mode: ToolMode):
