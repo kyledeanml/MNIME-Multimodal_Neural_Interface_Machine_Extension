@@ -158,8 +158,7 @@ build_app.bat
 
 ## Project Architecture
 
-`yaml
-
+```yaml
 MNIME/
 ├── core/                   # Core processing engine
 │   ├── __init__.py
@@ -251,8 +250,7 @@ MNIME/
 ├── LICENSE                 # MIT Open Source License
 └── README.md               # Project documentation
 
-`
-
+```
 
 ---
 
