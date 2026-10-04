@@ -328,7 +328,7 @@ MNIME includes a telemetry dashboard and benchmarking suite (`ui/nerds.py` & `be
   </a>
 </p>
 
-> **MNIME Build Process & Change Log** — Interactive document outlining the complete engineering lifecycle from initial repository genesis through 5D vector mathematics, local neural engine integration, standalone custom animated PyQt6 installer packaging, and forensic IDE conversation sessions.
+> **MNIME Build Process & Change Log** — The complete engineering lifecycle from initial repository genesis through 5D vector mathematics, local neural engine integration, standalone custom animated PyQt6 installer packaging, and forensic IDE conversation sessions.
 
 ---
 
