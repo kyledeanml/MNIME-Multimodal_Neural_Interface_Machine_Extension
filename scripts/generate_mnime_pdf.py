@@ -626,7 +626,7 @@ def build_body(styles):
         ["License",   "Open Source (see Section 14)"],
         ["Author",    "kyledeanml / KyleDeanAI"],
         ["Repository", "https://github.com/kyledeanml/MNIME-Multimodal_Neural_Interface_Machine_Extension"],
-        ["NLP Model",  "KyleDeanAI/MNIME-Core-V5-Q4_K_M (HuggingFace)"],
+        ["NLP Model",  "KyleDeanML/MNIME-Core-V5-Q4_K_M (HuggingFace)"],
         ["Network",   "Fully Offline — Zero external API calls"],
     ]
     story.append(spec_table(ov_data))
@@ -874,7 +874,7 @@ def build_body(styles):
         ["Smart Filename",   "max_tokens=20, thread-locked for safety"],
         ["Chat Response",    "max_tokens=1,024, stop on <|im_end|>"],
         ["Reference Brief",  "max_tokens=1,024, structured comparative analysis prompt"],
-        ["HuggingFace",      "KyleDeanAI/MNIME-Core-V5-Q4_K_M"],
+        ["HuggingFace",      "KyleDeanML/MNIME-Core-V5-Q4_K_M"],
     ]
     story.append(spec_table(nlp_data))
 
@@ -1085,7 +1085,7 @@ def build_body(styles):
     story.append(Paragraph("8.2  Run from Source", S["h2"]))
 
     steps = [
-        ("<b>Download the NLP Model</b>: Go to <font color='#00e5ff'>huggingface.co/KyleDeanAI/MNIME-Core-V5-Q4_K_M</font>, download the .gguf file, and place it in the <font color='#39ff14'>models/</font> directory.", None),
+        ("<b>Download the NLP Model</b>: Go to <font color='#00e5ff'>huggingface.co/KyleDeanML/MNIME-Core-V5-Q4_K_M</font>, download the .gguf file, and place it in the <font color='#39ff14'>models/</font> directory.", None),
         ("<b>Run setup.bat</b>: Creates a Python 3.12+ virtual environment and installs all dependencies from requirements.txt.", "setup.bat"),
         ("<b>Launch</b>: Double-click <font color='#39ff14'>run.bat</font>, or from terminal:", ".venv\\Scripts\\python.exe MNIME.py"),
         ("<b>Pin to Taskbar</b>: Run <font color='#39ff14'>create_shortcut.bat</font> to generate a Desktop shortcut, then right-click → Pin to taskbar.", None),
@@ -1320,7 +1320,7 @@ def build_body(styles):
     attr_data = [
         ["Component", "Author / Source"],
         ["MNIME Application",           "kyledeanml / KyleDeanAI"],
-        ["MNIME-Core NLP Model",         "KyleDeanAI — fine-tuned from Qwen2.5-1.5B-Instruct"],
+        ["MNIME-Core NLP Model",         "KyleDeanML — fine-tuned from Qwen2.5-1.5B-Instruct"],
         ["Base Model (Qwen2.5-1.5B)",   "Alibaba Cloud — Qwen Team"],
         ["PyMuPDF",                     "Artifex Software"],
         ["llama-cpp-python",            "Andrei Betlen"],

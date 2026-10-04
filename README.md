@@ -118,7 +118,7 @@ install_mnime.bat
 ### Option B — Run from Source
 
 **1. Clone & Place Model**
-Download `MNIME-Core-V5-Q4_K_M.gguf` from [Hugging Face](https://huggingface.co/KyleDeanAI/MNIME-Core-V5-Q4_K_M) into the `models/` folder:
+Download `MNIME-Core-V5-Q4_K_M.gguf` from [Hugging Face](https://huggingface.co/KyleDeanML/MNIME-Core-V5-Q4_K_M) into the `models/` folder:
 ```cmd
 models/MNIME-Core-V5-Q4_K_M.gguf
 ```
