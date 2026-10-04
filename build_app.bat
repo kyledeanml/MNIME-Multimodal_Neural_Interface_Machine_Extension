@@ -32,6 +32,10 @@ if exist "scripts\generate_changelog_pdf.py" (
     echo Generating interactive Change Log PDF from CHANGE_LOG.txt...
     "%PYTHON_EXE%" scripts\generate_changelog_pdf.py
 )
+if exist "scripts\generate_paper_preview.py" (
+    echo Generating research paper cover preview...
+    "%PYTHON_EXE%" scripts\generate_paper_preview.py
+)
 
 echo [3/4] Compiling Executable...
 if exist "build" rmdir /s /q "build"

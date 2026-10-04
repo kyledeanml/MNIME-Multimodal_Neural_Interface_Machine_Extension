@@ -300,7 +300,7 @@ MNIME includes a telemetry dashboard and benchmarking suite (`ui/nerds.py` & `be
 
 <p align="center">
   <a href="MNIME_paper.pdf">
-    <img src="docs/paper_cover_v5.png" alt="MNIME Research Paper" width="480">
+    <img src="docs/paper_cover_v5.png?v=2" alt="MNIME Research Paper" width="480">
   </a>
 </p>
 
