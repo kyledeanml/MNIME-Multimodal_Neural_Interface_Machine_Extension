@@ -951,13 +951,22 @@ class MainWindow(QMainWindow):
                 self._on_mode_changed(ToolMode.COMBINE_PDF)
                 return
                 
-            self.nlp_view.hide()
-            if not self.output_view.isVisible():
-                self.carousel.show()
+            is_nlp_active = self.nlp_view.vectorstore is not None or (hasattr(self.nlp_view, 'worker') and self.nlp_view.worker.isRunning())
+            if is_nlp_active:
+                self.carousel.hide()
+                self.action_bar.hide()
+                self.output_view.hide()
+                self.nlp_view.show()
+            else:
+                self.nlp_view.hide()
+                if not self.output_view.isVisible():
+                    self.carousel.show()
+                    self.action_bar.show()
         else:
             self.nlp_view.hide()
             if not self.output_view.isVisible():
                 self.carousel.show()
+                self.action_bar.show()
 
     def _get_file_filters(self) -> str:
         """Return file dialog filter based on active tool mode."""
