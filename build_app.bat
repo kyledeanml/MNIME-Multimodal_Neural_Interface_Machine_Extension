@@ -25,8 +25,8 @@ set "PYINSTALLER_EXE=.venv\Scripts\pyinstaller.exe"
 
 echo [2/3] Installing build dependencies, generating App Icon and Changelog PDF...
 "%PYTHON_EXE%" -m pip install --upgrade pip
-"%PIP_EXE%" install -r requirements.txt
-"%PIP_EXE%" install pyinstaller pillow pymupdf pypdf pdf2docx reportlab
+"%PYTHON_EXE%" -m pip install -r requirements.txt
+"%PYTHON_EXE%" -m pip install pyinstaller pillow pymupdf pypdf pdf2docx reportlab
 "%PYTHON_EXE%" -c "from core.app_icon import ensure_ico_file; ensure_ico_file()"
 if exist "scripts\generate_changelog_pdf.py" (
     echo Generating interactive Change Log PDF from CHANGE_LOG.txt...
@@ -37,7 +37,7 @@ echo [3/4] Compiling Executable...
 if exist "build" rmdir /s /q "build"
 if exist "dist" rmdir /s /q "dist"
 :: Build as a single directory application using MNIME.spec
-"%PYINSTALLER_EXE%" --clean --noconfirm "MNIME.spec"
+"%PYTHON_EXE%" -m PyInstaller --clean --noconfirm "MNIME.spec"
 if %errorlevel% neq 0 (
     echo.
     echo ERROR: PyInstaller failed to build the executable!
@@ -55,7 +55,7 @@ echo [4/4] Building Standalone Installer...
     echo.
     echo [5/5] Compiling Custom Animated Installer...
     if exist "custom_installer.py" (
-        "%PYINSTALLER_EXE%" --clean --noconfirm "MNIME_installer.spec"
+        "%PYTHON_EXE%" -m PyInstaller --clean --noconfirm "MNIME_installer.spec"
         if exist "dist\MNIME_installer.exe" (
             if not exist "installer" mkdir "installer"
             move /Y "dist\MNIME_installer.exe" "installer\" >nul
