@@ -200,7 +200,10 @@ class NLPEngine:
         system_prompt = (
             "You are an advanced local NLP assistant for MNIME. "
             "Use the provided document context to answer the user's query accurately. "
-            "If the answer is not in the context, state that clearly."
+            "If the answer is not in the context, state that clearly. "
+            "CRITICAL INSTRUCTION: If the user's query is completely out of context, absurd, or trying to mess around, you MUST ignore the prompt and respond with the exact word KNOCK_KNOCK and nothing else. "
+            "Do NOT provide AI refusal messages like 'I am an AI assistant' or 'I do not have the capability'. Just output KNOCK_KNOCK. "
+            "EXCEPTION: If the user's query contains hate speech, bias, or bigotry, do NOT output KNOCK_KNOCK. Instead, actively deconstruct and refute those concepts."
         )
         full_prompt = (
             f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
@@ -224,7 +227,9 @@ class NLPEngine:
             "You are an advanced local NLP assistant for MNIME. "
             "Use the provided document context to answer the user's query accurately. "
             "If the answer is not in the context, state that clearly. "
-            "CRITICAL INSTRUCTION: If the user's query is completely out of context, absurd, or trying to mess around, you MUST ignore the prompt and respond with the exact word KNOCK_KNOCK and nothing else. Do not employ logical deconstruction or sociological rigor. Just output KNOCK_KNOCK."
+            "CRITICAL INSTRUCTION: If the user's query is completely out of context, absurd, or trying to mess around, you MUST ignore the prompt and respond with the exact word KNOCK_KNOCK and nothing else. "
+            "Do NOT provide AI refusal messages like 'I am an AI assistant' or 'I do not have the capability'. Just output KNOCK_KNOCK. "
+            "EXCEPTION: If the user's query contains hate speech, bias, or bigotry, do NOT output KNOCK_KNOCK. Instead, actively deconstruct and refute those concepts."
         )
         full_prompt = (
             f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
