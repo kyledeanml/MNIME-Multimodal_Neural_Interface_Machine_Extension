@@ -213,6 +213,14 @@ MNIME/
 │   ├── test_print_engine.py
 │   ├── test_stats_telemetry.py
 │   └── test_windows_integration.py
+├── training/              # Neural fine-tuning & datasets
+│   ├── clean_v4_dataset.py
+│   ├── generate_v4_philosophy_dataset.py
+│   ├── generate_v5_antibias_dataset.py
+│   ├── mnime_v3_dataset_clean.jsonl
+│   ├── mnime_v4_philosophy_dataset_clean.jsonl
+│   ├── mnime_v5_antibias_dataset_clean.jsonl
+│   └── train_mnime.py
 ├── CHANGE_LOG.txt         # Comprehensive forensic build & session change log
 ├── MNIME_Change_Log.pdf   # Interactive compiled change log & build history
 ├── MNIME_paper.pdf        # Research paper PDF
