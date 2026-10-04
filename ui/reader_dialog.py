@@ -100,9 +100,10 @@ class ReaderPageView(QGraphicsView):
             event.accept()
 
 class ReaderDialog(QDialog):
-    def __init__(self, file_items, parent=None, update_callback=None, initial_index: int = 0):
+    def __init__(self, file_items, parent=None, update_callback=None, initial_index: int = 0, crossref_callback=None):
         super().__init__(parent)
         self.update_callback = update_callback
+        self.crossref_callback = crossref_callback
         self.file_items = file_items
         self.setWindowTitle("MNIME - READER")
         self.setMinimumSize(800, 600)
@@ -181,12 +182,6 @@ class ReaderDialog(QDialog):
                 border-bottom-right-radius: 40px;
             }
         """)
-        
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(20)
-        shadow.setColor(QColor(0, 0, 0, 180))
-        shadow.setOffset(0, 4)
-        self.container_frame.setGraphicsEffect(shadow)
         
         central_layout.addWidget(self.container_frame)
         

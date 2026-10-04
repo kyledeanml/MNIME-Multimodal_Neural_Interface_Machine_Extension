@@ -124,9 +124,6 @@ class MetalSplashScreen(QWidget):
         w, h = screen.width(), screen.height()
         self.setFixedSize(w, h)
         
-        self.opacity_effect = QGraphicsOpacityEffect(self)
-        self.setGraphicsEffect(self.opacity_effect)
-        
         self.rotation = 0.0
         self.logo_scale = 0.0
         
@@ -394,7 +391,7 @@ def main():
         splash = MetalSplashScreen()
         splash.show()
 
-        animation = QPropertyAnimation(splash.opacity_effect, b"opacity")
+        animation = QPropertyAnimation(splash, b"windowOpacity")
         animation.setDuration(1200)  # 1.2 second fade out
         animation.setStartValue(1.0)
         animation.setEndValue(0.0)
