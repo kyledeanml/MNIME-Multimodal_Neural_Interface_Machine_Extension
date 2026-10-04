@@ -4,7 +4,7 @@ MNIME - COMPLETE BUILD PROCESS AND DEVELOPMENT CHANGE LOG
 Document:           CHANGE_LOG.txt
 Workspace:          b:\Desktop\BASSD\BELCO\AAS-T_AISD\zFAL26\MNIME
 Product Name:       MNIME (Multimodal Neural Interface Machine Extension)
-Current Version:    2.1 (Production Release Ready)
+Current Version:    5.0 (Production Release Ready)
 Target OS:          Windows 11 (x64)
 Author:             Kyle Bauer / kyledeanml (Bellevue College)
 Created:            October 3, 2026
@@ -894,7 +894,7 @@ FILES TOUCHED:
   - CHANGE_LOG.txt
 
 ================================================================================
-END OF CHANGE LOG - MNIME v2.1 RELEASE BUILD
+END OF CHANGE LOG - MNIME v5.0 RELEASE BUILD
 ================================================================================
 
 [2026-10-03] Session 23: MNIME - Persistent Vector Store & LoRA Adapter Support
@@ -911,7 +911,7 @@ END OF CHANGE LOG - MNIME v2.1 RELEASE BUILD
 - Restored training/ scripts locally (git-ignored).
 
 [2026-10-03] Session 25: MNIME V3 Massive Dataset & Evaluation Framework
-- Created a separate parallel workspace (`MNIME_V3_Training`) to safeguard the V2.1 production release during massive training scale-up.
+- Created a separate parallel workspace (`MNIME_V3_Training`) to safeguard the v5.0 production release during massive training scale-up.
 - Developed `build_v3_dataset.py` to download `databricks-dolly-15k`, filter for document QA/extraction, format to Alpaca JSONL, and inject MNIME identity weights (50x).
 - Built `clean_dataset.py` to purge AI refusals and low-effort responses, yielding a pristine 4,792-entry dataset.
 - Shared `training/mnime_v3_dataset_clean.jsonl` in the main repo (updated `.gitignore` to allow tracking).

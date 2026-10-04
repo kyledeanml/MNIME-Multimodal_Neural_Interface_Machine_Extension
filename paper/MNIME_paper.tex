@@ -245,30 +245,13 @@ quantization pipeline.
 Post fine-tuning, we quantize to Q4\_K\_M, which provides an optimal balance
 between model quality and memory footprint ($\approx$1.0\,GB).
 
-\subsection{Training Data and Objective}
+\subsection{Training Data and Multi-Stage Alignment Pipeline}
 
-The current MNIME-Core adapter is a lightweight behavioral alignment pass
-rather than a large-scale domain fine-tune. The supervised dataset
-(\texttt{training/mnime\_dataset.jsonl}) contains 10 hand-written
-instruction--response pairs in Alpaca format covering:
-\begin{enumerate}
-    \item \textbf{Assistant identity}: consistent self-description as an
-    offline MNIME document assistant (6 examples).
-    \item \textbf{Short-form document outputs}: one-sentence summarization,
-    concise filename generation, and bookmark title generation (4 examples).
-\end{enumerate}
-Cross-referencing and document-grounded QA rely on the base model's
-instruction-following ability combined with retrieved context (Section~\ref{sec:arch_diagram});
-they were not separately fine-tuned.
-We apply Low-Rank Adaptation (LoRA)~\cite{hu2021lora} with rank $r=16$ and
-$\alpha=16$ to all attention and MLP projection matrices
-(\texttt{q,k,v,o,gate,up,down}), with the base weights loaded in 4-bit.
 
-\subsection{Multi-Stage Training and Alignment Pipeline}
 
 To ensure MNIME-Core remains highly responsive, accurate, and empathetic, we structured the fine-tuning process across a multi-stage, hybrid compute pipeline. This separates foundational QA alignment (trained locally) from expansive philosophical, ethical, and anti-bias instruction (trained via high-compute cloud instances and fused locally).
 
-\paragraph{Stage 1: Foundational V3 Local Training.} The foundational V3 phase aligns the base \texttt{Qwen2.5-1.5B-Instruct} weights to MNIME's core identity, focusing on closed QA, document summarization, and information extraction. Using a highly filtered 5,482-example subset of Databricks Dolly 15k (\path{training/mnime_v3_dataset_clean.jsonl}), the model was trained locally on an NVIDIA RTX 3060 (12\,GB VRAM). The pipeline employs HuggingFace \texttt{trl}, \texttt{peft}, and \texttt{bitsandbytes} to execute 4-bit NF4 Low-Rank Adaptation (LoRA).
+\paragraph{Stage 1: Foundational V3 Local Training.} The foundational V3 phase aligns the base \texttt{Qwen2.5-1.5B-Instruct} weights to MNIME's core identity, focusing on closed QA, document summarization, and information extraction. Using a highly filtered 5,482-example subset of Databricks Dolly 15k (\path{training/mnime_v3_dataset_clean.jsonl}), the model was trained locally on an NVIDIA RTX 3060 (12\,GB VRAM). The pipeline employs HuggingFace \texttt{trl}, \texttt{peft}, and \texttt{bitsandbytes} to execute 4-bit NF4 Low-Rank Adaptation (LoRA)~\cite{hu2021lora}.
 
 \paragraph{Stage 2: V4 Philosophy \& Robustness Cloud Upgrade.} Following the foundational local training, the model weights were elevated through a cloud fine-tuning phase on Google Cloud Platform (GCP) accelerators. The V4 phase utilized a synthetically engineered 15,000-example dataset (\path{training/mnime_v4_philosophy_dataset_clean.jsonl}) designed to impart ontological discourse (Stoicism, Existentialism) and conversational empathy. Concurrently, adversarial prompt injections and hallucination traps were embedded directly into the training corpus to hardcode resilience against jailbreaks. The resulting adapter was merged back into the base matrix in full fp16 precision.
 
