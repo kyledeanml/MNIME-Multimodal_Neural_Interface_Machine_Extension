@@ -158,13 +158,30 @@ build_app.bat
 
 ## Project Architecture
 
+<p align="center">
+  <a href="MNIME_Architecture.pdf">
+    <img src="docs/architecture_cover.png?v=1" alt="MNIME Project Architecture & Schematics" width="480">
+  </a>
+</p>
+
+<p align="center">
+  <a href="MNIME_Architecture.pdf">
+    <img src="https://img.shields.io/badge/View%20Full%20Architecture%20%26%20Schematics-PDF-00e5ff?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="View Architecture PDF">
+  </a>
+</p>
+
+> **Project Architecture & Subsystem Schematics** — Interactive 4-page system architecture manual detailing the 4-layer decoupled topology, 60 FPS non-blocking `QThread` concurrency, the Neural Assimilation Engine (TIES model merging), and dual-tier FAISS vector memory.
+
+<details>
+<summary><b>Expand Repository Directory Tree</b></summary>
+
 ```yaml
 MNIME/
 ├── core/                   # Core processing engine
 │   ├── __init__.py
 │   ├── app_icon.py         # Win32 icons & window properties
 │   ├── file_item.py        # Data model & thumbnail caching
-│   ├── fusion_engine.py      # Neural Assimilation Engine (Weight Fusion)
+│   ├── fusion_engine.py    # Neural Assimilation Engine (Weight Fusion)
 │   ├── ipc.py              # Single-instance IPC mechanism
 │   ├── logging_setup.py    # Application logging setup
 │   ├── nlp_engine.py       # GGUF model integration via llama-cpp
@@ -197,6 +214,7 @@ MNIME/
 │   ├── nerds.py            # Real-time telemetry & performance HUD
 │   └── tabs_bar.py         # Application navigation bar
 ├── docs/                   # Media & cover artwork assets
+│   ├── architecture_cover.png # System Architecture preview cover
 │   ├── changelog_cover.png # Interactive change log preview cover
 │   ├── paper_cover.png     # Research paper preview cover
 │   └── spec_cover.png      # Specification sheet preview cover
@@ -209,6 +227,7 @@ MNIME/
 │   └── template_ref.tex    # Reference template
 ├── scripts/                # Utility & PDF generation scripts
 │   ├── fetch_models.py            # Automated model downloader
+│   ├── generate_architecture_pdf.py # Dynamic Architecture PDF generator
 │   ├── generate_changelog_pdf.py  # Dynamic Change Log PDF & cover generator
 │   └── generate_mnime_pdf.py      # Specification manual PDF generator
 ├── tests/                  # Automated test suite
@@ -229,6 +248,7 @@ MNIME/
 │   ├── mnime_v5_antibias_dataset_clean.jsonl
 │   └── train_mnime.py
 ├── CHANGE_LOG.txt          # Comprehensive forensic build & session change log
+├── MNIME_Architecture.pdf  # Interactive system architecture & schematics
 ├── MNIME_Change_Log.pdf    # Interactive compiled change log & build history
 ├── MNIME_paper.pdf         # Research paper PDF
 ├── MNIME_Spec_Manual.pdf   # Specification & user manual PDF
@@ -249,8 +269,8 @@ MNIME/
 ├── version_info.txt        # Version build details
 ├── LICENSE                 # MIT Open Source License
 └── README.md               # Project documentation
-
 ```
+</details>
 
 ---
 

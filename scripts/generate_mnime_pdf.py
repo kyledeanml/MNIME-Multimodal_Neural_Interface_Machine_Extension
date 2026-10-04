@@ -697,6 +697,7 @@ def build_body(styles):
         ["core/nlp_engine.py",     "Singleton NLP engine. Loads/unloads GGUF model, generates chat responses, smart bookmarks, smart filenames.", "llama-cpp-python"],
         ["core/search_engine.py",  "FAISS-backed semantic search. Indexes PDFs/text files, performs similarity search, runs Windows OCR on image-only pages.", "langchain, faiss-cpu, sentence-transformers, winsdk"],
         ["core/file_item.py",      "Data model for a queued file. Stores path, extension, metadata, thumbnail pixmap.", "pymupdf, Pillow"],
+        ["core/fusion_engine.py",  "Neural Assimilation Engine. Background weight-fusion system for dynamic model merging & parameter absorption.", "numpy, torch, llama-cpp-python"],
         ["core/worker.py",         "Generic QThread worker with progress_callback signal. Wraps all engine calls.", "PyQt6.QtCore"],
         ["core/app_icon.py",       "Windows AppUserModelID registration, ICO generation, taskbar/desktop shortcut creation.", "winreg, ctypes"],
         ["ui/main_window.py",      "Central coordinator. Frameless dark metallic window, mode routing, drag-and-drop handler, VFX trigger.", "PyQt6, all ui/ modules"],

@@ -34,6 +34,7 @@ MNIME Builder and Installer.txt
 !MNIME_Spec_Manual.pdf
 !MNIME_paper.pdf
 !MNIME_Change_Log.pdf
+!MNIME_Architecture.pdf
 
 # Paper source — compiled PDF lives at root; exclude the LaTeX workspace
 paper/
