@@ -180,6 +180,7 @@ MNIME/
 ├── core/                   # Core processing engine
 │   ├── __init__.py
 │   ├── app_icon.py         # Win32 icons & window properties
+│   ├── fallback_responses.py # Zero-shot conversational fallback responses
 │   ├── file_item.py        # Data model & thumbnail caching
 │   ├── fusion_engine.py    # Neural Assimilation Engine (Weight Fusion)
 │   ├── ipc.py              # Single-instance IPC mechanism
@@ -188,6 +189,7 @@ MNIME/
 │   ├── pdf_engine.py       # PyMuPDF engine, DOCX & image conversion
 │   ├── print_engine.py     # High-DPI printing & rendering
 │   ├── search_engine.py    # FAISS vector indexing & RAG retrieval
+│   ├── system_cleaner.py   # Memory cache, VRAM & temp resource purger
 │   ├── text_safety.py      # Prompt parsing & text sanitization
 │   ├── version.py          # Application version constants
 │   ├── windows_integration.py  # Windows taskbar & OS integrations
@@ -317,7 +319,7 @@ MNIME includes a telemetry dashboard and benchmarking suite (`ui/nerds.py` & `be
   </a>
 </p>
 
-> **MNIME Build Process & Change Log** — Interactive document outlining the complete engineering lifecycle from initial repository genesis through 5D vector mathematics, local neural engine integration, dual-installer packaging, and forensic IDE conversation sessions.
+> **MNIME Build Process & Change Log** — Interactive document outlining the complete engineering lifecycle from initial repository genesis through 5D vector mathematics, local neural engine integration, standalone custom animated PyQt6 installer packaging, and forensic IDE conversation sessions.
 
 ---
 
