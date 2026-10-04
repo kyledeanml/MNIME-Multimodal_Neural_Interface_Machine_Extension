@@ -913,3 +913,27 @@ END OF CHANGE LOG - MNIME v2.1 RELEASE BUILD
 - Built `scripts/nlp_eval.py` to empirically benchmark models with precise Token-level F1 and ROUGE-L metrics against ground-truth datasets.
 - Updated `README.md` and `MNIME_paper.tex` to officially document the release of the V3 massive dataset.
 
+[2026-10-03] Session 26: V4 Cloud Training, Full-Precision Fusion, and GGUF Multi-Format Export
+- Deployed V4 training workload to Google Cloud Platform on an accelerator-backed instance (`mnime-v4-trainer`).
+- Executed supervised fine-tuning using Unsloth LoRA on `training/mnime_v4_philosophy_dataset_clean.jsonl` (15,000 synthetic examples covering Stoicism, Existentialism, and prompt injection traps).
+- Streamed training telemetry and checkpoints back to local storage (`training/v4_out/mnime_v4_adapter/` and `training/v4_out/checkpoint-343/`).
+- Conducted 100% cloud cost hygiene: deleted compute instance, purged all Cloud Storage staging buckets, and deallocated static IP reservations.
+- Developed `training/merge_v4.py` to execute sequential full-precision fp16 fusion of base Qwen2.5-1.5B-Instruct + V3 LoRA adapter + V4 LoRA adapter into `training/v4_out/MNIME-Core-V4-merged` (3.08 GB safetensors).
+- Utilized `llama.cpp` to export multi-precision GGUF artifacts: `MNIME-Core-V4-f16.gguf` (3.09 GB) and `MNIME-Core-V4-Q8_0.gguf` (1.64 GB).
+- Executed local on-device smoke test via `llama-cpp-python`, confirming consistent "MNIME-Core" identity and philosophical reasoning capabilities.
+
+[2026-10-03] Session 27: Neural Assimilation Engine (NAE) v2.0 & Streaming FP16/BF16 Fusion
+- Refactored `core/fusion_engine.py` to replace legacy in-memory heuristics with a true streaming, chunked parameter fusion architecture.
+- Added strict format validation rejecting lossy 4-bit GGUF files and enforcing full-precision HuggingFace `safetensors` directories to preserve subtle gradient deltas.
+- Implemented TIES delta parameter isolation (`Delta = W_donor - W_base`), top-k magnitude density pruning, and majority sign consensus resolution.
+- Added linear task-vector interpolation (`W_fused = W_base + alpha * Delta`) with automatic common-ancestor alignment.
+- Created `tests/test_fusion_engine.py` covering tensor chunking, safetensors serialization, linear fusion, TIES pruning, error boundaries, and consensus sign voting (7/7 unit tests passing).
+
+[2026-10-03] Session 28: V5 Ethics & Empathy Alignment Completion and Full Ecosystem Synchronization
+- Synthesized and aligned `training/mnime_v5_antibias_dataset_clean.jsonl` (20,000 synthetic examples targeting systemic bias, stereotype elimination, and dialectical anti-bigotry).
+- Configured MNIME-Core to deconstruct hateful tropes and prejudiced generalizations through sociological rigor and empirical logic rather than shallow, evasive refusal templates.
+- Assimilated V5 ethics matrices through the Neural Assimilation Engine into the production weights.
+- Consolidated multi-tier model artifacts into `models/` with fallback support and updated `version_info.txt`.
+- Synchronized all documentation, spec sheets, change logs, and research papers across `README.md`, `CHANGE_LOG.txt`, `MNIME_Architecture.pdf`, `MNIME_Change_Log.pdf`, `MNIME_Spec_Manual.pdf`, and `MNIME_paper.tex`.
+
+

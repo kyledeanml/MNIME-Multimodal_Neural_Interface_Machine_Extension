@@ -75,20 +75,24 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
 
 ## Fine-Tuned NLP Model — MNIME-Core
 
-`MNIME-Core-1.5B-Q4_K_M.gguf` is a fine-tuned version of `Qwen2.5-1.5B-Instruct`, quantized to Q4_K_M, specialized for high-density document synthesis, extraction, and cross-referencing.
+`MNIME-Core-1.5B-Q4_K_M.gguf` is an advanced multi-stage aligned model derived from `Qwen2.5-1.5B-Instruct`, specialized for high-density document synthesis, cross-referencing, philosophical reasoning, and empathetic anti-bias dialogue.
 
-- **V3 Massive Training Dataset**: We have released `training/mnime_v3_dataset_clean.jsonl` (5,482 high-quality, filtered document Q&A and extraction pairs) for training V3 architectures. This dataset merges Databricks Dolly 15k subsets with identity-preserving weights, strictly filtered for AI refusals.
-- **V4 Cloud Philosophy Dataset**: We have also drafted `training/mnime_v4_philosophy_dataset_clean.jsonl` (15,000 synthetic examples) engineered for the forthcoming GCP cloud fine-tuning phase. It integrates advanced philosophical instruction (Stoicism, Existentialism) with rigorous prompt-injection immunity and hallucination traps.
-- **V5 Ethics & Empathy Alignment**: To eliminate systemic bigotry and prejudice, we constructed `training/mnime_v5_antibias_dataset_clean.jsonl` (20,000 synthetic examples). This equips MNIME to actively deconstruct hate tropes via sociological rigor and empirical logic rather than relying on generic refusals.
-- **Model Download**: Download the model from [KyleDeanAI/MNIME-Core-1.5B-Q4_K_M](https://huggingface.co/KyleDeanAI/MNIME-Core-1.5B-Q4_K_M) and place it inside the `models/` directory.
-- **Hardware Acceleration**: Automatically offloads layers to available GPU VRAM (NVIDIA CUDA / Vulkan / Metal) via `llama-cpp-python`.
+### Multi-Stage Alignment Evolution
+MNIME-Core represents the culmination of a three-stage progressive alignment pipeline combining local LoRA adaptation, high-compute cloud fine-tuning, and full-precision tensor assimilation:
 
-### The Neural Assimilation Engine
-MNIME isn't just a static interface—it's designed to evolve. At its foundation, MNIME-Core acts as a highly disciplined logical scribe and assistant. However, with the built-in **Neural Assimilation Engine**, users have the power to transform MNIME into virtually anything.
+- **Stage 1 (V3 Foundational Synthesis & Extraction)**: Trained locally on `training/mnime_v3_dataset_clean.jsonl` (5,482 curated pairs merging Databricks Dolly 15k subsets with identity-preserving weights). Establishes deep document comprehension, closed QA, structured entity extraction, and prompt grounding.
+- **Stage 2 (V4 Philosophical Depth & Adversarial Robustness)**: Trained on high-VRAM cloud compute using `training/mnime_v4_philosophy_dataset_clean.jsonl` (15,000 synthetic examples). Embeds ontological reasoning (Stoicism, Existentialism), dialectical resilience, prompt-injection immunity, and hallucination counter-traps.
+- **Stage 3 (V5 Ethics, Empathy, & Anti-Bias Alignment)**: Synthesized and aligned using `training/mnime_v5_antibias_dataset_clean.jsonl` (20,000 examples). Rather than issuing evasive, canned refusal templates, MNIME-Core actively and objectively deconstructs hate tropes and demographic stereotypes using sociological evidence, empirical logic, and empathetic dialectics.
+- **Model Distribution & Formats**: Available in multiple precision targets, including full fp16 HuggingFace checkpoints, high-fidelity `MNIME-Core-V5-Q8_0.gguf` (1.64 GB), and production-optimized `MNIME-Core-1.5B-Q4_K_M.gguf` (~1.0 GB) for ultra-fast local inference.
+- **Hardware Acceleration**: Automatically offloads computation layers to available GPU VRAM (NVIDIA CUDA / Vulkan / Metal) via `llama-cpp-python`, with graceful CPU fallback.
 
-By simply dragging and dropping a customized donor model (e.g., a heavily trained medical diagnoser, a master Python coder, or a creative writing engine) into MNIME, the Assimilation Engine runs a background asynchronous fusion process. Using advanced weight-fusion techniques (like TIES-merging), it isolates the high-value parameter deltas of the new model and safely injects them into MNIME's core matrix without overwriting its fundamental logical resilience or causing catastrophic forgetting. You aren't just switching models; you are feeding and growing a singular, ultra-customized brain tailored exactly to your specific workflow.
+### The Neural Assimilation Engine (NAE)
+MNIME is not a static interface—it is built to evolve dynamically. While MNIME-Core operates as a rigorous logical scribe and analytical assistant, the built-in **Neural Assimilation Engine** (`core/fusion_engine.py`) allows operators to continually fuse external specialized domain capabilities into the application.
 
-**Full-precision requirement:** the engine merges tensor by tensor on fp16/bf16 HuggingFace `safetensors` folders (for example `training/v4_out/MNIME-Core-V4-merged`), optionally against a common ancestor such as `Qwen2.5-1.5B-Instruct` for true task vectors. Quantized GGUF files are rejected because 4-bit weights lose the precision a merge depends on. The output is a complete HF folder; convert it with llama.cpp (`convert_hf_to_gguf.py`) and quantize to Q4_K_M to run it in MNIME.
+Using advanced weight-fusion algorithms (such as TIES-merging and linear task-vector interpolation), the engine isolates high-value parameter deltas from donor models (e.g., medical diagnostics, legal analysis, or specialized coding assistants) and injects them into the base matrix without overwriting core logical foundations or inducing catastrophic forgetting.
+
+**Full-Precision Streaming Architecture:**
+The Assimilation Engine merges tensor-by-tensor directly on full-precision (fp16/bf16) HuggingFace `safetensors` model directories (such as `training/v4_out/MNIME-Core-V4-merged`). Operating in full floating-point precision preserves subtle gradient vectors that would otherwise be destroyed by 4-bit quantization. Once fused, the resulting model folder is seamlessly converted via `llama.cpp` to GGUF format (`Q8_0` or `Q4_K_M`) for deployment in MNIME.
 
 
 ---
@@ -235,6 +239,7 @@ MNIME/
 │   ├── generate_changelog_pdf.py  # Dynamic Change Log PDF & cover generator
 │   └── generate_mnime_pdf.py      # Specification manual PDF generator
 ├── tests/                  # Automated test suite
+│   ├── test_fusion_engine.py
 │   ├── test_ipc_parse.py
 │   ├── test_nlp_conversational_fallback.py
 │   ├── test_nlp_indexing.py
@@ -243,14 +248,16 @@ MNIME/
 │   ├── test_print_engine.py
 │   ├── test_stats_telemetry.py
 │   └── test_windows_integration.py
-├── training/               # Neural fine-tuning & datasets
+├── training/               # Neural fine-tuning, datasets & assimilation
 │   ├── clean_v4_dataset.py
 │   ├── generate_v4_philosophy_dataset.py
 │   ├── generate_v5_antibias_dataset.py
+│   ├── merge_v4.py
 │   ├── mnime_v3_dataset_clean.jsonl
 │   ├── mnime_v4_philosophy_dataset_clean.jsonl
 │   ├── mnime_v5_antibias_dataset_clean.jsonl
-│   └── train_mnime.py
+│   ├── train_mnime.py
+│   └── v4_out/             # Merged fp16 HF weights, F16 GGUF & Q8_0 GGUF
 ├── CHANGE_LOG.txt          # Comprehensive forensic build & session change log
 ├── MNIME_Architecture.pdf  # Interactive system architecture & schematics
 ├── MNIME_Change_Log.pdf    # Interactive compiled change log & build history

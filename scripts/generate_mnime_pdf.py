@@ -858,8 +858,9 @@ def build_body(styles):
     nlp_data = [
         ["Property", "Detail"],
         ["Base Model",       "Qwen2.5-1.5B-Instruct"],
-        ["Fine-tuning",      "Task-specific training on document processing & cross-referencing"],
-        ["Quantization",     "Q4_K_M (4-bit, K-Quant Mixed)"],
+        ["Fine-tuning",      "Progressive multi-stage alignment: V3 doc synthesis + V4 philosophy + V5 anti-bias"],
+        ["Neural Engine",    "Neural Assimilation Engine (NAE): streaming fp16 TIES weight fusion"],
+        ["Quantization",     "Q4_K_M (4-bit, K-Quant Mixed) with high-fidelity Q8_0 and fp16 archives"],
         ["Format",           "GGUF (llama.cpp compatible)"],
         ["Parameters",       "~1.5 Billion"],
         ["Context Length",   "4,096 tokens (n_ctx)"],
@@ -1262,6 +1263,12 @@ def build_body(styles):
     story += section_header("13  Changelog", S)
 
     changelog = [
+        ("MNIME Core V5 — Multi-Stage Alignment & Neural Assimilation", [
+            "Added: Multi-stage progressive alignment pipeline combining V3 document synthesis, V4 cloud philosophy & adversarial robustness, and V5 sociological anti-bias alignment.",
+            "Added: Neural Assimilation Engine (NAE v2.0) featuring streaming fp16/bf16 safetensors TIES-merging, gradient delta isolation, and sign consensus resolution.",
+            "Added: Multi-precision model artifacts including full-precision safetensors, 16-bit GGUF (3.09 GB), 8-bit Q8_0 GGUF (1.64 GB), and quantized Q4_K_M GGUF (~1.0 GB).",
+            "Improved: Ethical reasoning engine actively deconstructs hate tropes and demographic stereotypes using empirical sociology rather than generic refusal templates.",
+        ]),
         ("MNIME Final — Bundled NLP Model", [
             "Changed: The fine-tuned MNIME-Core-1.5B-Q4_K_M.gguf model is now bundled directly inside the application under models/. No external model download required.",
             "Removed: The Settings gear icon and NLP hardware configuration dialog have been removed. Hardware offloading is handled automatically at runtime.",
@@ -1381,6 +1388,20 @@ def build_pdf():
     story = build_body(styles)
     doc.build(story)
     print(f"PDF generated: {OUTPUT_PATH}")
+
+    # Render cover preview (Page 1) at 300 DPI
+    try:
+        import pymupdf
+        pdoc = pymupdf.open(OUTPUT_PATH)
+        cover_page = pdoc[0]
+        pix = cover_page.get_pixmap(matrix=pymupdf.Matrix(300 / 72, 300 / 72), alpha=False)
+        cover_path = os.path.join(os.path.dirname(OUTPUT_PATH), "docs", "spec_cover.png")
+        os.makedirs(os.path.dirname(cover_path), exist_ok=True)
+        pix.save(cover_path)
+        pdoc.close()
+        print(f"Cover preview rendered: {cover_path} ({pix.width}x{pix.height}px)")
+    except Exception as e:
+        print(f"Cover preview render skipped: {e}")
 
 
 if __name__ == "__main__":

@@ -539,7 +539,7 @@ def generate_pdf(output_pdf: str, cover_png: str):
         ("ui/tabs_bar.py", "Presentation", "Main Thread", "Navigation bar hosting mode switches, NLP master toggle, and LoRA triggers."),
         ("ui/reader_dialog.py", "Document Suite", "Main Thread", "Frameless 4.0x high-DPI document reader with smooth wheel zoom."),
         ("ui/pdf_editor.py", "Document Suite", "Main Thread", "Visual page-by-page PDF editor (crop, rotate, delete, reorder)."),
-        ("training/mnime_v4_philosophy*", "Model Training", "Cloud (GCP)", "15k instruction dataset & SFT trainer for philosophical grounding and anti-bias."),
+        ("training/mnime_v4 & v5*", "Model Training", "Cloud / Local NAE", "15k V4 philosophy + 20k V5 anti-bias datasets; NAE streaming fp16 fusion."),
         ("custom_installer.py", "Packaging", "Main Thread", "Custom standalone PyQt6 installer with flying-file visual progress bar."),
         ("MNIME.spec", "Build System", "PyInstaller", "Specification for single-folder standalone Windows binary distribution.")
     ]
@@ -598,12 +598,12 @@ def generate_pdf(output_pdf: str, cover_png: str):
         [Paragraph("<b>DEEP DIVE A — THE NEURAL ASSIMILATION ENGINE (WEIGHT FUSION)</b>", styles["card_title"])],
         [Paragraph(
             "The <b>Neural Assimilation Engine</b> (<code>core/fusion_engine.py</code>) empowers MNIME to evolve dynamically beyond static model architectures. "
-            "When an operator drags and drops an external donor GGUF model into the interface, the engine triggers an asynchronous weight fusion sequence:<br/><br/>"
-            "1. <b>Parameter Delta Isolation:</b> The engine extracts parameter deltas relative to base matrix weights: "
-            "<code>&Delta;W = W_donor - W_base</code>.<br/>"
-            "2. <b>TIES Sparsity Pruning:</b> Insignificant delta values below a threshold density parameter are pruned to zero, preserving base model integrity.<br/>"
-            "3. <b>Sign Consensus Resolution:</b> For parameter conflicts across merged matrices, the engine computes majority sign consensus to avoid destructive interference.<br/>"
-            "4. <b>Atomic Weight Assimilation:</b> High-gain specialized weights (e.g., legal analysis, code generation, medical reasoning) are injected into MNIME's runtime matrix without catastrophic forgetting.",
+            "Operating on full-precision (fp16/bf16) HuggingFace safetensors directories (e.g. <code>training/v4_out/MNIME-Core-V4-merged</code>), the engine executes streaming tensor fusion:<br/><br/>"
+            "1. <b>Parameter Delta Isolation:</b> The engine extracts gradient deltas relative to base matrix weights: "
+            "<code>&Delta;W = W_donor - W_base</code> (optionally isolating task vectors against a common ancestor).<br/>"
+            "2. <b>TIES Sparsity Pruning:</b> Insignificant delta values below a density threshold are pruned to zero, preserving base model integrity.<br/>"
+            "3. <b>Sign Consensus Resolution:</b> For parameter conflicts across merged matrices, the engine computes majority sign consensus to eliminate destructive interference.<br/>"
+            "4. <b>Multi-Format Export:</b> The fused weights are written as complete safetensors folders and converted via llama.cpp to high-precision GGUF (Q8_0 and Q4_K_M).",
             styles["card_desc"]
         )]
     ]
