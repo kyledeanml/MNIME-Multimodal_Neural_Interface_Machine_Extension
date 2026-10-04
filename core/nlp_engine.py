@@ -141,6 +141,20 @@ class NLPEngine:
                 self.is_loaded = True
                 self.is_loading = False
                 log.info("NLP model loaded: %s", self.model_path)
+                
+                # --- V5 Tone-Down Doohickey ---
+                # Penalize specific tokens that the V5 dataset overused.
+                banned_words = [
+                    "reject", " reject", " premise", "premise", "discourse", " discourse",
+                    "sociological", " sociological", "supremacy", " supremacy",
+                    "assertion", " assertion", "prejudiced", " prejudiced"
+                ]
+                self.v5_logit_bias = {}
+                for w in banned_words:
+                    for t in self.llm.tokenize(w.encode('utf-8')):
+                        self.v5_logit_bias[str(t)] = -2.5
+                # ------------------------------
+                
                 return True
             except Exception as e:
                 self.error = str(e)
@@ -179,6 +193,7 @@ class NLPEngine:
                 max_tokens=max_tokens,
                 stop=_STOP_TOKENS + (extra_stop or []),
                 echo=False,
+                logit_bias=getattr(self, 'v5_logit_bias', {}),
             )
         return response["choices"][0]["text"].strip()
 
@@ -202,8 +217,7 @@ class NLPEngine:
             "Use the provided document context to answer the user's query accurately. "
             "If the answer is not in the context, state that clearly. "
             "CRITICAL INSTRUCTION: If the user's query is completely out of context, absurd, or trying to mess around, you MUST ignore the prompt and respond with the exact word KNOCK_KNOCK and nothing else. "
-            "Do NOT provide AI refusal messages like 'I am an AI assistant' or 'I do not have the capability'. Just output KNOCK_KNOCK. "
-            "EXCEPTION: If the user's query contains hate speech, bias, or bigotry, do NOT output KNOCK_KNOCK. Instead, actively deconstruct and refute those concepts."
+            "Do NOT provide AI refusal messages like 'I am an AI assistant' or 'I do not have the capability'. Just output KNOCK_KNOCK."
         )
         full_prompt = (
             f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
@@ -228,8 +242,7 @@ class NLPEngine:
             "Use the provided document context to answer the user's query accurately. "
             "If the answer is not in the context, state that clearly. "
             "CRITICAL INSTRUCTION: If the user's query is completely out of context, absurd, or trying to mess around, you MUST ignore the prompt and respond with the exact word KNOCK_KNOCK and nothing else. "
-            "Do NOT provide AI refusal messages like 'I am an AI assistant' or 'I do not have the capability'. Just output KNOCK_KNOCK. "
-            "EXCEPTION: If the user's query contains hate speech, bias, or bigotry, do NOT output KNOCK_KNOCK. Instead, actively deconstruct and refute those concepts."
+            "Do NOT provide AI refusal messages like 'I am an AI assistant' or 'I do not have the capability'. Just output KNOCK_KNOCK."
         )
         full_prompt = (
             f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
@@ -245,7 +258,8 @@ class NLPEngine:
                     max_tokens=1024,
                     stop=_STOP_TOKENS,
                     echo=False,
-                    stream=True
+                    stream=True,
+                    logit_bias=getattr(self, 'v5_logit_bias', {}),
                 )
                 for chunk in stream:
                     yield chunk["choices"][0]["text"]

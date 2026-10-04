@@ -189,11 +189,12 @@ class NLPQueryWorker(QThread):
 
                 if not is_fallback_mode and not full_response:
                     buffer += chunk
-                    if "KNOCK_KNOCK" in buffer.upper() or "KNOCK KNOCK" in buffer.upper():
+                    buffer_upper = buffer.upper()
+                    if any(trigger in buffer_upper for trigger in ["KNOCK_KNOCK", "KNOCK KNOCK", "I REJECT THE PREMISE", "DISCOURSE", "I DO NOT PARTICIPATE", "THE ASSERTION THAT"]):
                         is_fallback_mode = True
                         break
                     
-                    if len(buffer) > 35:
+                    if len(buffer) > 45:
                         full_response += buffer
                         self.chunk_received.emit(buffer)
                         tokens_received += 1
