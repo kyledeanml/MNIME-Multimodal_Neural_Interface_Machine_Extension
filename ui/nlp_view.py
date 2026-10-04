@@ -63,7 +63,19 @@ class ExpandedNLPDialog(QDialog):
         frame_layout.addWidget(self.query_input)
         layout.addWidget(frame)
         
+        self.query_input.textChanged.connect(self._sync_to_parent)
+        self.parent_view.query_input.textChanged.connect(self._sync_from_parent)
+        self.query_input.setText(self.parent_view.query_input.text())
+        
         self.parent_view.window().installEventFilter(self)
+        
+    def _sync_to_parent(self, text):
+        if self.parent_view.query_input.text() != text:
+            self.parent_view.query_input.setText(text)
+
+    def _sync_from_parent(self, text):
+        if self.query_input.text() != text:
+            self.query_input.setText(text)
         
     def center_on_parent(self):
         parent_rect = self.parent_view.window().geometry()
@@ -77,10 +89,6 @@ class ExpandedNLPDialog(QDialog):
         return super().eventFilter(obj, event)
 
     def _submit_query(self):
-        query = self.query_input.text().strip()
-        if not query: return
-        self.query_input.clear()
-        self.parent_view.query_input.setText(query)
         self.parent_view._submit_query()
         
     def append_html(self, html: str):
@@ -361,6 +369,7 @@ class NLPView(QWidget):
             self.expanded_dialog = ExpandedNLPDialog(self, self.window())
         self.expanded_dialog.history_view.setHtml(self.history_view.toHtml())
         self.expanded_dialog.set_input_enabled(self.query_input.isEnabled())
+        self.expanded_dialog.query_input.setText(self.query_input.text())
         
         # Center on parent window
         self.expanded_dialog.center_on_parent()
