@@ -28,6 +28,7 @@ installer/
 MNIMECert.pfx
 build_log.txt
 MNIME Builder and Installer.txt
+V4_FINISH_GUIDE.txt
 
 # Documents and Test files
 *.pdf

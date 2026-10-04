@@ -88,6 +88,8 @@ MNIME isn't just a static interface—it's designed to evolve. At its foundation
 
 By simply dragging and dropping a customized donor model (e.g., a heavily trained medical diagnoser, a master Python coder, or a creative writing engine) into MNIME, the Assimilation Engine runs a background asynchronous fusion process. Using advanced weight-fusion techniques (like TIES-merging), it isolates the high-value parameter deltas of the new model and safely injects them into MNIME's core matrix without overwriting its fundamental logical resilience or causing catastrophic forgetting. You aren't just switching models; you are feeding and growing a singular, ultra-customized brain tailored exactly to your specific workflow.
 
+**Full-precision requirement:** the engine merges tensor by tensor on fp16/bf16 HuggingFace `safetensors` folders (for example `training/v4_out/MNIME-Core-V4-merged`), optionally against a common ancestor such as `Qwen2.5-1.5B-Instruct` for true task vectors. Quantized GGUF files are rejected because 4-bit weights lose the precision a merge depends on. The output is a complete HF folder; convert it with llama.cpp (`convert_hf_to_gguf.py`) and quantize to Q4_K_M to run it in MNIME.
+
 
 ---
 
