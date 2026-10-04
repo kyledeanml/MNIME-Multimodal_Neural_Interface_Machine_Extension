@@ -625,7 +625,7 @@ def build_body(styles):
         ["UI Framework", "PyQt6 6.11"],
         ["License",   "Open Source (see Section 14)"],
         ["Author",    "kyledeanml / KyleDeanAI"],
-        ["Repository", "https://github.com/kyledeanml/MNIME"],
+        ["Repository", "https://github.com/kyledeanml/MNIME-Multimodal_Neural_Interface_Machine_Extension"],
         ["NLP Model",  "KyleDeanAI/MNIME-Core-V5-Q4_K_M (HuggingFace)"],
         ["Network",   "Fully Offline — Zero external API calls"],
     ]
@@ -1346,7 +1346,7 @@ def build_body(styles):
                        textColor=TEXT_MUTED, alignment=TA_CENTER, spaceAfter=2)
     ))
     story.append(Paragraph(
-        "https://github.com/kyledeanml/MNIME",
+        "https://github.com/kyledeanml/MNIME-Multimodal_Neural_Interface_Machine_Extension",
         ParagraphStyle("footer_link", fontName="Helvetica", fontSize=7.5,
                        textColor=ACCENT_BLUE, alignment=TA_CENTER)
     ))
