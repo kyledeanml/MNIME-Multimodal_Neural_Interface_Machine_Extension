@@ -356,5 +356,4 @@ MNIME includes a telemetry dashboard and benchmarking suite (`ui/nerds.py` & `be
 Distributed under the MIT License. See [`LICENSE`](LICENSE) for complete licensing terms.
 
 ---
-
 *Special thanks to the Antigravity team at Google*
