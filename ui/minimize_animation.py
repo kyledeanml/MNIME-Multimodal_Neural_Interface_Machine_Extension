@@ -2,7 +2,7 @@ import math
 import random
 from PyQt6.QtWidgets import QWidget, QApplication
 from PyQt6.QtCore import Qt, QTimer, QPoint, QPointF, QRect
-from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
+from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QPolygonF
 
 class MinimizeParticle:
     def __init__(self, start_rect: QRect, target: QPoint):
@@ -23,6 +23,17 @@ class MinimizeParticle:
         
         colors = ["#00e5ff", "#00d2ff", "#38bdf8", "#7dd3fc", "#ffffff"]
         self.color_hex = random.choice(colors)
+        
+        self.base_color = QColor(self.color_hex)
+        
+        self.trail_color = QColor(self.base_color)
+        self.trail_color.setAlpha(100)
+        self.trail_pen = QPen(self.trail_color)
+        self.trail_pen.setWidthF(self.size * 0.8)
+        self.trail_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        
+        self.glow_color = QColor(self.base_color)
+        self.glow_color.setAlpha(60)
         
         self.active = True
         self.trail = []
@@ -97,11 +108,6 @@ class MinimizeAnimationOverlay(QWidget):
             p.update()
             if p.active:
                 active_count += 1
-                for tx, ty in p.trail:
-                    if tx < min_x: min_x = tx
-                    if ty < min_y: min_y = ty
-                    if tx > max_x: max_x = tx
-                    if ty > max_y: max_y = ty
                 if p.x < min_x: min_x = p.x
                 if p.y < min_y: min_y = p.y
                 if p.x > max_x: max_x = p.x
@@ -111,7 +117,7 @@ class MinimizeAnimationOverlay(QWidget):
             self._finish()
             return
 
-        margin = 20
+        margin = 60 # Increased margin to account for trails and glow without calculating them
         rect = QRect(int(min_x - margin), int(min_y - margin), int(max_x - min_x + margin*2), int(max_y - min_y + margin*2))
         
         if hasattr(self, '_last_rect'):
@@ -136,30 +142,19 @@ class MinimizeAnimationOverlay(QWidget):
             if not p.active:
                 continue
                 
-            color = QColor(p.color_hex)
-            
             # Draw trail
             if len(p.trail) > 1:
-                trail_color = QColor(color)
-                trail_color.setAlpha(100)
-                trail_pen = QPen(trail_color)
-                trail_pen.setWidthF(p.size * 0.8)
-                trail_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-                painter.setPen(trail_pen)
-                
-                from PyQt6.QtGui import QPolygonF
+                painter.setPen(p.trail_pen)
                 points = [QPointF(x, y) for x, y in p.trail]
                 painter.drawPolyline(QPolygonF(points))
                 
             # Draw particle head
             painter.setPen(Qt.PenStyle.NoPen)
-            painter.setBrush(color)
+            painter.setBrush(p.base_color)
             painter.drawEllipse(QPointF(p.x, p.y), p.size, p.size)
             
             # Subtle glow
-            glow_color = QColor(color)
-            glow_color.setAlpha(60)
-            painter.setBrush(glow_color)
+            painter.setBrush(p.glow_color)
             painter.drawEllipse(QPointF(p.x, p.y), p.size * 2.5, p.size * 2.5)
 
 class RestoreParticle:
@@ -183,6 +178,17 @@ class RestoreParticle:
         
         colors = ["#00e5ff", "#00d2ff", "#38bdf8", "#7dd3fc", "#ffffff"]
         self.color_hex = random.choice(colors)
+        
+        self.base_color = QColor(self.color_hex)
+        
+        self.trail_color = QColor(self.base_color)
+        self.trail_color.setAlpha(100)
+        self.trail_pen = QPen(self.trail_color)
+        self.trail_pen.setWidthF(self.size * 0.8)
+        self.trail_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        
+        self.glow_color = QColor(self.base_color)
+        self.glow_color.setAlpha(60)
         
         self.active = True
         self.trail = []
@@ -250,11 +256,6 @@ class RestoreAnimationOverlay(QWidget):
             p.update()
             if p.active:
                 active_count += 1
-                for tx, ty in p.trail:
-                    if tx < min_x: min_x = tx
-                    if ty < min_y: min_y = ty
-                    if tx > max_x: max_x = tx
-                    if ty > max_y: max_y = ty
                 if p.x < min_x: min_x = p.x
                 if p.y < min_y: min_y = p.y
                 if p.x > max_x: max_x = p.x
@@ -264,7 +265,7 @@ class RestoreAnimationOverlay(QWidget):
             self._finish()
             return
             
-        margin = 20
+        margin = 60 # Increased margin to account for trails and glow without calculating them
         rect = QRect(int(min_x - margin), int(min_y - margin), int(max_x - min_x + margin*2), int(max_y - min_y + margin*2))
         
         if hasattr(self, '_last_rect'):
@@ -289,25 +290,14 @@ class RestoreAnimationOverlay(QWidget):
             if not p.active:
                 continue
                 
-            color = QColor(p.color_hex)
-            
             if len(p.trail) > 1:
-                trail_color = QColor(color)
-                trail_color.setAlpha(100)
-                trail_pen = QPen(trail_color)
-                trail_pen.setWidthF(p.size * 0.8)
-                trail_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-                painter.setPen(trail_pen)
-                
-                from PyQt6.QtGui import QPolygonF
+                painter.setPen(p.trail_pen)
                 points = [QPointF(x, y) for x, y in p.trail]
                 painter.drawPolyline(QPolygonF(points))
                 
             painter.setPen(Qt.PenStyle.NoPen)
-            painter.setBrush(color)
+            painter.setBrush(p.base_color)
             painter.drawEllipse(QPointF(p.x, p.y), p.size, p.size)
             
-            glow_color = QColor(color)
-            glow_color.setAlpha(60)
-            painter.setBrush(glow_color)
+            painter.setBrush(p.glow_color)
             painter.drawEllipse(QPointF(p.x, p.y), p.size * 2.5, p.size * 2.5)
