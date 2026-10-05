@@ -356,9 +356,4 @@ MNIME includes a telemetry dashboard and benchmarking suite (`ui/nerds.py` & `be
 Distributed under the MIT License. See [`LICENSE`](LICENSE) for complete licensing terms.
 
 ---
-> *"IF I could only teach my pocketwatch to wind itself"*
-
-*Kyle Bauer 2026*
-
----
 *Special thanks to the Antigravity team at Google*
