@@ -1,6 +1,6 @@
 """
 Generates high-resolution PNG cover preview images for the MNIME Research Paper.
-Compiles via pdflatex, distills/normalizes to robust PDF 1.4, and renders Page 1
+Compiles via pdflatex (which outputs GitHub-compatible PDFs natively) and renders Page 1
 at 300 DPI to docs/paper_cover.png and docs/paper_cover_v5.png.
 """
 
@@ -9,58 +9,6 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-
-
-def find_ghostscript() -> str | None:
-    """Find Ghostscript executable (mgs.exe in MiKTeX, gswin64c, or gs)."""
-    candidates = [
-        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "MiKTeX" / "miktex" / "bin" / "x64" / "mgs.exe",
-        shutil.which("mgs"),
-        shutil.which("gswin64c"),
-        shutil.which("gswin32c"),
-        shutil.which("gs")
-    ]
-    for c in candidates:
-        if c and Path(c).is_file():
-            return str(c)
-    return None
-
-
-def distill_pdf_14(input_pdf: Path, output_pdf: Path) -> bool:
-    """Distill PDF to standard PDF 1.4 with full link preservation and clean xref."""
-    gs_exe = find_ghostscript()
-    if not gs_exe:
-        print("Note: Ghostscript not found. Using raw pdflatex output.")
-        if input_pdf != output_pdf:
-            shutil.copy2(input_pdf, output_pdf)
-        return True
-
-    temp_out = input_pdf.parent / (input_pdf.stem + "_distilled.tmp.pdf")
-    cmd = [
-        gs_exe,
-        "-sDEVICE=pdfwrite",
-        "-dCompatibilityLevel=1.4",
-        "-dPDFSETTINGS=/prepress",
-        "-dPrinted=false",
-        "-dNOPAUSE",
-        "-dQUIET",
-        "-dBATCH",
-        f"-sOutputFile={temp_out}",
-        str(input_pdf)
-    ]
-    try:
-        res = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        if temp_out.exists() and temp_out.stat().st_size > 1000:
-            shutil.move(str(temp_out), str(output_pdf))
-            print(f"Successfully distilled {output_pdf.name} to standard PDF 1.4 ({output_pdf.stat().st_size:,} bytes).")
-            return True
-    except Exception as err:
-        print(f"Warning: Ghostscript distillation failed ({err}); retaining raw PDF.")
-    finally:
-        if temp_out.exists():
-            temp_out.unlink(missing_ok=True)
-    return False
-
 
 def render_paper_cover(root_dir: Path):
     paper_dir = root_dir / "paper"
@@ -84,8 +32,6 @@ def render_paper_cover(root_dir: Path):
                     stderr=subprocess.PIPE
                 )
             print("LaTeX compilation finished successfully (2 passes).")
-            # Distill to standard PDF 1.4 for universal viewer compatibility
-            distill_pdf_14(pdf_in_paper, pdf_in_paper)
         except Exception as err:
             print(f"LaTeX compilation warning: {err}")
 
