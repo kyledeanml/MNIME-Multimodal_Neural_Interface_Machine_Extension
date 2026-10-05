@@ -210,27 +210,36 @@ class PDFEngine:
                         chunk_doc.close()
                         temp_chunks.append(chunk_path)
 
-                    # Final Assembly Pass
-                    final_doc = pymupdf.open()
-                    for c_idx, c_path in enumerate(temp_chunks):
+                    # Final Assembly Pass using incremental save to avoid RAM exhaustion
+                    import shutil
+                    if not temp_chunks:
+                        raise RuntimeError("No chunks generated.")
+                        
+                    shutil.copy(temp_chunks[0], output_path)
+                    
+                    for c_idx, c_path in enumerate(temp_chunks[1:]):
                         if progress_callback:
                             pct = 85 + int(((c_idx + 1) / len(temp_chunks)) * 10)
-                            progress_callback(pct, f"Assembling batch segment {c_idx + 1}/{len(temp_chunks)}...")
+                            progress_callback(pct, f"Assembling batch segment {c_idx + 2}/{len(temp_chunks)}...")
+                        
+                        final_doc = pymupdf.open(output_path)
                         c_doc = pymupdf.open(c_path)
                         final_doc.insert_pdf(c_doc)
+                        final_doc.saveIncr()
                         c_doc.close()
+                        final_doc.close()
 
                     if toc_entries:
                         try:
+                            final_doc = pymupdf.open(output_path)
                             final_doc.set_toc(toc_entries)
+                            final_doc.saveIncr()
+                            final_doc.close()
                         except Exception:
                             pass
 
                     if progress_callback:
                         progress_callback(98, "Saving final merged document...")
-
-                    final_doc.save(output_path, garbage=3, deflate=True)
-                    final_doc.close()
 
             if progress_callback:
                 progress_callback(100, f"Finished! Merged {total_items} files.")

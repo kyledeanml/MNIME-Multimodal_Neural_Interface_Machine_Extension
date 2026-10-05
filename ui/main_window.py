@@ -1148,11 +1148,11 @@ class MainWindow(QMainWindow):
                 self.carousel.set_items(self.file_items)
                 self.action_bar.update_count(len(self.file_items))
                 
-            if (current_count + len(expanded_paths) > self.MAX_FILE_LIMIT) or (len(self.file_items) > self.MAX_FILE_LIMIT):
+            if len(self.file_items) > 5000:
                 QMessageBox.information(
                     self,
                     "Batch Limit",
-                    f"Queue reached maximum capacity of {self.MAX_FILE_LIMIT} files."
+                    "Queue exceeded maximum capacity of 5000 files.\nPlease remove some files or process in batches."
                 )
 
         def _on_load_error(err):
