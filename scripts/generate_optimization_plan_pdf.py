@@ -220,7 +220,6 @@ def build_story():
         ["<b>0.02 CPU-seconds</b> burned in 60s idle (~0.001% of one core)", "~0% idle CPU; no timers firing while hidden (Phase 1)"],
         ["2 threads, 1,183 handles, no ML libraries loaded", "Reader open/close returns to baseline within 5 MB (Phase 3)"],
         ["torch / transformers / langchain bundled for embeddings", "torch-free build; embeddings via llama.cpp or ONNX (Phase 4)"],
-        ["Single monolithic Python+Qt process resident forever", "Optional native tray stub: ~1-3 MB resident (Phase 5, wild)"],
     ], [W * 0.5, W * 0.5]))
     s += [Spacer(1, 10),
           callout("The baseline above was sampled from the running process "
@@ -258,8 +257,7 @@ def build_story():
         "<i>committed private bytes</i> anywhere near 1.5 MB, since python312.dll plus the Qt core DLLs alone "
         "map ~32 MB of image. Chrome uses two tricks that MNIME can copy: "
         "(1) <b>trim the working set when idle</b> (Phase 2: Task Manager's default Memory column drops to "
-        "tens of MB), and (2) <b>keep only a tiny process resident</b> and spawn the heavy one on demand "
-        "(Phase 5: genuinely ~1-3 MB resident)."))
+        "tens of MB)."))
 
     # ---------------- 1. Architecture snapshot ----------------
     s.append(P("1. Current Runtime Shape (as of this audit)", S_H1))
@@ -602,51 +600,6 @@ def set_efficiency_mode(on: bool):
                      "window is still hidden.", AMBER, "CAUTION"))
     s.append(PageBreak())
 
-    # ---------------- Wild tier ----------------
-    s.append(P("3.5 Wild Tier: Architectural Moves", S_H2))
-    s.append(P("These change the process model. Implement each behind a QSettings feature flag "
-               "(default off) after Phases 1-4 land, so the measured gains of the safe phases are not "
-               "confounded."))
-    s.append(table([
-        ["ID", "Idea", "How", "Payoff", "Cost / risk"],
-        ["W1", "<b>Native tray stub</b> (the real Chrome-class number)",
-         "~300 LOC C (MSVC or zig cc) or Rust (<i>windows</i> crate) exe <i>mnime_tray.exe</i> owns the tray icon, "
-         "the named pipe (same IPC_PIPE_NAME and payload format), file association, and Run-on-Startup. "
-         "It spawns <i>MNIME.exe</i> on tray click or file open; MNIME.exe exits fully after N minutes hidden "
-         "and persists its queue to %LOCALAPPDATA%\\MNIME\\session.json.",
-         "Resident idle footprint ~1-3 MB working set. Python heap fragmentation becomes irrelevant because "
-         "the process ends.",
-         "Cold start of the Python app (~1-2 s) on first open after idle. Mitigate with a native layered "
-         "splash window in the stub and a 10-minute warm period."],
-        ["W2", "<b>Reader as its own process</b> (process-per-document, like browser tabs)",
-         "<i>MNIME.exe --reader file.pdf</i> imports only QtWidgets + pymupdf + reader_dialog; no main window, "
-         "carousel, NLP, or icons beyond the title bar. Cross-reference/NLP requests go back over the "
-         "existing local socket.",
-         "Closing a document returns 100% of its memory to the OS. Explorer double-click opens fast "
-         "with a lean process (~45-60 MB expected).",
-         "Two entry paths to maintain; window activation across processes needs AllowSetForegroundWindow."],
-        ["W3", "<b>Out-of-process NLP worker</b>",
-         "Spawn <i>mnime_nlp</i> (same exe, <i>--nlp-worker</i>) holding llama.cpp + embeddings; stream tokens "
-         "over a pipe; kill on idle TTL.",
-         "Guaranteed full RAM and VRAM release (GPU contexts do not always fully release in-process). "
-         "A model crash cannot take down the UI.",
-         "Serialization of context docs; startup latency hidden behind the existing loading state."],
-        ["W4", "<b>Pre-baked visuals</b>",
-         "Render the penteract loop once at build time to an animated WebP (240 px, 120 frames) and play it "
-         "with QMovie, which decodes one frame at a time. Same for the splash particle field if desired.",
-         "Animation cost drops from Python math per frame to a codec frame decode; identical look.",
-         "Lose procedural randomness; keep the procedural path behind a setting for the STATS/demo mode."],
-        ["W5", "<b>Nuitka build</b> instead of PyInstaller",
-         "Compile with <i>nuitka --standalone --enable-plugin=pyqt6</i>; benchmark startup and private bytes "
-         "against the PyInstaller build.",
-         "Faster cold start (helps W1/W2), modest RAM reduction.",
-         "Experimental; plugin compatibility for llama_cpp and pymupdf must be verified."],
-        ["W6", "<b>Thumbnail atlas</b>",
-         "One memory-mapped file of JPEG thumbnails with an offset index; decode only visible cards.",
-         "5,000-file queues cost almost nothing until scrolled into view.",
-         "Cache invalidation on file change (mtime/size key)."],
-    ], [W * 0.05, W * 0.15, W * 0.36, W * 0.22, W * 0.22]))
-    s.append(PageBreak())
 
     # ---------------- 4. Roadmap ----------------
     s.append(P("4. Phased Roadmap and Acceptance Criteria", S_H1))
@@ -667,20 +620,17 @@ def set_efficiency_mode(on: bool):
         ["4  Dependency diet", "F5, F9, F10",
          "torch absent from dist/ and from loaded modules after an NLP query. Retrieval recall@5 within "
          "2 points of current on the 20-query set. dist/ size reported before/after."],
-        ["5  Wild (flagged)", "W1, then W2, W3; W4-W6 optional",
-         "W1: resident footprint under 3 MB working set when idle. W2: closing a reader process returns "
-         "its full private bytes. Feature flags default off until validated."],
     ], [W * 0.17, W * 0.30, W * 0.53]))
 
     s.append(P("5. Expected Outcome Summary", S_H1))
     s.append(table([
-        ["Metric", "Today", "After Phase 2", "After Phase 4", "With W1"],
-        ["Idle CPU (one core)", "~5.4%", "~0%", "~0%", "0% (Python exited)"],
-        ["Idle working set", "225 MB", "10-25 MB", "10-25 MB", "1-3 MB"],
-        ["Idle private bytes", "200 MB", "~90-140 MB (paged out)", "~70-110 MB", "~1-2 MB"],
-        ["Reader peak (300 pp, 400%)", "unbounded at high zoom", "unchanged", "under +120 MB, capped", "isolated (W2)"],
-        ["NLP after idle", "resident forever", "unloaded after TTL", "unloaded, no torch", "worker exited"],
-    ], [W * 0.24, W * 0.17, W * 0.21, W * 0.20, W * 0.18]))
+        ["Metric", "Today", "After Phase 2", "After Phase 4"],
+        ["Idle CPU (one core)", "~5.4%", "~0%", "~0%"],
+        ["Idle working set", "225 MB", "10-25 MB", "10-25 MB"],
+        ["Idle private bytes", "200 MB", "~90-140 MB (paged out)", "~70-110 MB"],
+        ["Reader peak (300 pp, 400%)", "unbounded at high zoom", "unchanged", "under +120 MB, capped"],
+        ["NLP after idle", "resident forever", "unloaded after TTL", "unloaded, no torch"],
+    ], [W * 0.30, W * 0.20, W * 0.25, W * 0.25]))
     s.append(Spacer(1, 6))
     s.append(P("Post-phase figures are engineering estimates to be confirmed with the Section 2 protocol, "
                "not measurements. Report actual numbers back against this table.", S_SMALL))
