@@ -38,13 +38,17 @@ class PDFPageView(QGraphicsView):
         self.zoom_factor = 2.0
         self.setCursor(Qt.CursorShape.CrossCursor)
 
-    def set_page(self, page, pixmap):
+    def set_page(self, page, pixmap, render_scale: float = 1.0, clip=None):
         self.current_page = page
         self.scene().clear()
         self.pixmap_item = QGraphicsPixmapItem(pixmap)
         self.pixmap_item.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+        inv = 1.0 / (render_scale / self.devicePixelRatioF()) if render_scale > 0 else 1.0
+        self.pixmap_item.setScale(inv)
+        if clip:
+            self.pixmap_item.setPos(clip.x0, clip.y0)
         self.scene().addItem(self.pixmap_item)
-        self.scene().setSceneRect(QRectF(pixmap.rect()))
+        self.scene().setSceneRect(QRectF(0, 0, page.rect.width, page.rect.height))
         self.rubber_band = QRect()
 
     def fit_width(self):
@@ -137,6 +141,7 @@ class DocumentViewer(QDialog):
         self._run_reference = run_reference
         self.setWindowTitle(f"MNIME - Cross-Reference - {file_item.file_name}")
         self.setWindowFlags(Qt.WindowType.Window)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setMinimumSize(1100, 720)
         self.resize(1300, 820)
 
@@ -326,12 +331,15 @@ class DocumentViewer(QDialog):
         self.page_label.setText(f"Page {self.page_idx + 1} of {len(self.doc)}")
 
         page = self.doc[self.page_idx]
-        import pymupdf
-        mat = pymupdf.Matrix(self.view.zoom_factor, self.view.zoom_factor)
-        pix = page.get_pixmap(matrix=mat, alpha=False)
+        from core.render_utils import render_page
+        
+        # Apply the static zoom factor to view before rendering if it's new
+        if self.view.transform().m11() == 1.0:
+            self.view.scale(self.view.zoom_factor, self.view.zoom_factor)
 
-        img = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format.Format_RGB888)
-        self.view.set_page(page, QPixmap.fromImage(img.copy()))
+        qpixmap, scale, clip = render_page(page, self.view, self.view.devicePixelRatioF())
+        
+        self.view.set_page(page, qpixmap, render_scale=scale, clip=clip)
         self.view.verticalScrollBar().setValue(0)
 
     def _prev_page(self):

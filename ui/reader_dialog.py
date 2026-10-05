@@ -49,7 +49,7 @@ class ReaderPageView(QGraphicsView):
         # zoomed way out, and avoids re-renders for trivial zoom changes.
         return max(scale, 1.0)
 
-    def set_page(self, page, pixmap, render_scale: float = 1.0, fit_view: bool = True):
+    def set_page(self, page, pixmap, render_scale: float = 1.0, fit_view: bool = True, clip=None):
         """Display *pixmap* (rendered at *render_scale* px/pt) for *page*."""
         self.current_page = page
         self._render_scale = render_scale
@@ -58,13 +58,14 @@ class ReaderPageView(QGraphicsView):
         self.pixmap_item.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
         # Scale the item so that 1 scene unit == 1 PDF point regardless of
         # how many pixels pymupdf put in the bitmap.
-        inv = 1.0 / render_scale if render_scale > 0 else 1.0
+        inv = 1.0 / (render_scale / self.devicePixelRatioF()) if render_scale > 0 else 1.0
         self.pixmap_item.setScale(inv)
+        if clip:
+            self.pixmap_item.setPos(clip.x0, clip.y0)
         self.scene().addItem(self.pixmap_item)
-        # Scene rect in PDF-point coordinates
-        self.scene().setSceneRect(
-            QRectF(0, 0, pixmap.width() * inv, pixmap.height() * inv)
-        )
+        
+        # Scene rect in PDF-point coordinates always matches the full page
+        self.scene().setSceneRect(QRectF(0, 0, page.rect.width, page.rect.height))
 
         if fit_view:
             QTimer.singleShot(10, self._fit_to_view)
@@ -112,6 +113,7 @@ class ReaderDialog(QDialog):
         # Frameless dark metallic UI
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         
         self.doc = None
         self.page_idx = 0
@@ -410,25 +412,21 @@ class ReaderDialog(QDialog):
         self.page_label.setText(f"Page {self.page_idx + 1} of {len(self.doc)}")
 
         page = self.doc[self.page_idx]
-        import pymupdf
+        from core.render_utils import render_page
+        from PyQt6.QtWidgets import QApplication
 
-        if render_scale is None:
-            # Choose a scale so the rendered bitmap fills the viewer at fit-zoom.
-            # PDF points -> screen pixels: viewer_width / page_width_in_points
-            page_rect = page.rect  # in PDF points
+        # If fit_view is true, this is an initial render, set transform to identity
+        if fit_view:
+            self.view.resetTransform()
             viewer_w = max(self.view.viewport().width(), 1)
             viewer_h = max(self.view.viewport().height(), 1)
-            # Fit both dimensions (keep aspect ratio) and take the smaller
-            scale_w = viewer_w / max(page_rect.width, 1)
-            scale_h = viewer_h / max(page_rect.height, 1)
-            render_scale = max(min(scale_w, scale_h), 1.0)
+            scale_w = viewer_w / max(page.rect.width, 1)
+            scale_h = viewer_h / max(page.rect.height, 1)
+            self.view.scale(min(scale_w, scale_h), min(scale_w, scale_h))
 
-        mat = pymupdf.Matrix(render_scale, render_scale)
-        pix = page.get_pixmap(matrix=mat, alpha=False)
-
-        img = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format.Format_RGB888)
-        qpixmap = QPixmap.fromImage(img)
-        self.view.set_page(page, qpixmap, render_scale=render_scale, fit_view=fit_view)
+        qpixmap, scale, clip = render_page(page, self.view, self.view.devicePixelRatioF(), self.view.BASE_DPI / 72.0)
+        
+        self.view.set_page(page, qpixmap, render_scale=scale, fit_view=fit_view, clip=clip)
 
     def _on_zoom_changed(self):
         """Re-render the current page at the resolution matching the new zoom."""

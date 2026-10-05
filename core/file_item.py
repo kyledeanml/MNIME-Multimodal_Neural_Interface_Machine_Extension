@@ -75,6 +75,18 @@ class FileItem:
             return self.thumbnail_bytes
 
         try:
+            import hashlib
+            thumb_dir = os.path.join(os.environ.get("LOCALAPPDATA", ""), "MNIME", "thumbs")
+            os.makedirs(thumb_dir, exist_ok=True)
+            cache_key = f"{self.file_path}_{max_width}_{max_height}_{os.path.getmtime(self.file_path)}"
+            cache_hash = hashlib.md5(cache_key.encode()).hexdigest()
+            cache_path = os.path.join(thumb_dir, f"{cache_hash}.jpg")
+            
+            if os.path.exists(cache_path):
+                with open(cache_path, "rb") as f:
+                    self.thumbnail_bytes = f.read()
+                    return self.thumbnail_bytes
+
             if self.extension == ".pdf":
                 try:
                     import pymupdf
@@ -85,8 +97,12 @@ class FileItem:
                         zoom = min(max_width / max(1, rect.width), max_height / max(1, rect.height))
                         mat = pymupdf.Matrix(zoom * 1.5, zoom * 1.5)
                         pix = page.get_pixmap(matrix=mat, alpha=False)
-                        self.thumbnail_bytes = pix.tobytes("png")
+                        self.thumbnail_bytes = pix.tobytes("jpeg")
                         doc.close()
+                        try:
+                            with open(cache_path, "wb") as f:
+                                f.write(self.thumbnail_bytes)
+                        except Exception: pass
                         return self.thumbnail_bytes
                 except Exception:
                     pass
@@ -108,8 +124,12 @@ class FileItem:
                     text_preview = "Text Document"
                 d.text((10, 10), text_preview, fill=(50, 50, 50))
                 buffer = io.BytesIO()
-                img.save(buffer, format="PNG")
+                img.save(buffer, format="JPEG")
                 self.thumbnail_bytes = buffer.getvalue()
+                try:
+                    with open(cache_path, "wb") as f:
+                        f.write(self.thumbnail_bytes)
+                except Exception: pass
                 return self.thumbnail_bytes
 
             elif self.extension in [".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff"]:
@@ -118,8 +138,12 @@ class FileItem:
                     img = img.convert("RGB")
                     img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
                     buffer = io.BytesIO()
-                    img.save(buffer, format="PNG")
+                    img.save(buffer, format="JPEG")
                     self.thumbnail_bytes = buffer.getvalue()
+                    try:
+                        with open(cache_path, "wb") as f:
+                            f.write(self.thumbnail_bytes)
+                    except Exception: pass
                     return self.thumbnail_bytes
 
         except Exception:
@@ -127,11 +151,10 @@ class FileItem:
 
         return None
 
-    def get_thumbnail_pixmap(self, max_width: int = 120, max_height: int = 130) -> Optional[QPixmap]:
+    def get_thumbnail_pixmap(self, max_width: int = 120, max_height: int = 130, expand: bool = False) -> Optional[QPixmap]:
         """
         Returns a pre-rendered, pre-scaled QPixmap cached in memory.
-        Subsequent calls return the cached pixmap in O(1) time without
-        decoding or smooth-scaling overhead.
+        Subsequent calls return the cached pixmap in O(1) time.
         """
         if self._cached_pixmap is not None:
             return self._cached_pixmap
@@ -140,12 +163,15 @@ class FileItem:
         if thumb_bytes:
             pixmap = QPixmap()
             if pixmap.loadFromData(thumb_bytes):
+                mode = Qt.AspectRatioMode.KeepAspectRatioByExpanding if expand else Qt.AspectRatioMode.KeepAspectRatio
                 self._cached_pixmap = pixmap.scaled(
                     max_width,
                     max_height,
-                    Qt.AspectRatioMode.KeepAspectRatio,
+                    mode,
                     Qt.TransformationMode.SmoothTransformation
                 )
+                # Drop raw bytes to save RAM (F7 Viewer Diet)
+                self.thumbnail_bytes = None
                 return self._cached_pixmap
 
         return None

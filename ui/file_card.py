@@ -62,8 +62,9 @@ class FileCard(QFrame):
         layout.setSpacing(4)
 
         # Top Bar: File name + Remove (X) button
-        top_bar = QHBoxLayout()
-        top_bar.setContentsMargins(0, 0, 0, 0)
+        self.top_bar_widget = QWidget()
+        top_bar = QHBoxLayout(self.top_bar_widget)
+        top_bar.setContentsMargins(4, 4, 4, 4)
         top_bar.setSpacing(2)
 
         self.name_label = QLabel(self.item.file_name)
@@ -95,7 +96,10 @@ class FileCard(QFrame):
         top_bar.addWidget(self.name_label)
         top_bar.addStretch()
         top_bar.addWidget(self.remove_btn)
-        layout.addLayout(top_bar)
+        
+        self.top_bar_widget.setStyleSheet("background-color: rgba(10, 15, 24, 200); border-radius: 6px;")
+        self.top_bar_widget.setVisible(False)
+        layout.addWidget(self.top_bar_widget)
 
         # Center Preview / Status Container
         self.preview_container = QWidget()
@@ -185,17 +189,18 @@ class FileCard(QFrame):
         scaled = None
         if self.item._cached_pixmap is not None:
             scaled = self.item._cached_pixmap
-        elif self.item.thumbnail_bytes is not None:
-            scaled = self.item.get_thumbnail_pixmap(self.width() - 12, self.height() - 36)
+        elif getattr(self.item, "thumbnail_bytes", None) is not None:
+            scaled = self.item.get_thumbnail_pixmap(self.width(), self.height(), expand=True)
             
         if scaled and not scaled.isNull():
             px = (self.width() - scaled.width()) // 2
-            py = 24 + (self.height() - 36 - scaled.height()) // 2
+            py = (self.height() - scaled.height()) // 2
             painter.drawPixmap(px, py, scaled)
-            painter.fillRect(0, 0, self.width(), self.height(), QColor(10, 15, 24, 140))
+            
+            # Subtle vignette so status text and borders are legible
+            painter.fillRect(0, 0, self.width(), self.height(), QColor(10, 15, 24, 60))
         else:
-            painter.fillRect(6, 24, self.width() - 12, self.height() - 40, QColor(20, 26, 38))
-            painter.fillRect(0, 0, self.width(), self.height(), QColor(10, 15, 24, 120))
+            painter.fillRect(0, 0, self.width(), self.height(), QColor(20, 26, 38))
             if not self._thumb_requested:
                 self._thumb_requested = True
                 self._request_thumbnail_async()
@@ -221,6 +226,14 @@ class FileCard(QFrame):
     # ------------------------------------------------------------------
     # Mouse events — manual drag reorder (no QDrag/OLE, works with WM_DROPFILES)
     # ------------------------------------------------------------------
+    def enterEvent(self, event):
+        self.top_bar_widget.setVisible(True)
+        super().enterEvent(event)
+        
+    def leaveEvent(self, event):
+        self.top_bar_widget.setVisible(False)
+        super().leaveEvent(event)
+
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self._drag_start_pos = event.pos()
