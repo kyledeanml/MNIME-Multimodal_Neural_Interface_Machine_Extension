@@ -238,8 +238,6 @@ class SearchEngine:
         use_smart_sampling: bool = True,
         progress_callback: Optional[Callable[[int, str], None]] = None
     ) -> Any:
-        import pandas as pd
-
         if progress_callback:
             progress_callback(10, "Preparing files...")
 
@@ -295,36 +293,39 @@ class SearchEngine:
         if not data_list:
             raise ValueError("No valid text files found to index.")
 
-        df = pd.DataFrame(data_list)
-
         if progress_callback:
             progress_callback(40, "Initializing Embedding Model...")
 
         emb = SearchEngine.get_embeddings()
 
         final_docs = []
-        if use_smart_sampling and len(df) > 0:
+        if use_smart_sampling and len(data_list) > 0:
             if progress_callback:
                 progress_callback(50, "Smart Indexing (Extracting Probe Terms)...")
 
-            frac = 0.1 if len(df) > 10 else 1.0
-            sample = df['content'].sample(frac=frac, random_state=42).tolist()
+            import random
+            random.seed(42)
+            frac = 0.1 if len(data_list) > 10 else 1.0
+            sample_size = max(1, int(len(data_list) * frac))
+            sample_data = random.sample(data_list, sample_size)
+            sample = [d['content'] for d in sample_data]
+            
             p_terms = SearchEngine.extract_probe_terms(sample)
 
-            for i, (_, row) in enumerate(df.iterrows()):
+            for i, row in enumerate(data_list):
                 chunks = simple_text_split(row['content'])
                 for chk in chunks:
                     if any(term in chk for term in p_terms):
                         final_docs.append({"content": chk, "source": row['path']})
                 
                 if progress_callback:
-                    pct = 50 + int((i / len(df)) * 40)
-                    progress_callback(pct, f"Smart Indexing ({i+1}/{len(df)})...")
+                    pct = 50 + int((i / len(data_list)) * 40)
+                    progress_callback(pct, f"Smart Indexing ({i+1}/{len(data_list)})...")
             
             if not final_docs:
                 if progress_callback:
                     progress_callback(90, "Fallback: Full Indexing...")
-                for _, row in df.iterrows():
+                for row in data_list:
                     final_docs.extend([{"content": c, "source": row['path']} for c in simple_text_split(row['content'])])
 
             if not final_docs:
@@ -333,11 +334,11 @@ class SearchEngine:
             if progress_callback:
                 progress_callback(50, "Full Indexing...")
                 
-            for i, (_, row) in enumerate(df.iterrows()):
+            for i, row in enumerate(data_list):
                 final_docs.extend([{"content": c, "source": row['path']} for c in simple_text_split(row['content'])])
                 if progress_callback:
-                    pct = 50 + int((i / len(df)) * 40)
-                    progress_callback(pct, f"Full Indexing ({i+1}/{len(df)})...")
+                    pct = 50 + int((i / len(data_list)) * 40)
+                    progress_callback(pct, f"Full Indexing ({i+1}/{len(data_list)})...")
             
             if not final_docs:
                 raise ValueError("No readable text could be extracted.")
