@@ -31,8 +31,16 @@ class AnimatedLogoWidget(QLabel):
         
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._update_rotation)
-        self.timer.start(33) # ~30fps
+        # Timer will be started in showEvent() when visible
         self._update_rotation()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.timer.start(33)
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        self.timer.stop()
 
     def _update_rotation(self):
         self.rotation += 0.015

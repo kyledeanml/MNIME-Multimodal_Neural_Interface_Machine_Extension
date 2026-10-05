@@ -248,15 +248,19 @@ SVG_ICONS = {
 
 
 # In-memory caches to avoid redundant SVG parsing and rasterization
-_PIXMAP_CACHE = {}
-_ICON_CACHE = {}
+from collections import OrderedDict
+_PIXMAP_CACHE = OrderedDict()
+_ICON_CACHE = OrderedDict()
 
 
 def get_svg_pixmap(icon_name: str, size: int = 24, color: str = "#ffffff") -> QPixmap:
     """Generate a crisp QPixmap from SVG template with custom color and size (cached)."""
+    size = max(2, size - (size % 2))
     cache_key = (icon_name, size, color)
     if cache_key in _PIXMAP_CACHE:
-        return _PIXMAP_CACHE[cache_key]
+        pixmap = _PIXMAP_CACHE.pop(cache_key)
+        _PIXMAP_CACHE[cache_key] = pixmap
+        return pixmap
 
     svg_template = SVG_ICONS.get(icon_name, SVG_ICONS["document"])
     svg_data = svg_template.replace('stroke="currentColor"', f'stroke="{color}"')
@@ -270,6 +274,8 @@ def get_svg_pixmap(icon_name: str, size: int = 24, color: str = "#ffffff") -> QP
     painter.end()
     
     _PIXMAP_CACHE[cache_key] = pixmap
+    if len(_PIXMAP_CACHE) > 256:
+        _PIXMAP_CACHE.popitem(last=False)
     return pixmap
 
 
@@ -277,10 +283,14 @@ def get_icon(icon_name: str, color: str = "#ffffff") -> QIcon:
     """Return a QIcon for a given icon name (cached)."""
     cache_key = (icon_name, color)
     if cache_key in _ICON_CACHE:
-        return _ICON_CACHE[cache_key]
+        icon = _ICON_CACHE.pop(cache_key)
+        _ICON_CACHE[cache_key] = icon
+        return icon
 
     pixmap = get_svg_pixmap(icon_name, size=32, color=color)
     icon = QIcon(pixmap)
     _ICON_CACHE[cache_key] = icon
+    if len(_ICON_CACHE) > 256:
+        _ICON_CACHE.popitem(last=False)
     return icon
 

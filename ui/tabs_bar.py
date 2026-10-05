@@ -179,6 +179,11 @@ class TabsBar(QWidget):
         btn = self._buttons.get(ToolMode.RELOAD_NLP)
         if not btn: return
 
+        state_tuple = (is_loaded, is_loading)
+        if getattr(self, '_last_nlp_state', None) == state_tuple:
+            return
+        self._last_nlp_state = state_tuple
+
         # --- NLP checkbox: active light ---
         if is_loading:
             # Amber pulse while loading

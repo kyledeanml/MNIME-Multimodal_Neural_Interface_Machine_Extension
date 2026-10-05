@@ -199,24 +199,26 @@ class MainWindow(QMainWindow):
 
     def eventFilter(self, obj, event):
         # We only care about mouse moves for updating the edge-resizing cursors
-        if event.type() == event.Type.MouseMove:
-            # Respect global override cursors and mouse grabs (e.g. BlankCursor during card drag)
-            from PyQt6.QtWidgets import QApplication, QWidget
-            if QApplication.overrideCursor() is not None or QWidget.mouseGrabber() is not None:
-                return super().eventFilter(obj, event)
-            # Map the global cursor position to window coordinates
-            from PyQt6.QtGui import QCursor
-            pos = self.mapFromGlobal(QCursor.pos())
-            
-            # Check if we are hovering over an edge
-            edge = self._get_edge(pos)
-            if edge == Qt.Edge.LeftEdge or edge == Qt.Edge.RightEdge:
-                self.setCursor(Qt.CursorShape.SizeHorCursor)
+        if event.type() != event.Type.MouseMove:
+            return super().eventFilter(obj, event)
+
+        # Respect global override cursors and mouse grabs (e.g. BlankCursor during card drag)
+        from PyQt6.QtWidgets import QApplication, QWidget
+        if QApplication.overrideCursor() is not None or QWidget.mouseGrabber() is not None:
+            return super().eventFilter(obj, event)
+        # Map the global cursor position to window coordinates
+        from PyQt6.QtGui import QCursor
+        pos = self.mapFromGlobal(QCursor.pos())
+        
+        # Check if we are hovering over an edge
+        edge = self._get_edge(pos)
+        if edge == Qt.Edge.LeftEdge or edge == Qt.Edge.RightEdge:
+            self.setCursor(Qt.CursorShape.SizeHorCursor)
+        else:
+            if hasattr(self, 'particle_cursor'):
+                self.setCursor(self.particle_cursor)
             else:
-                if hasattr(self, 'particle_cursor'):
-                    self.setCursor(self.particle_cursor)
-                else:
-                    self.setCursor(Qt.CursorShape.ArrowCursor)
+                self.setCursor(Qt.CursorShape.ArrowCursor)
                 
         return super().eventFilter(obj, event)
 

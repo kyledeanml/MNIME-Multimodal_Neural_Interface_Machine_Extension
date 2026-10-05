@@ -119,6 +119,7 @@ class MetalSplashScreen(QWidget):
             Qt.WindowType.SplashScreen
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         
         screen = QApplication.primaryScreen().geometry()
         w, h = screen.width(), screen.height()
@@ -186,6 +187,8 @@ class MetalSplashScreen(QWidget):
                 
         if self.phase == 2:
             self.central_file_scale = min(1.0, arrived / len(self.particles))
+            if arrived == len(self.particles) and self.logo_scale >= 1.0:
+                self.anim_timer.stop()
             
         self.update()
 
@@ -391,18 +394,22 @@ def main():
         splash = MetalSplashScreen()
         splash.show()
 
-        animation = QPropertyAnimation(splash, b"windowOpacity")
-        animation.setDuration(1200)  # 1.2 second fade out
-        animation.setStartValue(1.0)
-        animation.setEndValue(0.0)
+        splash._animation = QPropertyAnimation(splash, b"windowOpacity")
+        splash._animation.setDuration(1200)  # 1.2 second fade out
+        splash._animation.setStartValue(1.0)
+        splash._animation.setEndValue(0.0)
 
         def on_fade_finished():
+            splash.anim_timer.stop()
+            splash.phase_timer.stop()
+            splash.particles = []
             splash.close()
+            splash.deleteLater()
             # Always start minimized to the tray after splash
             app.main_window.hide()
 
-        animation.finished.connect(on_fade_finished)
-        QTimer.singleShot(3500, animation.start)
+        splash._animation.finished.connect(on_fade_finished)
+        QTimer.singleShot(3500, splash._animation.start)
 
     sys.exit(app.exec())
 
