@@ -619,7 +619,7 @@ routines, achieving up to 50$\times$ throughput improvement over pure-Python
 PDF libraries.
 
 \paragraph{Chunked Batch \& NLP-Assisted Merging.}
-Single-pass document merging of thousands of files typically triggers process memory limits. MNIME introduces a two-tier chunked segment pipeline (batch size of 250) that caps active RAM consumption at $<200$\,MB regardless of total page count. Concurrently, the engine integrates \texttt{NLPEngine} during file ingestion to automatically build hierarchical TOC outlines and smart section bookmarks without requiring separate post-processing steps.
+Single-pass document merging of thousands of files typically triggers process memory limits and C-level memory aborts in native libraries. MNIME introduces a two-tier chunked segment pipeline (batch size of 250) that caps active RAM consumption at $<200$\,MB regardless of total page count. During final assembly, rather than loading all segments simultaneously into memory, chunks are sequentially streamed to disk via PyMuPDF's incremental save (\texttt{saveIncr}), maintaining near-zero active footprint. Concurrently, the engine integrates \texttt{NLPEngine} during file ingestion to automatically build hierarchical TOC outlines and smart section bookmarks without requiring separate post-processing steps.
 
 \paragraph{O(1) Carousel Operations.}
 Drag-and-drop reordering and card removal use surgical layout-index shifts
