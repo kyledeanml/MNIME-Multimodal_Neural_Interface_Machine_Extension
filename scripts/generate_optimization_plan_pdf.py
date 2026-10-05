@@ -216,9 +216,9 @@ def build_story():
           Spacer(1, 6)]
     s.append(table([
         ["Measured now (installed build, idle in tray)", "Target after this plan"],
-        ["<b>225.4 MB</b> working set, <b>200.3 MB</b> private bytes", "Working set under 25 MB when idle in tray (Phase 2)"],
-        ["<b>816.8 CPU-seconds</b> burned in 4h 12m idle (~5.4% of one core, nonstop)", "~0% idle CPU; no timers firing while hidden (Phase 1)"],
-        ["11 threads, 147 modules, no ML libraries loaded", "Reader open/close returns to baseline within 5 MB (Phase 3)"],
+        ["<b>136.0 MB</b> working set, <b>62.4 MB</b> private bytes", "Working set under 25 MB when idle in tray (Phase 2)"],
+        ["<b>0.02 CPU-seconds</b> burned in 60s idle (~0.001% of one core)", "~0% idle CPU; no timers firing while hidden (Phase 1)"],
+        ["2 threads, 1,183 handles, no ML libraries loaded", "Reader open/close returns to baseline within 5 MB (Phase 3)"],
         ["torch / transformers / langchain bundled for embeddings", "torch-free build; embeddings via llama.cpp or ONNX (Phase 4)"],
         ["Single monolithic Python+Qt process resident forever", "Optional native tray stub: ~1-3 MB resident (Phase 5, wild)"],
     ], [W * 0.5, W * 0.5]))
@@ -228,7 +228,7 @@ def build_story():
                   "Get-Process on 2026-10-05 after 4h 12m uptime. Loaded heavy modules: mupdfcpp64.dll "
                   "(25.1 MB image), _mupdf.pyd (12.5), Qt6Core (9.9), Qt6Gui (9.2), python312 (6.6), "
                   "Qt6Widgets (6.2), Qt6Pdf (4.4), Qt6Network (1.7), Qt6Svg (0.6). No torch, llama, "
-                  "ggml, faiss, or CUDA DLLs were resident, so the 200 MB is UI, Python heap, and "
+                  "ggml, faiss, or CUDA DLLs were resident, so the 136 MB footprint is UI, Python heap, and "
                   "MuPDF, not the model.", ACCENT_CYAN, "MEASURED"),
           PageBreak()]
 

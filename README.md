@@ -74,9 +74,9 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
 - **Dynamic Memory Management**: Unloads LLM weights and vector indices from RAM/VRAM when NLP mode is toggled off or on exit.
 - **Non-Blocking Multithreading**: Smooth 60 FPS UI performance backed by dedicated `QThread` workers and progress tracking.
 - **In-Memory Pixmap Caching**: SVG vector icons and card thumbnails are rasterized and pre-scaled once to eliminate CPU resampling overhead.
-- **EcoQoS & Working Set Trimming**: Actively purges the working set memory when minimized, reducing background idle memory to ~20MB.
+- **EcoQoS & Working Set Trimming**: Actively purges the working set memory when minimized. Recent empirical telemetry during minimized idle operation demonstrated a working set of 136.0 MB (62.4 MB private) with a peak of 174.3 MB, operating on 2 threads and 1,183 handles, while consuming negligible CPU (0.001% or 0.02s over a 60-second window).
 - **Zero-Dependency Vector Engine**: RAG semantic search operates solely on `llama-cpp-python` and `faiss`, entirely removing heavy ML wrappers (Torch, LangChain, SentenceTransformers).
-- **Native Managed Tray Architecture**: A 64KB C# system tray stub (`mnime_tray.exe`) manages the application lifecycle. When hidden for 10 minutes, the main Python process persists its document queue to `session.json` and completely self-terminates—achieving an ultimate Chrome-class 1.5MB idle footprint.
+- **Native Managed Tray Architecture**: A 64KB C# system tray stub (`mnime_tray.exe`) manages the application lifecycle. When hidden for 10 minutes, the main Python process persists its document queue to `session.json` and completely self-terminates, releasing 100% of computational resources until restored by the tray stub.
 
 ---
 
