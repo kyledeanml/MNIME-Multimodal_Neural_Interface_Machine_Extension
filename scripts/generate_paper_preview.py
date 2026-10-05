@@ -23,14 +23,15 @@ def render_paper_cover(root_dir: Path):
     if should_compile and tex_path.exists():
         print(f"Compiling {tex_path.name} via pdflatex...")
         try:
-            subprocess.run(
-                ["pdflatex", "-interaction=nonstopmode", tex_path.name],
-                cwd=str(paper_dir),
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            print("LaTeX compilation finished successfully.")
+            for _ in range(2):
+                subprocess.run(
+                    ["pdflatex", "-interaction=nonstopmode", tex_path.name],
+                    cwd=str(paper_dir),
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+            print("LaTeX compilation finished successfully (2 passes).")
         except Exception as err:
             print(f"LaTeX compilation warning: {err}")
 

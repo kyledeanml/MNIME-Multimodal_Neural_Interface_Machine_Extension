@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFileDialog,
     QMessageBox, QApplication, QFrame, QPushButton, QSystemTrayIcon, QMenu
 )
-from PyQt6.QtCore import Qt, QPoint
+from PyQt6.QtCore import Qt, QPoint, QTimer
 from PyQt6.QtGui import QColor, QIcon
 
 from core.file_item import FileItem, FileStatus
