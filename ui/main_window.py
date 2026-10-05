@@ -925,7 +925,7 @@ class MainWindow(QMainWindow):
         event.accept()
 
     def _on_tray_activated(self, reason):
-        if reason == QSystemTrayIcon.ActivationReason.DoubleClick:
+        if reason == QSystemTrayIcon.ActivationReason.DoubleClick or reason == QSystemTrayIcon.ActivationReason.Trigger:
             self._show_from_tray()
 
     def _on_mode_changed(self, mode: ToolMode):
