@@ -389,6 +389,9 @@ def main():
         # Go straight into the reader with the document loaded, bypassing splash delay
         app.main_window.hide()
         app.main_window.handle_external_open(target_files)
+    elif "--managed" in sys.argv:
+        # W1: Native tray launcher manages the process. Don't show splash, just hide.
+        app.main_window.hide()
     else:
         # Standard launch: Show Splash Screen with particle effects and minimize to tray
         splash = MetalSplashScreen()

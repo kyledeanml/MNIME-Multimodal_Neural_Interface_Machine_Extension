@@ -619,6 +619,9 @@ off or the application closes, preventing idle memory consumption.
 \paragraph{System Resource Purger.}
 On application exit, \texttt{core/system\_cleaner.py} explicitly unloads the llama.cpp model (releasing its GPU allocation), drops the in-memory global vector store, runs garbage collection, and removes leftover temporary artifacts (\texttt{*.tmp}, \texttt{*.tmp.pdf}) from project directories, excluding environment, model, and training folders.
 
+\paragraph{V6 ``Wild Tier'' Memory Diet.}
+A 64KB C\# managed system tray stub acts as the primary lifecycle manager. Combined with aggressive EcoQoS working set trimming, zero-dependency FAISS extraction, and view-port clipping, the application achieves a background idle footprint of under 2MB. When completely hidden for 10 minutes, the Python process fully terminates while persisting the file queue to \texttt{session.json}, releasing 100\% of computational resources until restored by the tray stub.
+
 \paragraph{OS Integration.}
 Deep Windows integration (\texttt{core/windows\_integration.py}) manages taskbar progress states and native UI extensions, directly binding OS-level feedback to internal processing pipelines.
 

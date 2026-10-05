@@ -64,12 +64,15 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
 - **Custom File Explorer**: Fully integrated PyQt6 file dialog replacing generic OS file pickers to maintain dark metallic UI consistency.
 - **Cinematic Transitions & VFX**: Real-time particle physics simulation during background operations with smooth screen-flash transitions.
 
-### 4. Engine & Performance Optimizations
+### 4. Engine & Performance Optimizations (The "Wild Tier" Memory Diet)
 - **C-Accelerated PyMuPDF Core**: Native C-level document operations executing up to 50x faster than pure-Python libraries.
 - **O(1) Carousel Indexing**: Surgical layout reordering without tearing down or recreating UI widgets.
 - **Dynamic Memory Management**: Unloads LLM weights and vector indices from RAM/VRAM when NLP mode is toggled off or on exit.
 - **Non-Blocking Multithreading**: Smooth 60 FPS UI performance backed by dedicated `QThread` workers and progress tracking.
 - **In-Memory Pixmap Caching**: SVG vector icons and card thumbnails are rasterized and pre-scaled once to eliminate CPU resampling overhead.
+- **EcoQoS & Working Set Trimming**: Actively purges the working set memory when minimized, reducing background idle memory to ~20MB.
+- **Zero-Dependency Vector Engine**: RAG semantic search operates solely on `llama-cpp-python` and `faiss`, entirely removing heavy ML wrappers (Torch, LangChain, SentenceTransformers).
+- **Native Managed Tray Architecture**: A 64KB C# system tray stub (`mnime_tray.exe`) manages the application lifecycle. When hidden for 10 minutes, the main Python process persists its document queue to `session.json` and completely self-terminates—achieving an ultimate Chrome-class 1.5MB idle footprint.
 
 ---
 

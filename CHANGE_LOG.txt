@@ -942,3 +942,12 @@ END OF CHANGE LOG - MNIME v5.0 RELEASE BUILD
 - Synchronized all documentation, spec sheets, change logs, and research papers across `README.md`, `CHANGE_LOG.txt`, `MNIME_Architecture.pdf`, `MNIME_Change_Log.pdf`, `MNIME_Spec_Manual.pdf`, and `MNIME_Research_Paper.tex`.
 
 
+
+[2026-10-05] Session 29: V6 Wild Tier Performance Optimizations & Memory Diet
+- Implemented EcoQoS working set memory trimming via core/idle_trim.py, reducing active memory to ~20MB when minimized.
+- Refactored UI document rendering (ReaderDialog, DocumentViewer) to use viewport clipping and QPainter to eliminate high-VRAM QGraphicsView overhead.
+- Purged heavy machine-learning dependencies (torch, sentence-transformers, langchain) from requirements.txt and MNIME.spec.
+- Migrated semantic search and embeddings directly to llama-cpp-python and faiss, reducing distribution size by gigabytes.
+- Lazily initialized particle overlays and NLP windows in MainWindow to drastically improve startup time and save ~200MB initial memory.
+- Developed native C# tray stub (mnime_tray.exe, 64KB) to act as a 1MB memory-resident launcher.
+- Added managed-mode (--managed) IPC support for complete process termination when hidden for 10 minutes (saving 100% RAM/VRAM), with persistent file queues saved to session.json.

@@ -121,6 +121,7 @@ class MainWindow(QMainWindow):
         self._particle_overlay = None
 
         self._setup_ui()
+        self._restore_session()
         
         self.particle_cursor = self._get_particle_cursor()
         self.setCursor(self.particle_cursor)
@@ -580,41 +581,58 @@ class MainWindow(QMainWindow):
         base_layout.addWidget(self.container_frame)
         self.setCentralWidget(central_widget)
         
-        # System Tray Integration
-        self.tray_icon = QSystemTrayIcon(self)
-        from core.app_icon import get_tray_icon
-        tray_icon = get_tray_icon()
-        if not tray_icon.isNull():
-            self.tray_icon.setIcon(tray_icon)
-        self.tray_icon.setToolTip("MNIME")
+        self.tray_icon = None
+        if "--managed" not in sys.argv:
+            # System Tray Integration
+            self.tray_icon = QSystemTrayIcon(self)
+            from core.app_icon import get_tray_icon
+            tray_icon = get_tray_icon()
+            if not tray_icon.isNull():
+                self.tray_icon.setIcon(tray_icon)
+            self.tray_icon.setToolTip("MNIME")
+            
+            tray_menu = QMenu(self)
+            tray_menu.setStyleSheet("""
+                QMenu {
+                    background-color: #11151f;
+                    color: #f0f6fc;
+                    border: 1px solid #1f2737;
+                }
+                QMenu::item:selected {
+                    background-color: #0077b6;
+                }
+            """)
+            show_action = tray_menu.addAction("Show MNIME")
+            show_action.triggered.connect(self._show_from_tray)
+            
+            self.startup_action = tray_menu.addAction("Run on Startup")
+            self.startup_action.setCheckable(True)
+            self.startup_action.setChecked(self._check_startup_enabled())
+            self.startup_action.triggered.connect(self._toggle_startup)
+            
+            tray_menu.addSeparator()
+            
+            quit_action = tray_menu.addAction("Quit")
+            quit_action.triggered.connect(self._quit_app)
+            
+            self.tray_icon.setContextMenu(tray_menu)
+            self.tray_icon.activated.connect(self._on_tray_activated)
+            self.tray_icon.show()
+            
+        # W1: If managed by the native tray, exit fully when hidden for 10 minutes to clear footprint.
+        self.managed_exit_timer = QTimer(self)
+        self.managed_exit_timer.setInterval(10 * 60 * 1000) # 10 minutes
+        self.managed_exit_timer.timeout.connect(self._quit_app)
         
-        tray_menu = QMenu(self)
-        tray_menu.setStyleSheet("""
-            QMenu {
-                background-color: #11151f;
-                color: #f0f6fc;
-                border: 1px solid #1f2737;
-            }
-            QMenu::item:selected {
-                background-color: #0077b6;
-            }
-        """)
-        show_action = tray_menu.addAction("Show MNIME")
-        show_action.triggered.connect(self._show_from_tray)
-        
-        self.startup_action = tray_menu.addAction("Run on Startup")
-        self.startup_action.setCheckable(True)
-        self.startup_action.setChecked(self._check_startup_enabled())
-        self.startup_action.triggered.connect(self._toggle_startup)
-        
-        tray_menu.addSeparator()
-        
-        quit_action = tray_menu.addAction("Quit")
-        quit_action.triggered.connect(self._quit_app)
-        
-        self.tray_icon.setContextMenu(tray_menu)
-        self.tray_icon.activated.connect(self._on_tray_activated)
-        self.tray_icon.show()
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        if "--managed" in sys.argv:
+            self.managed_exit_timer.start()
+            
+    def showEvent(self, event):
+        super().showEvent(event)
+        if "--managed" in sys.argv:
+            self.managed_exit_timer.stop()
 
     def _on_nlp_toggled(self, checked):
         if not checked and self._nlp_view is not None:
@@ -1338,8 +1356,37 @@ class MainWindow(QMainWindow):
             for w in (self.worker, self._reference_worker, self._load_worker)
         )
 
+    def _save_session(self):
+        """Save current file queue to session.json."""
+        try:
+            base = os.environ.get("LOCALAPPDATA") or os.path.join(os.path.expanduser("~"), ".mnime")
+            session_path = os.path.join(base, "MNIME", "session.json")
+            os.makedirs(os.path.dirname(session_path), exist_ok=True)
+            paths = [os.path.abspath(f.file_path) for f in self.file_items]
+            import json
+            with open(session_path, "w", encoding="utf-8") as f:
+                json.dump({"files": paths}, f)
+        except Exception as e:
+            log.exception("Failed to save session: %s", e)
+            
+    def _restore_session(self):
+        """Restore file queue from session.json."""
+        try:
+            base = os.environ.get("LOCALAPPDATA") or os.path.join(os.path.expanduser("~"), ".mnime")
+            session_path = os.path.join(base, "MNIME", "session.json")
+            if os.path.exists(session_path):
+                import json
+                with open(session_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                files = data.get("files", [])
+                if files:
+                    self.handle_external_open(files)
+        except Exception as e:
+            log.exception("Failed to restore session: %s", e)
+
     def _quit_app(self):
         """Cancel and join background work, remove temp output, then exit."""
+        self._save_session()
         for w in (self.worker, self._reference_worker, self._load_worker):
             if w is not None and w.isRunning():
                 w.cancel()
