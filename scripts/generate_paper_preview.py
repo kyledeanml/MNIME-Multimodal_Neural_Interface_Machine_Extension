@@ -72,10 +72,10 @@ def render_paper_cover(root_dir: Path):
     pix.save(str(cover_png_v5))
     doc.close()
 
-    # Replace original PDF with the sanitized version
-    shutil.move(str(temp_pdf), str(target_pdf))
+    # We will NOT overwrite the original PDF with the PyMuPDF version,
+    # as PyMuPDF's save function might be causing GitHub pdf.js compatibility issues.
     
-    # Also sync the sanitized version back to the paper directory if needed
+    # Also sync the raw PDF back to the paper directory if needed
     if target_pdf == pdf_in_root and pdf_in_paper.exists():
         shutil.copy2(pdf_in_root, pdf_in_paper)
     elif target_pdf == pdf_in_paper and pdf_in_root.exists():
