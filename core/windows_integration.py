@@ -44,8 +44,8 @@ def ensure_pdf_page_preview() -> bool:
             winreg.SetValueEx(key, "Treatment", 0, winreg.REG_DWORD, 2)
 
         icon_key_path = rf"{app_key_path}\DefaultIcon"
-        with winreg.CreateKey(winreg.HKEY_CURRENT_USER, icon_key_path) as key:
-            winreg.SetValueEx(key, "", 0, winreg.REG_EXPAND_SZ, DOCUMENT_PAGE_ICON)
+        with winreg.CreateKey(winreg.HKEY_CURRENT_USER, icon_key_path) as icon_key:
+            winreg.SetValueEx(icon_key, "", 0, winreg.REG_EXPAND_SZ, DOCUMENT_PAGE_ICON)
 
         types_key_path = rf"{app_key_path}\SupportedTypes"
         with winreg.CreateKey(winreg.HKEY_CURRENT_USER, types_key_path) as key:
