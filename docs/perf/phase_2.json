@@ -1,0 +1,11 @@
+{
+    "scenario": "S1",
+    "description": "Idle in tray 10 min (no files)",
+    "ws_mb": 8.0,
+    "private_mb": 62.9,
+    "peak_ws_mb": 103.3,
+    "threads": 11,
+    "handles": 573,
+    "cpu_pct": 0.0,
+    "cpu_s": 0.0
+}

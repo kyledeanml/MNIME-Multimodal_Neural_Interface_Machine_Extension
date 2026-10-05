@@ -121,8 +121,15 @@ class MainWindow(QMainWindow):
         self.setCursor(self.particle_cursor)
         
         # Install a global event filter to seamlessly handle cursor changes on edges
-        from PyQt6.QtCore import QCoreApplication
+        from PyQt6.QtCore import QCoreApplication, QTimer
         QCoreApplication.instance().installEventFilter(self)
+
+        # Start idle trim timer assuming we start hidden (in tray)
+        if not hasattr(self, '_idle_trim_timer'):
+            self._idle_trim_timer = QTimer(self)
+            self._idle_trim_timer.setSingleShot(True)
+            self._idle_trim_timer.timeout.connect(self._do_idle_trim)
+        self._idle_trim_timer.start(30000)
 
         # NOTE: _bypass_uipi_for_drag_drop is intentionally NOT called here.
         # It must run AFTER show() so it can override Qt's OLE DnD registration.
@@ -131,6 +138,14 @@ class MainWindow(QMainWindow):
     def showEvent(self, event):
         """Register WM_DROPFILES AFTER Qt has finished its internal OLE DnD setup."""
         super().showEvent(event)
+        if hasattr(self, '_idle_trim_timer'):
+            self._idle_trim_timer.stop()
+        try:
+            from core.idle_trim import set_efficiency_mode
+            set_efficiency_mode(False)
+        except Exception:
+            pass
+            
         if not self._dnd_registered:
             # Defer by one event-loop cycle so RegisterDragDrop has fully completed
             from PyQt6.QtCore import QTimer
@@ -823,6 +838,42 @@ class MainWindow(QMainWindow):
         # Save a reference so the animation isn't garbage collected
         self._minimize_anim = MinimizeAnimationOverlay(self.geometry(), target_pt, None)
         self._minimize_anim.show()
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        from PyQt6.QtCore import QTimer
+        if not hasattr(self, '_idle_trim_timer'):
+            self._idle_trim_timer = QTimer(self)
+            self._idle_trim_timer.setSingleShot(True)
+            self._idle_trim_timer.timeout.connect(self._do_idle_trim)
+        self._idle_trim_timer.start(30000)
+
+    def _do_idle_trim(self):
+        from PyQt6.QtWidgets import QApplication
+        if self.isVisible():
+            return
+        
+        # Unload model if setting enabled
+        from PyQt6.QtCore import QSettings
+        if str(QSettings("MNIME", "MNIMEApp").value("nlp_idle_unload_tray", "true")).lower() == "true":
+            try:
+                from core.nlp_engine import NLPEngine
+                NLPEngine.get_instance().unload_model()
+            except Exception:
+                pass
+                
+        # Are there other top-level windows open?
+        for w in QApplication.topLevelWidgets():
+            if w.isVisible() and w is not self and not w.inherits("QMenu") and not w.inherits("QToolTip"):
+                # E.g. ReaderDialog is open
+                return
+                
+        try:
+            from core.idle_trim import trim_now, set_efficiency_mode
+            trim_now()
+            set_efficiency_mode(True)
+        except Exception:
+            pass
 
     def closeEvent(self, event):
         from PyQt6.QtWidgets import QApplication

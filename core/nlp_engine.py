@@ -47,6 +47,12 @@ class NLPEngine:
         # so every inference and every load/unload goes through this lock.
         self._lock = threading.RLock()
 
+        self._idle_ttl_timer = None
+        try:
+            self.nlp_idle_unload_minutes = float(settings.value("nlp_idle_unload_minutes", 5))
+        except (ValueError, TypeError):
+            self.nlp_idle_unload_minutes = 5.0
+
         # Free the model on normal interpreter exit
         atexit.register(self.unload_model)
 
@@ -62,8 +68,24 @@ class NLPEngine:
         self.unload_model()
         sys.exit(0)
 
+    def _reset_idle_timer(self):
+        with self._lock:
+            if self._idle_ttl_timer:
+                self._idle_ttl_timer.cancel()
+            if self.is_loaded and self.nlp_idle_unload_minutes > 0:
+                self._idle_ttl_timer = threading.Timer(self.nlp_idle_unload_minutes * 60, self._on_idle_timeout)
+                self._idle_ttl_timer.daemon = True
+                self._idle_ttl_timer.start()
+
+    def _on_idle_timeout(self):
+        log.info("NLP model idle TTL reached; unloading to free resources.")
+        self.unload_model()
+
     def unload_model(self):
         with self._lock:
+            if self._idle_ttl_timer:
+                self._idle_ttl_timer.cancel()
+                self._idle_ttl_timer = None
             if self.llm is not None:
                 try:
                     self.llm.close()
@@ -140,6 +162,7 @@ class NLPEngine:
 
                 self.is_loaded = True
                 self.is_loading = False
+                self._reset_idle_timer()
                 log.info("NLP model loaded: %s", self.model_path)
                 
                 # --- V5 Tone-Down Doohickey ---
@@ -188,6 +211,7 @@ class NLPEngine:
         with self._lock:
             if self.llm is None:
                 raise RuntimeError(self.error or "Model not loaded.")
+            self._reset_idle_timer()
             response = self.llm(
                 prompt,
                 max_tokens=max_tokens,
@@ -255,6 +279,7 @@ class NLPEngine:
             with self._lock:
                 if self.llm is None:
                     raise RuntimeError(self.error or "Model not loaded.")
+                self._reset_idle_timer()
                 stream = self.llm(
                     full_prompt,
                     max_tokens=1024,
