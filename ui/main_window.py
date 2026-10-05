@@ -115,6 +115,11 @@ class MainWindow(QMainWindow):
         self.setAcceptDrops(True)
         self._dnd_registered = False
 
+        # Lazy-loaded views
+        self._output_view = None
+        self._nlp_view = None
+        self._particle_overlay = None
+
         self._setup_ui()
         
         self.particle_cursor = self._get_particle_cursor()
@@ -564,28 +569,13 @@ class MainWindow(QMainWindow):
         self.carousel.clear_clicked.connect(self._clear_files)
         self.carousel.card_double_clicked.connect(lambda item: self._open_reader(item.file_path))
         main_layout.addWidget(self.carousel, 1)
-
-        # Output View (Hidden by default)
-        self.output_view = OutputView(self)
-        self.output_view.start_over_clicked.connect(self._start_over)
-        self.output_view.hide()
-        main_layout.addWidget(self.output_view, 1)
-
-        # NLP View (Hidden by default)
-        self.nlp_view = NLPView(self)
-        self.nlp_view.start_over_clicked.connect(self._start_over)
-        self.tabs_bar.nlp_toggled.connect(lambda checked: self.nlp_view.clear_index() if not checked else None)
-        self.nlp_view.hide()
-        main_layout.addWidget(self.nlp_view, 1)
+        # Views are lazily constructed when accessed via properties to reduce startup memory
+        self.tabs_bar.nlp_toggled.connect(self._on_nlp_toggled)
 
         self.action_bar = ActionBar(self)
         self.action_bar.action_triggered.connect(self._execute_action)
         self.action_bar.action_hovered.connect(self._on_action_hovered)
         self.carousel.drop_layout.insertWidget(1, self.action_bar)
-
-        # Merge particle overlay for hover pull, collapse, and dramatic transition flash
-        from ui.merge_particles import MergeParticleOverlay
-        self.particle_overlay = MergeParticleOverlay(self)
 
         base_layout.addWidget(self.container_frame)
         self.setCentralWidget(central_widget)
@@ -625,6 +615,37 @@ class MainWindow(QMainWindow):
         self.tray_icon.setContextMenu(tray_menu)
         self.tray_icon.activated.connect(self._on_tray_activated)
         self.tray_icon.show()
+
+    def _on_nlp_toggled(self, checked):
+        if not checked and self._nlp_view is not None:
+            self._nlp_view.clear_index()
+
+    @property
+    def output_view(self):
+        if self._output_view is None:
+            from ui.output_view import OutputView
+            self._output_view = OutputView(self)
+            self._output_view.start_over_clicked.connect(self._start_over)
+            self._output_view.hide()
+            self.container_frame.layout().addWidget(self._output_view, 1)
+        return self._output_view
+
+    @property
+    def nlp_view(self):
+        if self._nlp_view is None:
+            from ui.nlp_view import NLPView
+            self._nlp_view = NLPView(self)
+            self._nlp_view.start_over_clicked.connect(self._start_over)
+            self._nlp_view.hide()
+            self.container_frame.layout().addWidget(self._nlp_view, 1)
+        return self._nlp_view
+
+    @property
+    def particle_overlay(self):
+        if self._particle_overlay is None:
+            from ui.merge_particles import MergeParticleOverlay
+            self._particle_overlay = MergeParticleOverlay(self)
+        return self._particle_overlay
 
     def _on_reader_files_updated(self, paths):
         self._clear_files()

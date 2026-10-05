@@ -10,34 +10,86 @@ import time
 import stat
 import re
 import threading
+import json
 from collections import Counter
 from typing import List, Callable, Optional, Dict, Any
-
-# Ensure progress bars and telemetry are disabled globally to prevent GUI thread deadlocks
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
-os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
-os.environ.setdefault("TQDM_DISABLE", "1")
-os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 
 from .file_item import FileItem
 from .logging_setup import get_logger
 
 log = get_logger("search")
 
-EMBEDDING_MODEL_DIRNAME = "bge-small-en-v1.5"
-
+EMBEDDING_MODEL_FILENAME = "bge-small-en-v1.5-q8_0.gguf"
 
 def get_embedding_model_path() -> str:
     """Locate the bundled embedding model so semantic search never touches the network."""
     from .app_icon import get_resource_path
-    path = get_resource_path(os.path.join("models", EMBEDDING_MODEL_DIRNAME))
-    if not os.path.isfile(os.path.join(path, "model.safetensors")):
+    path = get_resource_path(os.path.join("models", "bge-small-en-v1.5", EMBEDDING_MODEL_FILENAME))
+    if not os.path.isfile(path):
         raise FileNotFoundError(
-            f"Embedding model not found at '{path}'. Run 'python scripts/fetch_models.py' "
-            "to download it once, or reinstall MNIME."
+            f"Embedding model not found at '{path}'. Run scripts/download_gguf.py to download it."
         )
     return path
 
+class VectorStore:
+    def __init__(self, dim: int = 384):
+        import faiss
+        self.index = faiss.IndexFlatIP(dim)
+        self.docs = []
+        
+    def add_documents(self, docs: List[Dict[str, str]], embeddings: List[List[float]]):
+        if not embeddings: return
+        import faiss
+        import numpy as np
+        emb_arr = np.array(embeddings, dtype=np.float32)
+        faiss.normalize_L2(emb_arr)
+        self.index.add(emb_arr)
+        self.docs.extend(docs)
+
+    def similarity_search(self, query_emb: List[float], k: int = 5) -> List[Dict[str, str]]:
+        if self.index.ntotal == 0:
+            return []
+        import faiss
+        import numpy as np
+        emb_arr = np.array([query_emb], dtype=np.float32)
+        faiss.normalize_L2(emb_arr)
+        D, I = self.index.search(emb_arr, k)
+        results = []
+        for i in range(len(I[0])):
+            idx = I[0][i]
+            if idx != -1 and idx < len(self.docs):
+                results.append(self.docs[idx])
+        return results
+
+    def save_local(self, path: str):
+        import faiss
+        os.makedirs(path, exist_ok=True)
+        faiss.write_index(self.index, os.path.join(path, "index.faiss"))
+        with open(os.path.join(path, "docs.json"), "w", encoding="utf-8") as f:
+            json.dump(self.docs, f)
+
+    @classmethod
+    def load_local(cls, path: str) -> "VectorStore":
+        import faiss
+        vs = cls()
+        vs.index = faiss.read_index(os.path.join(path, "index.faiss"))
+        with open(os.path.join(path, "docs.json"), "r", encoding="utf-8") as f:
+            vs.docs = json.load(f)
+        return vs
+
+def simple_text_split(text: str, chunk_size: int = 1500, chunk_overlap: int = 200) -> List[str]:
+    chunks = []
+    i = 0
+    while i < len(text):
+        chunk = text[i:i+chunk_size]
+        if i + chunk_size < len(text):
+            break_idx = max(chunk.rfind('\n'), chunk.rfind('. '))
+            if break_idx > chunk_size // 2:
+                chunk = text[i:i+break_idx+1]
+        chunks.append(chunk)
+        i += len(chunk) - chunk_overlap
+        if i < 0: i = 0
+    return chunks
 
 class SearchEngine:
     """Core backend engine for semantic search over codebases and text documents."""
@@ -76,9 +128,7 @@ class SearchEngine:
         ignore_dirs = {'.venv', 'venv', 'env', '.git', 'node_modules', '__pycache__', '.idea', '.vscode'}
         
         for root, dirs, files in os.walk(root_dir):
-            # Skip ignored directories to avoid hanging on dependencies
             dirs[:] = [d for d in dirs if d not in ignore_dirs]
-            
             for fname in files:
                 ext = os.path.splitext(fname)[1].lower()
                 if ext in (".py", ".txt", ".md", ".json", ".csv", ".js", ".ts", ".html", ".css", ".cpp", ".c", ".h", ".java"):
@@ -135,29 +185,41 @@ class SearchEngine:
 
     _embedding_model = None
     _embedding_lock = threading.Lock()
+    _idle_timer = None
 
     @classmethod
     def get_embeddings(cls):
-        """Thread-safe cached instance of HuggingFaceEmbeddings with disabled progress bars to prevent GUI thread deadlocks."""
-        if cls._embedding_model is None:
-            with cls._embedding_lock:
-                if cls._embedding_model is None:
-                    os.environ.setdefault("HF_HUB_OFFLINE", "1")
-                    os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
-                    os.environ.setdefault("TQDM_DISABLE", "1")
-                    os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
-                    try:
-                        import transformers.utils.logging as tul
-                        tul.disable_progress_bar()
-                    except Exception:
-                        pass
-                    from langchain_huggingface import HuggingFaceEmbeddings
-                    cls._embedding_model = HuggingFaceEmbeddings(
-                        model_name=get_embedding_model_path(),
-                        model_kwargs={"device": "cpu"},
-                        encode_kwargs={"normalize_embeddings": True},
-                    )
+        """Thread-safe cached instance of llama.cpp embedding model."""
+        with cls._embedding_lock:
+            if cls._embedding_model is None:
+                from llama_cpp import Llama
+                cls._embedding_model = Llama(
+                    model_path=get_embedding_model_path(),
+                    embedding=True,
+                    n_ctx=512,
+                    verbose=False
+                )
+            cls._reset_idle_timer()
         return cls._embedding_model
+
+    @classmethod
+    def _reset_idle_timer(cls):
+        if cls._idle_timer:
+            cls._idle_timer.cancel()
+        from PyQt6.QtCore import QSettings
+        settings = QSettings("kyledeanml", "MNIME")
+        idle_minutes = int(settings.value("nlp_idle_unload_minutes", 5))
+        if idle_minutes > 0:
+            cls._idle_timer = threading.Timer(idle_minutes * 60, cls.unload_model)
+            cls._idle_timer.start()
+
+    @classmethod
+    def unload_model(cls):
+        with cls._embedding_lock:
+            if cls._embedding_model is not None:
+                del cls._embedding_model
+                cls._embedding_model = None
+                log.info("Unloaded embedding model due to idle timeout.")
 
     _global_vstore = None
 
@@ -165,18 +227,8 @@ class SearchEngine:
     def get_global_cache_path() -> str:
         """Persistent global vector store location (user-writable, survives reinstalls)."""
         base = os.environ.get("LOCALAPPDATA") or os.path.join(os.path.expanduser("~"), ".mnime")
-        path = os.path.join(base, "MNIME", "global_vector_store")
+        path = os.path.join(base, "MNIME", "global_vector_store_v2")
         os.makedirs(path, exist_ok=True)
-
-        # One-time migration from the old in-repo location.
-        legacy = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "global_memory_cache"))
-        if not os.path.exists(os.path.join(path, "index.faiss")) and os.path.exists(os.path.join(legacy, "index.faiss")):
-            import shutil
-            for name in ("index.faiss", "index.pkl"):
-                src = os.path.join(legacy, name)
-                if os.path.exists(src):
-                    shutil.copy2(src, os.path.join(path, name))
-            log.info("Migrated global vector store from %s to %s", legacy, path)
         return path
 
     @staticmethod
@@ -185,14 +237,7 @@ class SearchEngine:
         use_smart_sampling: bool = True,
         progress_callback: Optional[Callable[[int, str], None]] = None
     ) -> Any:
-        """
-        Loads texts from given files, including PDFs, and builds a FAISS vector index.
-        Returns the FAISS vectorstore.
-        """
         import pandas as pd
-        from langchain_community.vectorstores import FAISS
-        from langchain_core.documents import Document
-        from langchain_text_splitters import RecursiveCharacterTextSplitter
 
         if progress_callback:
             progress_callback(10, "Preparing files...")
@@ -255,8 +300,8 @@ class SearchEngine:
             progress_callback(40, "Initializing Embedding Model...")
 
         emb = SearchEngine.get_embeddings()
-        split = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=200)
 
+        final_docs = []
         if use_smart_sampling and len(df) > 0:
             if progress_callback:
                 progress_callback(50, "Smart Indexing (Extracting Probe Terms)...")
@@ -265,12 +310,11 @@ class SearchEngine:
             sample = df['content'].sample(frac=frac, random_state=42).tolist()
             p_terms = SearchEngine.extract_probe_terms(sample)
 
-            final_docs = []
             for i, (_, row) in enumerate(df.iterrows()):
-                chunks = split.split_text(row['content'])
+                chunks = simple_text_split(row['content'])
                 for chk in chunks:
                     if any(term in chk for term in p_terms):
-                        final_docs.append(Document(page_content=chk, metadata={"source": row['path']}))
+                        final_docs.append({"content": chk, "source": row['path']})
                 
                 if progress_callback:
                     pct = 50 + int((i / len(df)) * 40)
@@ -280,42 +324,45 @@ class SearchEngine:
                 if progress_callback:
                     progress_callback(90, "Fallback: Full Indexing...")
                 for _, row in df.iterrows():
-                    final_docs.extend([Document(page_content=c, metadata={"source": row['path']}) for c in split.split_text(row['content'])])
+                    final_docs.extend([{"content": c, "source": row['path']} for c in simple_text_split(row['content'])])
 
             if not final_docs:
-                raise ValueError("No readable text could be extracted. Ensure the documents contain selectable text (not just scanned images).")
-
-            docs_to_index = final_docs
-            vstore = FAISS.from_documents(final_docs, emb)
-            
+                raise ValueError("No readable text could be extracted.")
         else:
             if progress_callback:
                 progress_callback(50, "Full Indexing...")
                 
-            all_docs = []
             for i, (_, row) in enumerate(df.iterrows()):
-                all_docs.extend([Document(page_content=c, metadata={"source": row['path']}) for c in split.split_text(row['content'])])
+                final_docs.extend([{"content": c, "source": row['path']} for c in simple_text_split(row['content'])])
                 if progress_callback:
                     pct = 50 + int((i / len(df)) * 40)
                     progress_callback(pct, f"Full Indexing ({i+1}/{len(df)})...")
             
-            if not all_docs:
-                raise ValueError("No readable text could be extracted. Ensure the documents contain selectable text (not just scanned images).")
+            if not final_docs:
+                raise ValueError("No readable text could be extracted.")
 
-            docs_to_index = all_docs
-            vstore = FAISS.from_documents(all_docs, emb)
+        # Batch encode
+        if progress_callback:
+            progress_callback(92, "Generating Embeddings...")
+            
+        embeddings_res = emb.create_embedding([doc["content"] for doc in final_docs])
+        embeddings = [e["embedding"] for e in embeddings_res["data"]]
 
-        # Update global persistent memory cache
+        vstore = VectorStore(dim=len(embeddings[0]))
+        vstore.add_documents(final_docs, embeddings)
+
         if progress_callback:
             progress_callback(95, "Updating Persistent Vector Store...")
+            
         try:
             cache_path = SearchEngine.get_global_cache_path()
             if os.path.exists(os.path.join(cache_path, "index.faiss")):
-                global_vstore = FAISS.load_local(cache_path, emb, allow_dangerous_deserialization=True)
-                global_vstore.add_documents(docs_to_index)
+                global_vstore = VectorStore.load_local(cache_path)
+                global_vstore.add_documents(final_docs, embeddings)
                 global_vstore.save_local(cache_path)
             else:
-                global_vstore = FAISS.from_documents(docs_to_index, emb)
+                global_vstore = VectorStore(dim=len(embeddings[0]))
+                global_vstore.add_documents(final_docs, embeddings)
                 global_vstore.save_local(cache_path)
             SearchEngine._global_vstore = global_vstore
         except Exception as e:
@@ -328,47 +375,32 @@ class SearchEngine:
 
     @staticmethod
     def search(vectorstore: Any, query: str, k: int = 5) -> List[Dict[str, Any]]:
-        """
-        Searches the built FAISS index.
-        Returns a list of dicts with 'content' and 'source'.
-        """
         if not vectorstore:
             return []
-            
-        hits = vectorstore.similarity_search(query, k=k)
-        results = []
-        for hit in hits:
-            results.append({
-                "content": hit.page_content,
-                "source": hit.metadata.get("source", "Unknown")
-            })
-        return results
+        
+        emb = SearchEngine.get_embeddings()
+        q_emb = emb.create_embedding(query)["data"][0]["embedding"]
+        hits = vectorstore.similarity_search(q_emb, k=k)
+        return hits
 
     @staticmethod
     def search_global_memory(query: str, k: int = 5) -> List[Dict[str, Any]]:
-        """
-        Searches the persistent global vector store.
-        Returns a list of dicts with 'content' and 'source'.
-        """
         try:
             if SearchEngine._global_vstore is None:
                 cache_path = SearchEngine.get_global_cache_path()
                 if not os.path.exists(os.path.join(cache_path, "index.faiss")):
                     return []
-                from langchain_community.vectorstores import FAISS
-                SearchEngine._global_vstore = FAISS.load_local(
-                    cache_path, SearchEngine.get_embeddings(), allow_dangerous_deserialization=True
-                )
-            hits = SearchEngine._global_vstore.similarity_search(query, k=k)
-            return [
-                {"content": hit.page_content, "source": hit.metadata.get("source", "Unknown")}
-                for hit in hits
-            ]
+                SearchEngine._global_vstore = VectorStore.load_local(cache_path)
+            
+            emb = SearchEngine.get_embeddings()
+            q_emb = emb.create_embedding(query)["data"][0]["embedding"]
+            hits = SearchEngine._global_vstore.similarity_search(q_emb, k=k)
+            return hits
         except Exception as e:
             log.exception("Failed to search global vector store: %s", e)
             return []
 
     @staticmethod
     def release_global_store():
-        """Drop the in-memory copy of the global store (it stays on disk)."""
         SearchEngine._global_vstore = None
+

@@ -62,7 +62,7 @@ hiddenimports = [
     'ui.tabs_bar',
 ]
 
-for pkg in ['pymupdf', 'pdf2docx', 'pypdf', 'langchain', 'langchain_community', 'sentence_transformers', 'faiss', 'llama_cpp']:
+for pkg in ['pymupdf', 'pdf2docx', 'pypdf', 'faiss', 'llama_cpp']:
     try:
         pkg_datas, pkg_binaries, pkg_hiddenimports = collect_all(pkg)
         datas += pkg_datas
@@ -80,10 +80,14 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['matplotlib', 'tensorflow', 'nltk', 'IPython', 'spacy', 'torchvision'],
+    excludes=['matplotlib', 'tensorflow', 'nltk', 'IPython', 'spacy', 'torchvision', 'torch', 'torchaudio', 'transformers', 'pandas'],
     noarchive=False,
-    optimize=0,
+    optimize=2,
 )
+
+# Filter out Qt6Pdf and qpdf plugins from binaries
+a.binaries = [b for b in a.binaries if 'Qt6Pdf' not in b[0] and 'qpdf' not in b[0]]
+
 pyz = PYZ(a.pure)
 
 exe = EXE(
