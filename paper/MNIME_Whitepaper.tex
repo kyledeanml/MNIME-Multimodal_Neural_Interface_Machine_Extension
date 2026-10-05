@@ -497,6 +497,10 @@ generation throughput of \textbf{56.15\,tokens/s} (17.81\,ms per token), utilizi
 Furthermore, end-to-end integration tests confirmed sub-second heterogeneous
 document composition (vector PDF, multi-page paginated text, and rasterized images
 merged in 0.41\,s) with 100\% chapter-level TOC heuristic extraction precision.
+Additionally, a high-volume stability test demonstrated that the two-tier chunked segment
+architecture successfully merged 5,000 PDFs without memory exhaustion. The system
+processed 250-document chunks in approximately 21 seconds per chunk, maintaining a
+stable active RAM footprint while concurrently executing NLP-driven TOC generation.
 Users can reproduce and externally validate these metrics directly via the bundled
 \texttt{benchmark.py} GUI utility.
 
