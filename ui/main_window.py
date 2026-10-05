@@ -591,8 +591,8 @@ class MainWindow(QMainWindow):
                 self.tray_icon.setIcon(tray_icon)
             self.tray_icon.setToolTip("MNIME")
             
-            tray_menu = QMenu(self)
-            tray_menu.setStyleSheet("""
+            self.tray_menu = QMenu(self)
+            self.tray_menu.setStyleSheet("""
                 QMenu {
                     background-color: #11151f;
                     color: #f0f6fc;
@@ -602,20 +602,20 @@ class MainWindow(QMainWindow):
                     background-color: #0077b6;
                 }
             """)
-            show_action = tray_menu.addAction("Show MNIME")
+            show_action = self.tray_menu.addAction("Show MNIME")
             show_action.triggered.connect(self._show_from_tray)
             
-            self.startup_action = tray_menu.addAction("Run on Startup")
+            self.startup_action = self.tray_menu.addAction("Run on Startup")
             self.startup_action.setCheckable(True)
             self.startup_action.setChecked(self._check_startup_enabled())
             self.startup_action.triggered.connect(self._toggle_startup)
             
-            tray_menu.addSeparator()
+            self.tray_menu.addSeparator()
             
-            quit_action = tray_menu.addAction("Quit")
+            quit_action = self.tray_menu.addAction("Quit")
             quit_action.triggered.connect(self._quit_app)
             
-            self.tray_icon.setContextMenu(tray_menu)
+            self.tray_icon.setContextMenu(self.tray_menu)
             self.tray_icon.activated.connect(self._on_tray_activated)
             self.tray_icon.show()
             
