@@ -552,7 +552,7 @@ class MainWindow(QMainWindow):
                 color: #ffffff;
             }
         """)
-        close_btn.clicked.connect(self.close)
+        close_btn.clicked.connect(self._quit_app)
         
         top_bar.addWidget(min_btn)
         top_bar.addWidget(close_btn)
