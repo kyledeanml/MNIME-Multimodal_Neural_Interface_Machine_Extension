@@ -33,7 +33,7 @@ V4_FINISH_GUIDE.txt
 # Documents and Test files
 *.pdf
 !MNIME_Spec_Manual.pdf
-!MNIME_paper.pdf
+!MNIME_Research_Paper.pdf
 !MNIME_Change_Log.pdf
 !MNIME_Architecture.pdf
 

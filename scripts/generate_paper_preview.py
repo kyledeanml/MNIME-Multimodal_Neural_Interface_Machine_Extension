@@ -1,6 +1,6 @@
 """
 Generates high-resolution PNG cover preview images for the MNIME Research Paper.
-Renders Page 1 of MNIME_paper.pdf at 300 DPI to docs/paper_cover.png and docs/paper_cover_v5.png.
+Renders Page 1 of MNIME_Research_Paper.pdf at 300 DPI to docs/paper_cover.png and docs/paper_cover_v5.png.
 """
 
 import os
@@ -12,9 +12,9 @@ from pathlib import Path
 
 def render_paper_cover(root_dir: Path):
     paper_dir = root_dir / "paper"
-    tex_path = paper_dir / "MNIME_paper.tex"
-    pdf_in_paper = paper_dir / "MNIME_paper.pdf"
-    pdf_in_root = root_dir / "MNIME_paper.pdf"
+    tex_path = paper_dir / "MNIME_Research_Paper.tex"
+    pdf_in_paper = paper_dir / "MNIME_Research_Paper.pdf"
+    pdf_in_root = root_dir / "MNIME_Research_Paper.pdf"
     cover_png = root_dir / "docs" / "paper_cover.png"
     cover_png_v5 = root_dir / "docs" / "paper_cover_v5.png"
 
@@ -45,7 +45,7 @@ def render_paper_cover(root_dir: Path):
 
     target_pdf = pdf_in_root if pdf_in_root.exists() else pdf_in_paper
     if not target_pdf.exists():
-        print(f"ERROR: Cannot find MNIME_paper.pdf in {root_dir} or {paper_dir}")
+        print(f"ERROR: Cannot find MNIME_Research_Paper.pdf in {root_dir} or {paper_dir}")
         return False
 
     import pymupdf
