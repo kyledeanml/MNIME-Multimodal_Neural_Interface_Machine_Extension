@@ -49,12 +49,16 @@ def render_paper_cover(root_dir: Path):
         return False
 
     import pymupdf
-    print(f"Opening {target_pdf.name} for cover rasterization...")
+    print(f"Opening {target_pdf.name} for cover rasterization and sanitization...")
     doc = pymupdf.open(str(target_pdf))
     if len(doc) == 0:
         print("ERROR: Document contains no pages.")
         doc.close()
         return False
+
+    # Sanitize and optimize the PDF to prevent GitHub's pdf.js "Invalid PDF" errors
+    temp_pdf = target_pdf.with_name(target_pdf.name + ".tmp")
+    doc.save(str(temp_pdf), garbage=4, deflate=True)
 
     page = doc[0]
     # Render at 300 DPI (zoom = 300 / 72 ≈ 4.166667)
@@ -66,6 +70,15 @@ def render_paper_cover(root_dir: Path):
     pix.save(str(cover_png))
     pix.save(str(cover_png_v5))
     doc.close()
+
+    # Replace original PDF with the sanitized version
+    shutil.move(str(temp_pdf), str(target_pdf))
+    
+    # Also sync the sanitized version back to the paper directory if needed
+    if target_pdf == pdf_in_root and pdf_in_paper.exists():
+        shutil.copy2(pdf_in_root, pdf_in_paper)
+    elif target_pdf == pdf_in_paper and pdf_in_root.exists():
+        shutil.copy2(pdf_in_paper, pdf_in_root)
 
     print(f"Cover preview successfully generated: {pix.width}x{pix.height}px")
     print(f"  - {cover_png} ({cover_png.stat().st_size:,} bytes)")
