@@ -1,6 +1,7 @@
 """
 Generates high-resolution PNG cover preview images for the MNIME Research Paper.
-Renders Page 1 of MNIME_Research_Paper.pdf at 300 DPI to docs/paper_cover.png and docs/paper_cover_v5.png.
+Compiles via pdflatex, distills/normalizes to robust PDF 1.4, and renders Page 1
+at 300 DPI to docs/paper_cover.png and docs/paper_cover_v5.png.
 """
 
 import os
@@ -8,6 +9,57 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+
+def find_ghostscript() -> str | None:
+    """Find Ghostscript executable (mgs.exe in MiKTeX, gswin64c, or gs)."""
+    candidates = [
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "MiKTeX" / "miktex" / "bin" / "x64" / "mgs.exe",
+        shutil.which("mgs"),
+        shutil.which("gswin64c"),
+        shutil.which("gswin32c"),
+        shutil.which("gs")
+    ]
+    for c in candidates:
+        if c and Path(c).is_file():
+            return str(c)
+    return None
+
+
+def distill_pdf_14(input_pdf: Path, output_pdf: Path) -> bool:
+    """Distill PDF to standard PDF 1.4 with full link preservation and clean xref."""
+    gs_exe = find_ghostscript()
+    if not gs_exe:
+        print("Note: Ghostscript not found. Using raw pdflatex output.")
+        if input_pdf != output_pdf:
+            shutil.copy2(input_pdf, output_pdf)
+        return True
+
+    temp_out = input_pdf.parent / (input_pdf.stem + "_distilled.tmp.pdf")
+    cmd = [
+        gs_exe,
+        "-sDEVICE=pdfwrite",
+        "-dCompatibilityLevel=1.4",
+        "-dPDFSETTINGS=/prepress",
+        "-dPrinted=false",
+        "-dNOPAUSE",
+        "-dQUIET",
+        "-dBATCH",
+        f"-sOutputFile={temp_out}",
+        str(input_pdf)
+    ]
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        if temp_out.exists() and temp_out.stat().st_size > 1000:
+            shutil.move(str(temp_out), str(output_pdf))
+            print(f"Successfully distilled {output_pdf.name} to standard PDF 1.4 ({output_pdf.stat().st_size:,} bytes).")
+            return True
+    except Exception as err:
+        print(f"Warning: Ghostscript distillation failed ({err}); retaining raw PDF.")
+    finally:
+        if temp_out.exists():
+            temp_out.unlink(missing_ok=True)
+    return False
 
 
 def render_paper_cover(root_dir: Path):
@@ -19,11 +71,11 @@ def render_paper_cover(root_dir: Path):
     cover_png_v5 = root_dir / "docs" / "paper_cover_v5.png"
 
     # If tex is newer than pdf or user specifies --compile, compile via pdflatex
-    should_compile = "--compile" in sys.argv
+    should_compile = "--compile" in sys.argv or not pdf_in_paper.exists()
     if should_compile and tex_path.exists():
         print(f"Compiling {tex_path.name} via pdflatex...")
         try:
-            for _ in range(2):
+            for pass_num in (1, 2):
                 subprocess.run(
                     ["pdflatex", "-interaction=nonstopmode", tex_path.name],
                     cwd=str(paper_dir),
@@ -32,14 +84,15 @@ def render_paper_cover(root_dir: Path):
                     stderr=subprocess.PIPE
                 )
             print("LaTeX compilation finished successfully (2 passes).")
+            # Distill to standard PDF 1.4 for universal viewer compatibility
+            distill_pdf_14(pdf_in_paper, pdf_in_paper)
         except Exception as err:
             print(f"LaTeX compilation warning: {err}")
 
     # Synchronize root PDF if paper/ PDF exists and is newer
     if pdf_in_paper.exists():
-        if not pdf_in_root.exists() or pdf_in_paper.stat().st_mtime >= pdf_in_root.stat().st_mtime:
-            shutil.copy2(pdf_in_paper, pdf_in_root)
-            print(f"Synchronized {pdf_in_paper} -> {pdf_in_root}")
+        shutil.copy2(pdf_in_paper, pdf_in_root)
+        print(f"Synchronized {pdf_in_paper} -> {pdf_in_root}")
     elif pdf_in_root.exists():
         shutil.copy2(pdf_in_root, pdf_in_paper)
         print(f"Synchronized {pdf_in_root} -> {pdf_in_paper}")
@@ -50,16 +103,12 @@ def render_paper_cover(root_dir: Path):
         return False
 
     import pymupdf
-    print(f"Opening {target_pdf.name} for cover rasterization and sanitization...")
+    print(f"Opening {target_pdf.name} for cover rasterization...")
     doc = pymupdf.open(str(target_pdf))
     if len(doc) == 0:
         print("ERROR: Document contains no pages.")
         doc.close()
         return False
-
-    # Sanitize and optimize the PDF to prevent GitHub's pdf.js "Invalid PDF" errors
-    temp_pdf = target_pdf.with_name(target_pdf.name + ".tmp")
-    doc.save(str(temp_pdf), garbage=4, deflate=True)
 
     page = doc[0]
     # Render at 300 DPI (zoom = 300 / 72 ≈ 4.166667)
@@ -72,14 +121,13 @@ def render_paper_cover(root_dir: Path):
     pix.save(str(cover_png_v5))
     doc.close()
 
-    # We will NOT overwrite the original PDF with the PyMuPDF version,
-    # as PyMuPDF's save function might be causing GitHub pdf.js compatibility issues.
-    
-    # Also sync the raw PDF back to the paper directory if needed
-    if target_pdf == pdf_in_root and pdf_in_paper.exists():
-        shutil.copy2(pdf_in_root, pdf_in_paper)
-    elif target_pdf == pdf_in_paper and pdf_in_root.exists():
-        shutil.copy2(pdf_in_paper, pdf_in_root)
+    # Clean up LaTeX auxiliary build files to keep the paper directory clean
+    for ext in ("aux", "log", "out", "bbl", "blg", "tmp", "toc"):
+        for f in paper_dir.glob(f"*.{ext}"):
+            try:
+                f.unlink()
+            except OSError:
+                pass
 
     print(f"Cover preview successfully generated: {pix.width}x{pix.height}px")
     print(f"  - {cover_png} ({cover_png.stat().st_size:,} bytes)")

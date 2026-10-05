@@ -309,7 +309,11 @@ MNIME includes a telemetry dashboard and benchmarking suite (`ui/nerds.py` & `be
 
 <p align="center">
   <a href="MNIME_Research_Paper.pdf">
-    <img src="https://img.shields.io/badge/Read%20the%20Research%20Paper-PDF-00e5ff?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="Read Research Paper PDF">
+    <img src="https://img.shields.io/badge/View%20in%20GitHub-PDF-00e5ff?style=for-the-badge&logo=github&logoColor=white" alt="View Research Paper on GitHub">
+  </a>
+  &nbsp;
+  <a href="https://raw.githubusercontent.com/kyledeanml/MNIME-Multimodal_Neural_Interface_Machine_Extension/main/MNIME_Research_Paper.pdf">
+    <img src="https://img.shields.io/badge/Direct%20Download-PDF-ff3366?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="Direct PDF Download">
   </a>
 </p>
 
