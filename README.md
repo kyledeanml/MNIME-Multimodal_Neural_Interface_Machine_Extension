@@ -230,8 +230,8 @@ MNIME/
 │   ├── paper_cover.png     # Research paper preview cover
 │   └── spec_cover.png      # Specification sheet preview cover
 ├── paper/                  # Research paper LaTeX source & PDF
-│   ├── MNIME_Research_Paper.pdf     # Compiled research paper
-│   ├── MNIME_Research_Paper.tex     # LaTeX manuscript source
+│   ├── MNIME_Whitepaper.pdf     # Compiled research paper
+│   ├── MNIME_Whitepaper.tex     # LaTeX manuscript source
 │   ├── acl.sty             # ACL formatting style sheet
 │   ├── acl_natbib.bst      # ACL bibliography style sheet
 │   ├── mnime_refs.bib      # Citation database
@@ -264,7 +264,7 @@ MNIME/
 ├── CHANGE_LOG.txt          # Comprehensive forensic build & session change log
 ├── MNIME_Architecture.pdf  # Interactive system architecture & schematics
 ├── MNIME_Change_Log.pdf    # Interactive compiled change log & build history
-├── MNIME_Research_Paper.pdf         # Research paper PDF
+├── MNIME_Whitepaper.pdf         # Research paper PDF
 ├── MNIME_Spec_Manual.pdf   # Specification & user manual PDF
 ├── MN.ico                  # Multi-resolution application icon
 ├── MNIME.py                # Application entry point
@@ -302,17 +302,17 @@ MNIME includes a telemetry dashboard and benchmarking suite (`ui/nerds.py` & `be
 ## Research Paper
 
 <p align="center">
-  <a href="MNIME_Research_Paper.pdf">
+  <a href="MNIME_Whitepaper.pdf">
     <img src="docs/paper_cover_v5.png?v=2" alt="MNIME Research Paper" width="480">
   </a>
 </p>
 
 <p align="center">
-  <a href="MNIME_Research_Paper.pdf">
+  <a href="MNIME_Whitepaper.pdf">
     <img src="https://img.shields.io/badge/View%20in%20GitHub-PDF-00e5ff?style=for-the-badge&logo=github&logoColor=white" alt="View Research Paper on GitHub">
   </a>
   &nbsp;
-  <a href="https://raw.githubusercontent.com/kyledeanml/MNIME-Multimodal_Neural_Interface_Machine_Extension/main/MNIME_Research_Paper.pdf">
+  <a href="https://raw.githubusercontent.com/kyledeanml/MNIME-Multimodal_Neural_Interface_Machine_Extension/main/MNIME_Whitepaper.pdf">
     <img src="https://img.shields.io/badge/Direct%20Download-PDF-ff3366?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="Direct PDF Download">
   </a>
 </p>

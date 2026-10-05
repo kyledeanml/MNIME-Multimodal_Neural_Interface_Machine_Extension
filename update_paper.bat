@@ -16,7 +16,7 @@ if not defined PYTHON_EXE set "PYTHON_EXE=python"
 if %errorlevel% equ 0 (
     echo.
     echo ========================================================
-    echo SUCCESS: MNIME_Research_Paper.pdf and docs\paper_cover_v5.png
+    echo SUCCESS: MNIME_Whitepaper.pdf and docs\paper_cover_v5.png
     echo have been successfully generated and synchronized.
     echo ========================================================
 ) else (

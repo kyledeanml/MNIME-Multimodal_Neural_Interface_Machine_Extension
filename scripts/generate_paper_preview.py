@@ -64,9 +64,9 @@ def distill_pdf_14(input_pdf: Path, output_pdf: Path) -> bool:
 
 def render_paper_cover(root_dir: Path):
     paper_dir = root_dir / "paper"
-    tex_path = paper_dir / "MNIME_Research_Paper.tex"
-    pdf_in_paper = paper_dir / "MNIME_Research_Paper.pdf"
-    pdf_in_root = root_dir / "MNIME_Research_Paper.pdf"
+    tex_path = paper_dir / "MNIME_Whitepaper.tex"
+    pdf_in_paper = paper_dir / "MNIME_Whitepaper.pdf"
+    pdf_in_root = root_dir / "MNIME_Whitepaper.pdf"
     cover_png = root_dir / "docs" / "paper_cover.png"
     cover_png_v5 = root_dir / "docs" / "paper_cover_v5.png"
 
@@ -99,7 +99,7 @@ def render_paper_cover(root_dir: Path):
 
     target_pdf = pdf_in_root if pdf_in_root.exists() else pdf_in_paper
     if not target_pdf.exists():
-        print(f"ERROR: Cannot find MNIME_Research_Paper.pdf in {root_dir} or {paper_dir}")
+        print(f"ERROR: Cannot find MNIME_Whitepaper.pdf in {root_dir} or {paper_dir}")
         return False
 
     import pymupdf
