@@ -1362,10 +1362,10 @@ class MainWindow(QMainWindow):
             base = os.environ.get("LOCALAPPDATA") or os.path.join(os.path.expanduser("~"), ".mnime")
             session_path = os.path.join(base, "MNIME", "session.json")
             os.makedirs(os.path.dirname(session_path), exist_ok=True)
-            paths = [os.path.abspath(f.file_path) for f in self.file_items]
+            # Dump the files when the program closes by not saving them to the session
             import json
             with open(session_path, "w", encoding="utf-8") as f:
-                json.dump({"files": paths}, f)
+                json.dump({"files": []}, f)
         except Exception as e:
             log.exception("Failed to save session: %s", e)
             
