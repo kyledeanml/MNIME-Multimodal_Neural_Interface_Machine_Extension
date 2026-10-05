@@ -65,3 +65,15 @@ def test_empty_pdf_handled(tmp_path):
     
     with pytest.raises(PDFInputError):
         open_pdf_checked(empty_pdf)
+
+def test_merge_pdfs_batched(dummy_pdf, tmp_path):
+    # Test batching logic (>250 items)
+    items = [FileItem(dummy_pdf) for _ in range(300)]
+    out_file = str(tmp_path / "merged_batched.pdf")
+    PDFEngine.combine_files(items, out_file)
+    
+    assert os.path.exists(out_file)
+    doc = pymupdf.open(out_file)
+    assert doc.page_count == 300
+    doc.close()
+

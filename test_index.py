@@ -8,9 +8,9 @@ from core.search_engine import SearchEngine
 from core.file_item import FileItem
 
 def test_index():
-    item = FileItem("test.txt", ".txt", "test")
     with open("test.txt", "w") as f:
         f.write("This is a test document for indexing.")
+    item = FileItem("test.txt")
         
     try:
         SearchEngine.build_index([item], use_smart_sampling=True)

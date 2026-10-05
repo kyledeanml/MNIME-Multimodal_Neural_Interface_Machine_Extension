@@ -1148,7 +1148,7 @@ class MainWindow(QMainWindow):
                 self.carousel.set_items(self.file_items)
                 self.action_bar.update_count(len(self.file_items))
                 
-            if len(self.file_items) >= self.MAX_FILE_LIMIT:
+            if (current_count + len(expanded_paths) > self.MAX_FILE_LIMIT) or (len(self.file_items) > self.MAX_FILE_LIMIT):
                 QMessageBox.information(
                     self,
                     "Batch Limit",

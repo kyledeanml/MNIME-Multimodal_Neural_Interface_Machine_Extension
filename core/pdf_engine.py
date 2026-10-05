@@ -57,54 +57,180 @@ class PDFEngine:
         total_items = len(file_items)
         os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
 
+        # Check NLP engine status
+        try:
+            from PyQt6.QtCore import QSettings
+            from core.nlp_engine import NLPEngine
+            settings = QSettings("MNIME", "MNIMEApp")
+            use_nlp = str(settings.value("nlp_smart_indexing", "true")).lower() == "true"
+            nlp_engine = NLPEngine.get_instance()
+            if use_nlp:
+                nlp_engine.check_model()
+            is_nlp_active = use_nlp and nlp_engine.is_loaded
+        except Exception:
+            is_nlp_active = False
+            nlp_engine = None
+
         # 1. Primary High-Speed Engine: PyMuPDF
         try:
             import pymupdf
+            import tempfile
 
-            merged_doc = pymupdf.open()
-            for idx, item in enumerate(file_items):
-                if progress_callback:
-                    pct = int((idx / total_items) * 90)
-                    progress_callback(pct, f"Merging {item.file_name} ({idx + 1}/{total_items})...")
+            BATCH_SIZE = 250
+            toc_entries = []
+            current_page_count = 1
 
-                ext = item.extension.lower()
-                if ext == ".pdf":
-                    sub_doc = open_pdf_checked(item.file_path)
-                    merged_doc.insert_pdf(sub_doc)
-                    sub_doc.close()
-                elif ext in [".jpg", ".jpeg", ".png", ".bmp", ".webp"]:
-                    img_doc = pymupdf.open(item.file_path)
-                    pdf_bytes = img_doc.convert_to_pdf()
-                    img_pdf = pymupdf.open("pdf", pdf_bytes)
-                    merged_doc.insert_pdf(img_pdf)
-                    img_pdf.close()
-                    img_doc.close()
-                elif ext == ".txt":
+            if total_items <= BATCH_SIZE:
+                merged_doc = pymupdf.open()
+                for idx, item in enumerate(file_items):
+                    if progress_callback:
+                        pct = int((idx / total_items) * 90)
+                        progress_callback(pct, f"Merging {item.file_name} ({idx + 1}/{total_items})...")
+
+                    start_page = len(merged_doc) + 1
+                    ext = item.extension.lower()
+                    if ext == ".pdf":
+                        sub_doc = open_pdf_checked(item.file_path)
+                        bm_title = item.file_name
+                        if is_nlp_active:
+                            try:
+                                first_page_txt = sub_doc[0].get_text("text").strip() if len(sub_doc) > 0 else ""
+                                smart_t = nlp_engine.generate_smart_filename(first_page_txt, item.file_name)
+                                if smart_t and smart_t != item.file_name:
+                                    bm_title = f"{item.file_name} ({smart_t})"
+                            except Exception:
+                                pass
+                        toc_entries.append([1, bm_title, start_page])
+                        merged_doc.insert_pdf(sub_doc)
+                        sub_doc.close()
+                    elif ext in [".jpg", ".jpeg", ".png", ".bmp", ".webp"]:
+                        img_doc = pymupdf.open(item.file_path)
+                        pdf_bytes = img_doc.convert_to_pdf()
+                        img_pdf = pymupdf.open("pdf", pdf_bytes)
+                        toc_entries.append([1, item.file_name, start_page])
+                        merged_doc.insert_pdf(img_pdf)
+                        img_pdf.close()
+                        img_doc.close()
+                    elif ext == ".txt":
+                        try:
+                            with open(item.file_path, "r", encoding="utf-8") as f:
+                                text_content = f.read()
+                        except UnicodeDecodeError:
+                            with open(item.file_path, "r", encoding="latin-1", errors="replace") as f:
+                                text_content = f.read()
+
+                        txt_pdf = pymupdf.open()
+                        lines = text_content.splitlines() or [""]
+                        lines_per_page = 45
+                        for chunk_start in range(0, len(lines), lines_per_page):
+                            page = txt_pdf.new_page()
+                            rect = pymupdf.Rect(50, 50, page.rect.width - 50, page.rect.height - 50)
+                            chunk_text = "\n".join(lines[chunk_start:chunk_start + lines_per_page])
+                            page.insert_textbox(rect, chunk_text, fontsize=11, fontname="helv")
+                        
+                        toc_entries.append([1, item.file_name, start_page])
+                        merged_doc.insert_pdf(txt_pdf)
+                        txt_pdf.close()
+
+                if toc_entries:
                     try:
-                        with open(item.file_path, "r", encoding="utf-8") as f:
-                            text_content = f.read()
-                    except UnicodeDecodeError:
-                        with open(item.file_path, "r", encoding="latin-1", errors="replace") as f:
-                            text_content = f.read()
+                        merged_doc.set_toc(toc_entries)
+                    except Exception:
+                        pass
 
-                    txt_pdf = pymupdf.open()
-                    lines = text_content.splitlines()
-                    if not lines:
-                        lines = [""]
-                    lines_per_page = 45
-                    for chunk_start in range(0, len(lines), lines_per_page):
-                        page = txt_pdf.new_page()
-                        rect = pymupdf.Rect(50, 50, page.rect.width - 50, page.rect.height - 50)
-                        chunk_text = "\n".join(lines[chunk_start:chunk_start + lines_per_page])
-                        page.insert_textbox(rect, chunk_text, fontsize=11, fontname="helv")
-                    merged_doc.insert_pdf(txt_pdf)
-                    txt_pdf.close()
+                if progress_callback:
+                    progress_callback(95, "Compacting and saving document...")
 
-            if progress_callback:
-                progress_callback(95, "Compacting and saving document...")
+                merged_doc.save(output_path, garbage=3, deflate=True)
+                merged_doc.close()
 
-            merged_doc.save(output_path, garbage=3, deflate=True)
-            merged_doc.close()
+            else:
+                # High-Volume Batch Processing (prevents RAM/handle exhaustion on 1000s of files)
+                temp_chunks = []
+                with tempfile.TemporaryDirectory(prefix="mnime_merge_batch_") as tmp_dir:
+                    for batch_start in range(0, total_items, BATCH_SIZE):
+                        batch_items = file_items[batch_start:batch_start + BATCH_SIZE]
+                        chunk_doc = pymupdf.open()
+
+                        for idx_in_batch, item in enumerate(batch_items):
+                            global_idx = batch_start + idx_in_batch
+                            if progress_callback:
+                                pct = int((global_idx / total_items) * 85)
+                                progress_callback(pct, f"Merging {item.file_name} ({global_idx + 1}/{total_items})...")
+
+                            ext = item.extension.lower()
+                            if ext == ".pdf":
+                                sub_doc = open_pdf_checked(item.file_path)
+                                bm_title = item.file_name
+                                if is_nlp_active:
+                                    try:
+                                        first_page_txt = sub_doc[0].get_text("text").strip() if len(sub_doc) > 0 else ""
+                                        smart_t = nlp_engine.generate_smart_filename(first_page_txt, item.file_name)
+                                        if smart_t and smart_t != item.file_name:
+                                            bm_title = f"{item.file_name} ({smart_t})"
+                                    except Exception:
+                                        pass
+                                toc_entries.append([1, bm_title, current_page_count])
+                                current_page_count += len(sub_doc)
+                                chunk_doc.insert_pdf(sub_doc)
+                                sub_doc.close()
+                            elif ext in [".jpg", ".jpeg", ".png", ".bmp", ".webp"]:
+                                img_doc = pymupdf.open(item.file_path)
+                                pdf_bytes = img_doc.convert_to_pdf()
+                                img_pdf = pymupdf.open("pdf", pdf_bytes)
+                                toc_entries.append([1, item.file_name, current_page_count])
+                                current_page_count += len(img_pdf)
+                                chunk_doc.insert_pdf(img_pdf)
+                                img_pdf.close()
+                                img_doc.close()
+                            elif ext == ".txt":
+                                try:
+                                    with open(item.file_path, "r", encoding="utf-8") as f:
+                                        text_content = f.read()
+                                except UnicodeDecodeError:
+                                    with open(item.file_path, "r", encoding="latin-1", errors="replace") as f:
+                                        text_content = f.read()
+
+                                txt_pdf = pymupdf.open()
+                                lines = text_content.splitlines() or [""]
+                                lines_per_page = 45
+                                for chunk_start_line in range(0, len(lines), lines_per_page):
+                                    page = txt_pdf.new_page()
+                                    rect = pymupdf.Rect(50, 50, page.rect.width - 50, page.rect.height - 50)
+                                    chunk_text = "\n".join(lines[chunk_start_line:chunk_start_line + lines_per_page])
+                                    page.insert_textbox(rect, chunk_text, fontsize=11, fontname="helv")
+                                
+                                toc_entries.append([1, item.file_name, current_page_count])
+                                current_page_count += len(txt_pdf)
+                                chunk_doc.insert_pdf(txt_pdf)
+                                txt_pdf.close()
+
+                        chunk_path = os.path.join(tmp_dir, f"chunk_{batch_start // BATCH_SIZE}.pdf")
+                        chunk_doc.save(chunk_path, garbage=3, deflate=True)
+                        chunk_doc.close()
+                        temp_chunks.append(chunk_path)
+
+                    # Final Assembly Pass
+                    final_doc = pymupdf.open()
+                    for c_idx, c_path in enumerate(temp_chunks):
+                        if progress_callback:
+                            pct = 85 + int(((c_idx + 1) / len(temp_chunks)) * 10)
+                            progress_callback(pct, f"Assembling batch segment {c_idx + 1}/{len(temp_chunks)}...")
+                        c_doc = pymupdf.open(c_path)
+                        final_doc.insert_pdf(c_doc)
+                        c_doc.close()
+
+                    if toc_entries:
+                        try:
+                            final_doc.set_toc(toc_entries)
+                        except Exception:
+                            pass
+
+                    if progress_callback:
+                        progress_callback(98, "Saving final merged document...")
+
+                    final_doc.save(output_path, garbage=3, deflate=True)
+                    final_doc.close()
 
             if progress_callback:
                 progress_callback(100, f"Finished! Merged {total_items} files.")
