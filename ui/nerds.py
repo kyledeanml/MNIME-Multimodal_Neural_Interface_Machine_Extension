@@ -525,13 +525,12 @@ class StatsBenchmarkWorker(QThread):
         os.environ.setdefault("TQDM_DISABLE", "1")
         os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
         try:
-            from core.search_engine import get_embedding_model_path, SearchEngine
-            from langchain_community.vectorstores import FAISS
+            from core.search_engine import get_embedding_model_path, SearchEngine, VectorStore
 
             emb_path = get_embedding_model_path()
             self.log_message.emit(f"Loading local embedding model: {os.path.basename(emb_path)}...", "INFO")
             t_load = time.time()
-            embeddings = SearchEngine.get_embeddings()
+            embeddings_model = SearchEngine.get_embeddings()
             self.log_message.emit(f"Embedding model ready in {time.time() - t_load:.2f}s", "SUCCESS")
         except Exception as e:
             self.log_message.emit(f"Vector search engine error: {e}", "ERROR")
@@ -555,7 +554,11 @@ class StatsBenchmarkWorker(QThread):
 
         t_index = time.time()
         try:
-            vectorstore = FAISS.from_texts(test_corpus, embeddings)
+            embeddings_res = embeddings_model.create_embedding(test_corpus)
+            embeddings = [e["embedding"] for e in embeddings_res["data"]]
+            vectorstore = VectorStore(dim=len(embeddings[0]))
+            final_docs = [{"content": c, "source": "benchmark"} for c in test_corpus]
+            vectorstore.add_documents(final_docs, embeddings)
             index_sec = time.time() - t_index
             self.log_message.emit(f"FAISS vectorstore built: {len(test_corpus)} vectors indexed in {index_sec:.3f}s", "SUCCESS")
         except Exception as e:

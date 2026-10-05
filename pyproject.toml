@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MNIME-desktop"
-version = "1.0.0"
+version = "5.0.0"
 
 description = "MNIME - Native, high-performance offline document suite"
 readme = "README.md"
@@ -17,9 +17,7 @@ dependencies = [
     "pymupdf>=1.23.0",
     "numpy==2.5.3",
     "llama-cpp-python>=0.2.75",
-    "sentence-transformers",
     "faiss-cpu",
-    "langchain",
     "pandas",
     "torch==2.14.1",
     "pywin32",

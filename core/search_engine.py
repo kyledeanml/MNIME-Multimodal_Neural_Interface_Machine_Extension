@@ -87,8 +87,9 @@ def simple_text_split(text: str, chunk_size: int = 1500, chunk_overlap: int = 20
             if break_idx > chunk_size // 2:
                 chunk = text[i:i+break_idx+1]
         chunks.append(chunk)
-        i += len(chunk) - chunk_overlap
-        if i < 0: i = 0
+        if i + len(chunk) >= len(text):
+            break
+        i += max(1, len(chunk) - chunk_overlap)
     return chunks
 
 class SearchEngine:

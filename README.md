@@ -29,6 +29,10 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
   <a href="MNIME_Spec_Manual.pdf">
     <img src="https://img.shields.io/badge/View%20Full%20Spec%20%26%20Manual-PDF-00e5ff?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="View Spec Sheet PDF">
   </a>
+  &nbsp;
+  <a href="https://raw.githubusercontent.com/kyledeanml/MNIME-Multimodal_Neural_Interface_Machine_Extension/main/MNIME_Spec_Manual.pdf">
+    <img src="https://img.shields.io/badge/Direct%20Download-PDF-ff3366?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="Direct PDF Download">
+  </a>
 </p>
 
 > **Specification Sheet & User Manual** — 14 sections covering all features, technical specs, architecture, NLP engine details, UI guide, installation, keyboard shortcuts, performance notes, dependency stack, error handling, and changelog.
@@ -176,6 +180,10 @@ build_app.bat
 <p align="center">
   <a href="MNIME_Architecture.pdf">
     <img src="https://img.shields.io/badge/View%20Full%20Architecture%20%26%20Schematics-PDF-00e5ff?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="View Architecture PDF">
+  </a>
+  &nbsp;
+  <a href="https://raw.githubusercontent.com/kyledeanml/MNIME-Multimodal_Neural_Interface_Machine_Extension/main/MNIME_Architecture.pdf">
+    <img src="https://img.shields.io/badge/Direct%20Download-PDF-ff3366?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="Direct PDF Download">
   </a>
 </p>
 
@@ -332,6 +340,10 @@ MNIME includes a telemetry dashboard and benchmarking suite (`ui/nerds.py` & `be
 <p align="center">
   <a href="MNIME_Change_Log.pdf">
     <img src="https://img.shields.io/badge/View%20Full%20Change%20Log-PDF-00e5ff?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="View Change Log PDF">
+  </a>
+  &nbsp;
+  <a href="https://raw.githubusercontent.com/kyledeanml/MNIME-Multimodal_Neural_Interface_Machine_Extension/main/MNIME_Change_Log.pdf">
+    <img src="https://img.shields.io/badge/Direct%20Download-PDF-ff3366?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="Direct PDF Download">
   </a>
 </p>
 
