@@ -292,6 +292,27 @@ def send_to_existing_instance(file_paths: list) -> bool:
         return True
     return False
 
+class KeepAliveWindow(QWidget):
+    """
+    A 1x1 pixel, transparent, borderless window placed off-screen.
+    This prevents Windows Task Manager from treating MNIME strictly as a 
+    background process and dumping it into Efficiency Mode when the main window is hidden.
+    This ensures MNIME stays in the 'Apps' list and runs at its normal smooth speed.
+    """
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("MNIME Engine")
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.SplashScreen |
+            Qt.WindowType.WindowTransparentForInput
+        )
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        self.setFixedSize(1, 1)
+        self.setWindowOpacity(0.0)
+        self.move(-10000, -10000)
+
 def main():
     # Enable high-DPI scaling
     QApplication.setHighDpiScaleFactorRoundingPolicy(
@@ -413,6 +434,10 @@ def main():
 
         splash._animation.finished.connect(on_fade_finished)
         QTimer.singleShot(3500, splash._animation.start)
+
+    # Initialize the KeepAliveWindow to prevent OS power throttling
+    app.keep_alive = KeepAliveWindow()
+    app.keep_alive.show()
 
     sys.exit(app.exec())
 
