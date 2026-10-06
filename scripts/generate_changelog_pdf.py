@@ -257,7 +257,7 @@ class CoverPage(Flowable):
             ("Author & Lead:", "Kyle Bauer / kyledeanml (Bellevue College AISD)"),
             ("Primary Engine:", "PyQt6 / PyMuPDF / llama.cpp (MNIME-Core V5 GGUF)"),
             ("Packaging:", "PyInstaller (Modern Animated)"),
-            ("Source Dataset:", "IDE Logs, Git Commits (289+), Transcripts & Pytest Suite"),
+            ("Source Dataset:", "IDE Logs (95+), Git Commits (289+), Transcripts & Pytest Suite"),
             ("Generation Source:", f"Dynamic Artifact generated from CHANGE_LOG.txt")
         ]
 
