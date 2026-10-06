@@ -45,6 +45,7 @@ paper/
 *.png
 !MNIME_reimagined_alpha.png
 !docs/*.png
+!docs/*.jpg
 *_bookmarked.pdf
 *_compressed.pdf
 *_merged.pdf

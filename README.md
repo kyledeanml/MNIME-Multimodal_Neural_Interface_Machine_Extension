@@ -234,6 +234,7 @@ MNIME/
 ├── docs/                   # Media & cover artwork assets
 │   ├── architecture_cover.png # System Architecture preview cover
 │   ├── changelog_cover.png # Interactive change log preview cover
+│   ├── neural_interface_avatar.jpg # Neural Interface visual artwork
 │   ├── paper_cover.png     # Research paper preview cover
 │   └── spec_cover.png      # Specification sheet preview cover
 ├── paper/                  # Research paper LaTeX source & PDF
@@ -353,6 +354,16 @@ MNIME includes a telemetry dashboard and benchmarking suite (`ui/nerds.py` & `be
 ## License
 
 Distributed under the MIT License. See [`LICENSE`](LICENSE) for complete licensing terms.
+
+---
+
+<p align="center">
+  <img src="docs/neural_interface_avatar.jpg" alt="MNIME Neural Interface" width="500">
+</p>
+
+<p align="center">
+  <em>Multimodal Neural Interface Machine Extension</em>
+</p>
 
 ---
 *Special thanks to the Antigravity team at Google*
