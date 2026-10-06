@@ -951,3 +951,13 @@ END OF CHANGE LOG - MNIME v5.0 RELEASE BUILD
 - Lazily initialized particle overlays and NLP windows in MainWindow to drastically improve startup time and save ~200MB initial memory.
 - Developed native C# tray stub (mnime_tray.exe, 64KB) to act as a 1MB memory-resident launcher.
 - Added managed-mode (--managed) IPC support for complete process termination when hidden for 10 minutes (saving 100% RAM/VRAM), with persistent file queues saved to session.json.
+
+[2026-10-05 to 2026-10-06] Session 30: High-Performance PDF Engine, UI Controls, & Documentation Overhaul
+- Core PDF Engine: Added a high-performance incremental saving architecture and comprehensive document merging capabilities.
+- Test Suite Expansion: Implemented rigorous unit tests and benchmarks for large-scale PDF merging (test_large_merge.py, test_index.py) to validate performance at scale.
+- User Interface Integration: Finalized the main application window with robust file management, drag-and-drop support, and interactive UI controls.
+- Whitepaper Integration: Authored, compiled, and integrated the official MNIME Whitepaper (MNIME_Whitepaper.tex and PDF). The whitepaper provides deep architectural, neural, and mathematical documentation.
+- Documentation Refinements: Refined phonetic pronunciation guidelines ("nigh.mh") across the README and whitepaper, and removed deprecated references (e.g., "Dean Bauer Merge").
+- Requirements Clarification: Updated system requirements to specify explicit testing and support for Windows 10/11 environments exclusively.
+- Architecture Changes: Removed the legacy native managed tray architecture in favor of a modernized optimization plan PDF generator.
+- Visual Assets: Added the neural interface avatar image to documentation assets and synchronized documentation generation via updated batch scripts.
