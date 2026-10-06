@@ -79,6 +79,17 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
 
 ---
 
+## Phase 6 Roadmap: Deep Semantic Integration
+
+We are currently embarking on a new phase to deeply integrate the `MNIME-Core` NLP engine into the core document manipulation tools, moving beyond the isolated chat interface. The proposed pipeline includes:
+
+1. **Semantic Document Splitting**: Using NLP to detect topic boundaries and segment large PDFs automatically, classifying documents by type (e.g., separating contracts from invoices).
+2. **Enhanced "Smart" Bookmarking**: Upgrading the heuristic bookmarking engine to semantically summarize sections into concise titles and generate bookmark hierarchies from extracted entities (e.g., names, dates, companies).
+3. **NLP-Augmented Document Viewer**: Embedding context menu actions directly into the reader (e.g., highlight and right-click to summarize/explain) and supporting semantic highlighting (query-driven visual bounding boxes on the PDF canvas).
+4. **Intelligent Merging & Synthesis**: Injecting NLP into the merge pipeline to automatically generate executive summary cover pages and context-aware filenames for merged outputs.
+
+---
+
 ## Fine-Tuned NLP Model — MNIME-Core
 
 `MNIME-Core-V5-Q4_K_M.gguf` is an advanced multi-stage aligned model derived from `Qwen2.5-1.5B-Instruct`, specialized for high-density document synthesis, cross-referencing, philosophical reasoning, and empathetic anti-bias dialogue.

@@ -978,3 +978,9 @@ Recent Commits (Git History Trace):
   0733f4d feat: add high-performance PDF engine and main window UI for document processing
   79f9604 docs: add MNIME whitepaper PDF
   8a68e3f feat: add initial latex whitepaper and compiled pdf for MNIME project
+
+[2026-10-06] Session 31 (Planning Phase): Deep Semantic Integration Roadmap
+- Drafted comprehensive architecture plans for deeply integrating the MNIME-Core NLP engine into the core document manipulation tools.
+- Set up isolated workspaces (`nlp_integration/`) for semantic document splitting, enhanced smart bookmarking, and an NLP-augmented document viewer.
+- Updated README.md and MNIME_Whitepaper.tex to publicly document the upcoming deep semantic integration phase.
+- Established scaffolding for Human-in-the-Loop (HITL) developer contributions.
