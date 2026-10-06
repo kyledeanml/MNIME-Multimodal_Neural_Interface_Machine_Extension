@@ -252,12 +252,29 @@ class CoverPage(Flowable):
         c.setFillColor(WHITE)
         c.drawString(card_x + 80, card_y + card_h - 18, "Production Release Ready  |  Windows 11 (x64)")
 
+        # Dynamically calculate commit count and IDE log count
+        import subprocess
+        import os
+        try:
+            commit_count = subprocess.check_output(["git", "rev-list", "--count", "HEAD"], stderr=subprocess.DEVNULL).decode("utf-8").strip()
+        except Exception:
+            commit_count = "289"
+            
+        try:
+            brain_path = os.path.join(os.path.expanduser("~"), ".gemini", "antigravity-ide", "brain")
+            if os.path.exists(brain_path):
+                ide_count = str(len([d for d in os.listdir(brain_path) if os.path.isdir(os.path.join(brain_path, d))]))
+            else:
+                ide_count = "95"
+        except Exception:
+            ide_count = "95"
+
         # Metadata rows
         meta_items = [
             ("Author & Lead:", "Kyle Bauer / kyledeanml (Bellevue College AISD)"),
             ("Primary Engine:", "PyQt6 / PyMuPDF / llama.cpp (MNIME-Core V5 GGUF)"),
             ("Packaging:", "PyInstaller (Modern Animated)"),
-            ("Source Dataset:", "IDE Logs (95+), Git Commits (289+), Transcripts & Pytest Suite"),
+            ("Source Dataset:", f"IDE Logs ({ide_count}+), Git Commits ({commit_count}+), Transcripts & Pytest Suite"),
             ("Generation Source:", f"Dynamic Artifact generated from CHANGE_LOG.txt")
         ]
 
