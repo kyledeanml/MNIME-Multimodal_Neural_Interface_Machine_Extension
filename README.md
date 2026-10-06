@@ -3,7 +3,7 @@
 </p>
 
 <p align="center"><strong>MULTIMODAL NEURAL INTERFACE MACHINE EXTENSION</strong></p>
-<p align="center"><em><font face="Brush Script MT, Segoe Script, cursive" color="#00e5ff" size="4">nigh.me</font></em></p>
+<p align="center"><em><font face="Brush Script MT, Segoe Script, cursive" color="#00e5ff" size="4">nigh.mh</font></em></p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-00e5ff.svg?style=flat-square" alt="License"></a>
