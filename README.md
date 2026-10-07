@@ -376,8 +376,6 @@ Distributed under the MIT License. See [`LICENSE`](LICENSE) for complete licensi
 
 ---
 
-## Air-Gap Salvage
-
 <p align="center">
   <a href="Air-Gap%20Salvage.pdf">
     <img src="docs/airgap_salvage_cover.png?v=1" alt="Air-Gap Salvage - Field Service Record" width="480">
