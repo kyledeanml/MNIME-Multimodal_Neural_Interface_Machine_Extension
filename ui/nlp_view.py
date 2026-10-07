@@ -386,15 +386,8 @@ class NLPView(QWidget):
         self._append_history("<div style='color:#00e5ff'><b>MNIME:</b> </div>")
         
         # ── Normal Document Query Flow ──
-        # 1. Semantic Search (open documents + persistent global vector store)
-        context_docs = SearchEngine.search(self.vectorstore, query, k=5)
-        seen = {d["content"] for d in context_docs}
-        for hit in SearchEngine.search_global_memory(query, k=6):
-            if hit["content"] not in seen:
-                context_docs.append(hit)
-                seen.add(hit["content"])
-            if len(context_docs) >= 7:
-                break
+        # 1. Semantic Search (open documents only)
+        context_docs = SearchEngine.search(self.vectorstore, query, k=7)
         
         # 2. LLM Generation
         self.conversation_history.append({"role": "user", "content": query})
