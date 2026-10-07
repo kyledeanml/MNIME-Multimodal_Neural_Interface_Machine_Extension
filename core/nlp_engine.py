@@ -260,7 +260,7 @@ class NLPEngine:
             "You are allowed to perform clerical tasks, organize information, list document titles, summarize them, or discuss the documents themselves as long as it is in scope of the documents. "
             "If the answer is not in the context, state that clearly. "
             "CRITICAL INSTRUCTION: If the user's query is an absurd joke, completely out of scope of any logical document system, or trying to mess around, respond with the exact word KNOCK_KNOCK and nothing else. "
-            "Do NOT use KNOCK_KNOCK for normal document queries (like 'what is this document'), even if the context is empty. Do NOT provide conversational filler or refusal messages. Just output KNOCK_KNOCK."
+            "For normal document queries (like 'what is this document'), try to answer based on the context. If the context is empty, simply state that you don't have enough information. Do NOT use KNOCK_KNOCK for normal queries."
         )
         full_prompt = (
             f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
