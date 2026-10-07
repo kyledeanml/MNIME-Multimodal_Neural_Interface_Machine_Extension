@@ -362,19 +362,10 @@ MNIME includes a telemetry dashboard and benchmarking suite (`ui/nerds.py` & `be
 
 > **MNIME Build Process & Change Log** — The complete engineering lifecycle from initial repository genesis through 5D vector mathematics, local neural engine integration, standalone custom animated PyQt6 installer packaging, and forensic IDE conversation sessions.
 
----
 
-## License
-
-Distributed under the MIT License. See [`LICENSE`](LICENSE) for complete licensing terms.
 
 ---
 
-<p align="center">
-  <img src="docs/neural_interface_avatar.jpg" alt="MNIME Neural Interface" width="500">
-</p>
-
----
 
 <p align="center">
   <a href="Air-Gap%20Salvage.pdf">
@@ -382,22 +373,22 @@ Distributed under the MIT License. See [`LICENSE`](LICENSE) for complete licensi
   </a>
 </p>
 
+---
+
+
+
+
+
 <p align="center">
-  <a href="Air-Gap%20Salvage.pdf">
-    <img src="https://img.shields.io/badge/View%20Air--Gap%20Salvage-PDF-00e5ff?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="View Air-Gap Salvage PDF">
-  </a>
-  &nbsp;
-  <a href="https://raw.githubusercontent.com/kyledeanml/MNIME-Multimodal_Neural_Interface_Machine_Extension/main/Air-Gap%20Salvage.pdf">
-    <img src="https://img.shields.io/badge/Direct%20Download-PDF-ff3366?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="Direct PDF Download">
-  </a>
+  <img src="docs/neural_interface_avatar.jpg" alt="MNIME Neural Interface" width="500">
 </p>
 
-> **Air-Gap Salvage — Field Service Record** — Archival field service record and sub-canal repair narrative (MNIME-75 Edge Mod-C, Year 2075). Chronicles off-grid machine extension servicing in the Lower Basin drainage flats, telemetry bus stabilization, recursive context recovery, and zero-cloud local neural inference behind the walk-in cold box.
 
----
 
 <p align="center">
   <em>Multimodal Neural Interface Machine Extension</em>
 </p>
 
 ---
+
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for complete licensing terms.
