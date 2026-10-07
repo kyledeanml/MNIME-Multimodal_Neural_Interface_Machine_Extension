@@ -246,7 +246,7 @@ class NLPEngine:
         )
         full_prompt = (
             f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
-            f"<|im_start|>user\nCONTEXT:\n{context_text}\n\nQUERY: {sanitize_prompt_text(prompt, 4000)}<|im_end|>\n"
+            f"<|im_start|>user\nCONTEXT:\n{context_text}\n\nQUERY: {sanitize_prompt_text(prompt, 1000)}<|im_end|>\n"
             f"<|im_start|>assistant\n"
         )
         try:
@@ -272,7 +272,7 @@ class NLPEngine:
         )
         full_prompt = (
             f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
-            f"<|im_start|>user\nCONTEXT:\n{context_text}\n\nQUERY: {sanitize_prompt_text(prompt, 4000)}<|im_end|>\n"
+            f"<|im_start|>user\nCONTEXT:\n{context_text}\n\nQUERY: {sanitize_prompt_text(prompt, 1000)}<|im_end|>\n"
             f"<|im_start|>assistant\n"
         )
         try:
@@ -310,7 +310,7 @@ class NLPEngine:
         full_prompt = (
             f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
             f"<|im_start|>user\nOTHER DOCUMENTS CONTEXT:\n{context_text}\n\n"
-            f"HIGHLIGHTED SOURCE TEXT:\n{sanitize_prompt_text(source_text, 4000)}<|im_end|>\n"
+            f"HIGHLIGHTED SOURCE TEXT:\n{sanitize_prompt_text(source_text, 1500)}<|im_end|>\n"
             f"<|im_start|>assistant\nCOMPARATIVE BRIEF:\n"
         )
         try:

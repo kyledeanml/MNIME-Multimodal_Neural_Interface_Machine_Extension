@@ -11,7 +11,7 @@ _WIN_RESERVED = {
     *(f"LPT{i}" for i in range(1, 10)),
 }
 
-MAX_CONTEXT_CHARS = 12000  # Hard cap on document text placed in a single prompt
+MAX_CONTEXT_CHARS = 8000  # Hard cap on document text placed in a single prompt
 
 
 def sanitize_prompt_text(text: str, limit: int = MAX_CONTEXT_CHARS) -> str:
