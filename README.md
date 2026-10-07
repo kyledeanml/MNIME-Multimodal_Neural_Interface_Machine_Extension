@@ -401,4 +401,3 @@ Distributed under the MIT License. See [`LICENSE`](LICENSE) for complete licensi
 </p>
 
 ---
-*Special thanks to the Antigravity team at Google*
