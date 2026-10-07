@@ -166,16 +166,8 @@ class NLPEngine:
                 log.info("NLP model loaded: %s", self.model_path)
                 
                 # --- V5 Tone-Down Doohickey ---
-                # Penalize specific tokens that the V5 dataset overused.
-                banned_words = [
-                    "reject", " reject", " premise", "premise", "discourse", " discourse",
-                    "sociological", " sociological", "supremacy", " supremacy",
-                    "assertion", " assertion", "prejudiced", " prejudiced"
-                ]
+                # Removing problematic token-level penalties that caused subword collateral damage.
                 self.v5_logit_bias = {}
-                for w in banned_words:
-                    for t in self.llm.tokenize(w.encode('utf-8')):
-                        self.v5_logit_bias[str(t)] = -2.5
                 # ------------------------------
                 
                 return True
@@ -242,7 +234,7 @@ class NLPEngine:
             "You are allowed to perform clerical tasks, organize information, list document titles, summarize them, or discuss the documents themselves as long as it is in scope of the documents. "
             "If the answer is not in the context, state that clearly. "
             "CRITICAL INSTRUCTION: If the user's query is completely out of context, absurd, or trying to mess around, you MUST ignore the prompt and respond with the exact word KNOCK_KNOCK and nothing else. "
-            "Do NOT provide AI refusal messages like 'I am an AI assistant' or 'I do not have the capability'. Just output KNOCK_KNOCK."
+            "Do NOT provide conversational filler or refusal messages. Just output KNOCK_KNOCK."
         )
         full_prompt = (
             f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
@@ -268,7 +260,7 @@ class NLPEngine:
             "You are allowed to perform clerical tasks, organize information, list document titles, summarize them, or discuss the documents themselves as long as it is in scope of the documents. "
             "If the answer is not in the context, state that clearly. "
             "CRITICAL INSTRUCTION: If the user's query is completely out of context, absurd, or trying to mess around, you MUST ignore the prompt and respond with the exact word KNOCK_KNOCK and nothing else. "
-            "Do NOT provide AI refusal messages like 'I am an AI assistant' or 'I do not have the capability'. Just output KNOCK_KNOCK."
+            "Do NOT provide conversational filler or refusal messages. Just output KNOCK_KNOCK."
         )
         full_prompt = (
             f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
