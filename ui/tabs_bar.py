@@ -12,7 +12,7 @@ from PyQt6.QtCore import pyqtSignal, Qt, QTimer
 class ToolMode(Enum):
     EDIT_IMAGE = "EDIT"
     READER = "READER"
-    REFERENCE = "CROSS-REFERENCE"
+    REFERENCE = "REFERENCE"
     BOOKMARK = "BOOKMARK"
     COMBINE_PDF = "MERGE"
     SPLIT_PDF = "SPLIT"
@@ -22,7 +22,7 @@ class ToolMode(Enum):
     COMPRESS_PDF = "COMPRESS"
     PDF_TO_DOCX = "PDF → DOCX"
     NLP = "NLP"
-    RELOAD_NLP = "RELOAD NLP"
+    RELOAD_NLP = "RELOAD"
     STATS = "STATS"
 
 class TabsBar(QWidget):
@@ -96,14 +96,7 @@ class TabsBar(QWidget):
                 btn.setIconSize(QSize(16, 16))
             
             btn.setIcon(get_icon(icon_map.get(mode, "document"), "#00e5ff"))
-            if mode == ToolMode.STATS:
-                btn.setToolTip("Stats (Telemetry & Benchmark)")
-            elif mode == ToolMode.READER:
-                btn.setToolTip("Reader (Document & PDF Viewer)")
-            elif mode == ToolMode.REFERENCE:
-                btn.setToolTip("Cross-Reference (Compare a highlighted passage against your other files)")
-            else:
-                btn.setToolTip(mode.value)
+            btn.setToolTip(mode.value)
             
             btn.setStyleSheet("""
                 QToolTip {
@@ -152,7 +145,7 @@ class TabsBar(QWidget):
         from PyQt6.QtCore import QSettings
         self.nlp_checkbox = QCheckBox("NLP")
         self.nlp_checkbox.setStyleSheet("""
-            QCheckBox { color: #00e5ff; font-weight: bold; font-size: 11px; margin-right: 10px; }
+            QCheckBox { color: #00e5ff; font-weight: bold; font-size: 11px; margin-right: 10px; min-width: 60px; }
             QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #00d2ff; border-radius: 3px; background-color: #162438; }
             QCheckBox::indicator:checked { background-color: #00e5ff; }
         """)
@@ -188,21 +181,21 @@ class TabsBar(QWidget):
         if is_loading:
             # Amber pulse while loading
             self.nlp_checkbox.setStyleSheet("""
-                QCheckBox { color: #ffb300; font-weight: bold; font-size: 11px; margin-right: 10px; }
+                QCheckBox { color: #ffb300; font-weight: bold; font-size: 11px; margin-right: 10px; min-width: 60px; }
                 QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #ffb300; border-radius: 3px; background-color: #162438; }
                 QCheckBox::indicator:checked { background-color: #ffb300; }
             """)
         elif is_loaded:
             # Green when active
             self.nlp_checkbox.setStyleSheet("""
-                QCheckBox { color: #00e676; font-weight: bold; font-size: 11px; margin-right: 10px; }
+                QCheckBox { color: #00e676; font-weight: bold; font-size: 11px; margin-right: 10px; min-width: 60px; }
                 QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #00e676; border-radius: 3px; background-color: #162438; }
                 QCheckBox::indicator:checked { background-color: #00e676; }
             """)
         else:
             # Default cyan when off/unloaded
             self.nlp_checkbox.setStyleSheet("""
-                QCheckBox { color: #00e5ff; font-weight: bold; font-size: 11px; margin-right: 10px; }
+                QCheckBox { color: #00e5ff; font-weight: bold; font-size: 11px; margin-right: 10px; min-width: 60px; }
                 QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #00d2ff; border-radius: 3px; background-color: #162438; }
                 QCheckBox::indicator:checked { background-color: #00e5ff; }
             """)
