@@ -36,6 +36,9 @@ V4_FINISH_GUIDE.txt
 !MNIME_Research_Paper.pdf
 !MNIME_Change_Log.pdf
 !MNIME_Architecture.pdf
+!MNIME_Whitepaper.pdf
+!Air-Gap Salvage.pdf
+
 
 # Paper source — compiled PDF lives at root; exclude the LaTeX workspace
 paper/

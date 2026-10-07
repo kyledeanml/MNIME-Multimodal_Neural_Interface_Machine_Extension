@@ -243,6 +243,7 @@ MNIME/
 │   ├── nerds.py            # Real-time telemetry & performance HUD
 │   └── tabs_bar.py         # Application navigation bar
 ├── docs/                   # Media & cover artwork assets
+│   ├── airgap_salvage_cover.png # Air-Gap Salvage field log preview cover
 │   ├── architecture_cover.png # System Architecture preview cover
 │   ├── changelog_cover.png # Interactive change log preview cover
 │   ├── neural_interface_avatar.jpg # Neural Interface visual artwork
@@ -280,6 +281,7 @@ MNIME/
 │   ├── mnime_v5_antibias_dataset_clean.jsonl
 │   ├── train_mnime.py
 │   └── v4_out/             # Merged fp16 HF weights, F16 GGUF & Q8_0 GGUF
+├── Air-Gap Salvage.pdf     # Field service record & sub-canal repair narrative
 ├── CHANGE_LOG.txt          # Comprehensive forensic build & session change log
 ├── MNIME_Architecture.pdf  # Interactive system architecture & schematics
 ├── MNIME_Change_Log.pdf    # Interactive compiled change log & build history
@@ -371,6 +373,30 @@ Distributed under the MIT License. See [`LICENSE`](LICENSE) for complete licensi
 <p align="center">
   <img src="docs/neural_interface_avatar.jpg" alt="MNIME Neural Interface" width="500">
 </p>
+
+---
+
+## Air-Gap Salvage
+
+<p align="center">
+  <a href="Air-Gap%20Salvage.pdf">
+    <img src="docs/airgap_salvage_cover.png?v=1" alt="Air-Gap Salvage - Field Service Record" width="480">
+  </a>
+</p>
+
+<p align="center">
+  <a href="Air-Gap%20Salvage.pdf">
+    <img src="https://img.shields.io/badge/View%20Air--Gap%20Salvage-PDF-00e5ff?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="View Air-Gap Salvage PDF">
+  </a>
+  &nbsp;
+  <a href="https://raw.githubusercontent.com/kyledeanml/MNIME-Multimodal_Neural_Interface_Machine_Extension/main/Air-Gap%20Salvage.pdf">
+    <img src="https://img.shields.io/badge/Direct%20Download-PDF-ff3366?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="Direct PDF Download">
+  </a>
+</p>
+
+> **Air-Gap Salvage — Field Service Record** — Archival field service record and sub-canal repair narrative (MNIME-75 Edge Mod-C, Year 2075). Chronicles off-grid machine extension servicing in the Lower Basin drainage flats, telemetry bus stabilization, recursive context recovery, and zero-cloud local neural inference behind the walk-in cold box.
+
+---
 
 <p align="center">
   <em>Multimodal Neural Interface Machine Extension</em>
