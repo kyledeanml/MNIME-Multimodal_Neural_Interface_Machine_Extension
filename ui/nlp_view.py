@@ -160,11 +160,12 @@ class NLPQueryWorker(QThread):
     new_fallback_state = pyqtSignal(int)
     fallback_selected = pyqtSignal(str, str)
 
-    def __init__(self, query: str, context_docs: list, fallback_state: int = 0):
+    def __init__(self, query: str, context_docs: list, fallback_state: int = 0, first_joke_done: bool = False):
         super().__init__()
         self.query = query
         self.context_docs = context_docs
         self.fallback_state = fallback_state
+        self.first_joke_done = first_joke_done
 
     def run(self):
         import time
@@ -229,7 +230,11 @@ class NLPQueryWorker(QThread):
                 self.chunk_received.emit(buffer)
 
             if is_fallback_mode:
-                setup, punchline = random.choice(CASUAL_DIALOG_TEMPLATES)
+                if not self.first_joke_done:
+                    setup = "Not an answer to your out of scope question"
+                    punchline = ""
+                else:
+                    setup, punchline = random.choice(CASUAL_DIALOG_TEMPLATES)
                 self.fallback_selected.emit(setup, punchline)
                 self.new_fallback_state.emit(1)
                 fallback_text = "Knock, knock."
@@ -258,6 +263,7 @@ class NLPView(QWidget):
         self.current_fallback = None
         self.user_fallback_setup = None
         self.fallback_worker = None
+        self.first_joke_done = False
         self._setup_ui()
         
         import atexit, sys
@@ -512,8 +518,14 @@ class NLPView(QWidget):
                     self.current_fallback = random.choice(CASUAL_DIALOG_TEMPLATES)
                 
                 setup, punchline = self.current_fallback
-                self.fallback_state = 2
-                self._start_fallback_stream(f"{setup}.")
+                if not punchline:
+                    self.fallback_state = 0
+                    self.current_fallback = None
+                    self.first_joke_done = True
+                    self._start_fallback_stream(f"{setup}.")
+                else:
+                    self.fallback_state = 2
+                    self._start_fallback_stream(f"{setup}.")
                 return
 
         # Case B: MNIME-initiated joke - Turn 3 (MNIME gave setup, user asks "setup who?")
@@ -542,7 +554,7 @@ class NLPView(QWidget):
                 break
         
         # 2. LLM Generation
-        self.query_worker = NLPQueryWorker(query, context_docs, getattr(self, 'fallback_state', 0))
+        self.query_worker = NLPQueryWorker(query, context_docs, getattr(self, 'fallback_state', 0), getattr(self, 'first_joke_done', False))
         self.query_worker.chunk_received.connect(self._on_query_chunk)
         self.query_worker.finished.connect(self._on_query_response)
         self.query_worker.new_fallback_state.connect(self._set_fallback_state)
