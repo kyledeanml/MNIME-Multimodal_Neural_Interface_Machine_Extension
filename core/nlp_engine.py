@@ -20,9 +20,16 @@ class NLPEngine:
     _instance_lock = threading.Lock()
 
     def __init__(self):
-        # Check for bundled model
-        bundled_model = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "MNIME-Core-V5-Q4_K_M.gguf")
-        default_path = bundled_model if os.path.exists(bundled_model) else ""
+        # Check for bundled model dynamically
+        models_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models")
+        bundled_model = ""
+        if os.path.exists(models_dir):
+            for file in os.listdir(models_dir):
+                if file.endswith(".gguf") and "bge" not in file.lower():
+                    bundled_model = os.path.join(models_dir, file)
+                    break
+
+        default_path = bundled_model if bundled_model and os.path.exists(bundled_model) else ""
 
         settings = QSettings("MNIME", "MNIMEApp")
         saved_path = settings.value("gguf_model_path", "")
