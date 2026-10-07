@@ -222,7 +222,7 @@ class NLPEngine:
             parts.append(f"Document ({source}):\n{content}")
         return sanitize_prompt_text("\n\n".join(parts))
 
-    def generate_response(self, prompt: str, context_docs: List[Dict[str, Any]]) -> str:
+    def generate_response(self, prompt: str, context_docs: List[Dict[str, Any]], history: List[Dict[str, str]] = None) -> str:
         self.check_model(auto_load=True)
         if not self.is_loaded:
             return f"Error: {self.error}"
@@ -234,18 +234,28 @@ class NLPEngine:
             "You are allowed to perform clerical tasks, organize information, list document titles, summarize them, or discuss the documents themselves as long as it is in scope of the documents. "
             "If the answer is not in the context, state that clearly."
         )
-        full_prompt = (
-            f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
-            f"<|im_start|>user\nCONTEXT:\n{context_text}\n\nQUERY: {sanitize_prompt_text(prompt, 1000)}<|im_end|>\n"
-            f"<|im_start|>assistant\n"
-        )
+        full_prompt = f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
+        
+        if history:
+            for i, msg in enumerate(history):
+                # The last message is the current query, so we treat it specially
+                if i == len(history) - 1 and msg["role"] == "user":
+                    full_prompt += f"<|im_start|>user\nCONTEXT:\n{context_text}\n\nQUERY: {sanitize_prompt_text(msg['content'], 1000)}<|im_end|>\n"
+                else:
+                    role = msg["role"]
+                    content = sanitize_prompt_text(msg["content"], 1000)
+                    full_prompt += f"<|im_start|>{role}\n{content}<|im_end|>\n"
+        else:
+            full_prompt += f"<|im_start|>user\nCONTEXT:\n{context_text}\n\nQUERY: {sanitize_prompt_text(prompt, 1000)}<|im_end|>\n"
+
+        full_prompt += "<|im_start|>assistant\n"
         try:
             return self._complete(full_prompt, 1024)
         except Exception as e:
             log.exception("generate_response failed")
             return f"Error generating response: {e}"
 
-    def generate_response_stream(self, prompt: str, context_docs: List[Dict[str, Any]]):
+    def generate_response_stream(self, prompt: str, context_docs: List[Dict[str, Any]], history: List[Dict[str, str]] = None):
         self.check_model(auto_load=True)
         if not self.is_loaded:
             yield f"Error: {self.error}"
@@ -258,11 +268,21 @@ class NLPEngine:
             "You are allowed to perform clerical tasks, organize information, list document titles, summarize them, or discuss the documents themselves as long as it is in scope of the documents. "
             "If the answer is not in the context, state that clearly."
         )
-        full_prompt = (
-            f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
-            f"<|im_start|>user\nCONTEXT:\n{context_text}\n\nQUERY: {sanitize_prompt_text(prompt, 1000)}<|im_end|>\n"
-            f"<|im_start|>assistant\n"
-        )
+        full_prompt = f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
+        
+        if history:
+            for i, msg in enumerate(history):
+                # The last message is the current query, so we treat it specially
+                if i == len(history) - 1 and msg["role"] == "user":
+                    full_prompt += f"<|im_start|>user\nCONTEXT:\n{context_text}\n\nQUERY: {sanitize_prompt_text(msg['content'], 1000)}<|im_end|>\n"
+                else:
+                    role = msg["role"]
+                    content = sanitize_prompt_text(msg["content"], 1000)
+                    full_prompt += f"<|im_start|>{role}\n{content}<|im_end|>\n"
+        else:
+            full_prompt += f"<|im_start|>user\nCONTEXT:\n{context_text}\n\nQUERY: {sanitize_prompt_text(prompt, 1000)}<|im_end|>\n"
+
+        full_prompt += "<|im_start|>assistant\n"
         try:
             with self._lock:
                 if self.llm is None:

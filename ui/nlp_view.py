@@ -138,16 +138,17 @@ class NLPQueryWorker(QThread):
     point_generated = pyqtSignal(float, float, str)
     stats_updated = pyqtSignal(dict)
 
-    def __init__(self, query: str, context_docs: list):
+    def __init__(self, query: str, context_docs: list, history: list = None):
         super().__init__()
         self.query = query
         self.context_docs = context_docs
+        self.history = history or []
 
     def run(self):
         import time
         from ui.nerds import get_process_memory_mb
         try:
-            generator = NLPEngine.get_instance().generate_response_stream(self.query, self.context_docs)
+            generator = NLPEngine.get_instance().generate_response_stream(self.query, self.context_docs, self.history)
             full_response = ""
 
             t_start_eval = time.time()
@@ -195,6 +196,7 @@ class NLPView(QWidget):
         super().__init__(parent)
         self.vectorstore = None
         self.expanded_dialog = None
+        self.conversation_history = []
         self._setup_ui()
         
         import atexit, sys
@@ -213,6 +215,7 @@ class NLPView(QWidget):
             self.vectorstore = None
             import gc
             gc.collect()
+        self.conversation_history = []
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
@@ -394,7 +397,9 @@ class NLPView(QWidget):
                 break
         
         # 2. LLM Generation
-        self.query_worker = NLPQueryWorker(query, context_docs)
+        self.conversation_history.append({"role": "user", "content": query})
+        
+        self.query_worker = NLPQueryWorker(query, context_docs, list(self.conversation_history))
         self.query_worker.chunk_received.connect(self._on_query_chunk)
         self.query_worker.finished.connect(self._on_query_response)
         
@@ -415,6 +420,7 @@ class NLPView(QWidget):
         self._insert_html_at_end(f"<span style='color:#00e5ff'>{safe_chunk}</span>")
 
     def _on_query_response(self, response: str):
+        self.conversation_history.append({"role": "assistant", "content": response})
         self._insert_html_at_end("<br><hr><br>")
         self._set_input_enabled(True)
         self.query_input.setFocus()
