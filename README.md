@@ -363,27 +363,11 @@ MNIME includes a telemetry dashboard and benchmarking suite (`ui/nerds.py` & `be
 > **MNIME Build Process & Change Log** — The complete engineering lifecycle from initial repository genesis through 5D vector mathematics, local neural engine integration, standalone custom animated PyQt6 installer packaging, and forensic IDE conversation sessions.
 
 
-
 ---
-
-
-<p align="center">
-  <a href="Air-Gap%20Salvage.pdf">
-    <img src="docs/airgap_salvage_cover.png?v=1" alt="Air-Gap Salvage - Field Service Record" width="480">
-  </a>
-</p>
-
----
-
-
-
-
 
 <p align="center">
   <img src="docs/neural_interface_avatar.jpg" alt="MNIME Neural Interface" width="500">
 </p>
-
-
 
 <p align="center">
   <em>Multimodal Neural Interface Machine Extension</em>
