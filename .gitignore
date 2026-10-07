@@ -60,3 +60,8 @@ unsloth_compiled_cache/
 models/
 version_info.txt
 V3_Training_Pipeline/
+
+# Credentials & Secrets
+HFaccess.txt
+client_secret*.json
+
