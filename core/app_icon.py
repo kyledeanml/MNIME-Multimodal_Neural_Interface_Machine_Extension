@@ -184,7 +184,7 @@ def _draw_logo_pixmap(size: int = 64, rotation: float = 0.0, is_tray: bool = Fal
             
     else:
         # INSANE 5D PENTERACT for the main app! (32 vertices, 80 edges)
-        radius = size * 0.44
+        radius = size * 0.38
         points_nd = []
         for i in range(32):
             x = -0.5 if (i & 1) == 0 else 0.5
@@ -252,7 +252,7 @@ def _draw_logo_pixmap(size: int = 64, rotation: float = 0.0, is_tray: bool = Fal
             x2 = x * z_factor
             y2 = y * z_factor
             
-            scale = radius * 4.5
+            scale = radius * 3.4
             px = center.x() + x2 * scale
             py = center.y() + y2 * scale
             points_2d.append(QPointF(px, py))
