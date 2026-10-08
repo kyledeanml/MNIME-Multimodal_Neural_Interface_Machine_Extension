@@ -843,40 +843,12 @@ class MainWindow(QMainWindow):
             return
         self._is_restoring = True
         
-        from ui.minimize_animation import RestoreAnimationOverlay
-        from PyQt6.QtCore import QPoint
-        
-        tray_geom = self.tray_icon.geometry()
-        if tray_geom.isNull():
-            screen = QApplication.primaryScreen().geometry()
-            start_pt = QPoint(screen.width() - 50, screen.height() - 50)
-        else:
-            start_pt = tray_geom.center()
-            
-        def on_anim_finished():
-            self.showNormal()
-            self.activateWindow()
-            self._is_restoring = False
-            
-        self._restore_anim = RestoreAnimationOverlay(start_pt, self.geometry(), on_anim_finished)
-        self._restore_anim.show()
+        self.showNormal()
+        self.activateWindow()
+        self._is_restoring = False
 
     def _animate_minimize_to_tray(self):
-        from ui.minimize_animation import MinimizeAnimationOverlay
-        from PyQt6.QtCore import QPoint
-        
-        tray_geom = self.tray_icon.geometry()
-        if tray_geom.isNull():
-            screen = QApplication.primaryScreen().geometry()
-            target_pt = QPoint(screen.width() - 50, screen.height() - 50)
-        else:
-            target_pt = tray_geom.center()
-            
         self.hide()
-        
-        # Save a reference so the animation isn't garbage collected
-        self._minimize_anim = MinimizeAnimationOverlay(self.geometry(), target_pt, None)
-        self._minimize_anim.show()
 
     def hideEvent(self, event):
         super().hideEvent(event)

@@ -235,9 +235,7 @@ class RestoreAnimationOverlay(QWidget):
         self.setGeometry(screen)
         
         self.on_finished = on_finished
-        
-        self.particles = [RestoreParticle(start_point, target_rect) for _ in range(150)]
-        
+        self.particles = [RestoreParticle(start_point, target_rect) for _ in range(1)]
         self.anim_timer = QTimer(self)
         self.anim_timer.timeout.connect(self._update_animation)
         self.anim_timer.start(16)
