@@ -26,6 +26,9 @@ class PDFPageView(QGraphicsView):
     text_selected = pyqtSignal(str)
     prev_page_requested = pyqtSignal()
     next_page_requested = pyqtSignal()
+    zoom_changed = pyqtSignal()
+
+    BASE_DPI = 96.0
 
     def __init__(self, scene, parent=None):
         super().__init__(scene, parent)
@@ -35,8 +38,13 @@ class PDFPageView(QGraphicsView):
         self.start_pos = QPoint()
         self.is_drawing = False
         self.current_page = None
-        self.zoom_factor = 2.0
+        self._render_scale = 1.0
         self.setCursor(Qt.CursorShape.CrossCursor)
+
+    def get_render_scale(self) -> float:
+        view_scale = self.transform().m11()
+        scale = view_scale * (self.BASE_DPI / 72.0)
+        return max(scale, 1.0)
 
     def set_page(self, page, pixmap, render_scale: float = 1.0, clip=None):
         self.current_page = page
@@ -58,11 +66,13 @@ class PDFPageView(QGraphicsView):
         self.resetTransform()
         scale = (self.viewport().width() - 20) / max(rect.width(), 1)
         self.scale(scale, scale)
+        self.zoom_changed.emit()
 
     def wheelEvent(self, event):
         if event.modifiers() == Qt.KeyboardModifier.ControlModifier:
             factor = 1.15 if event.angleDelta().y() > 0 else 1 / 1.15
             self.scale(factor, factor)
+            self.zoom_changed.emit()
             return
         bar = self.verticalScrollBar()
         at_top = bar.value() <= bar.minimum()
@@ -111,13 +121,13 @@ class PDFPageView(QGraphicsView):
         top_left = self.mapToScene(self.rubber_band.topLeft())
         bottom_right = self.mapToScene(self.rubber_band.bottomRight())
 
-        # Scene units are rendered pixels; divide by the render zoom to get PDF points
+        # Scene units are already in PDF points since mapToScene converts from viewport pixels
         import pymupdf
         rect = pymupdf.Rect(
-            top_left.x() / self.zoom_factor,
-            top_left.y() / self.zoom_factor,
-            bottom_right.x() / self.zoom_factor,
-            bottom_right.y() / self.zoom_factor
+            top_left.x(),
+            top_left.y(),
+            bottom_right.x(),
+            bottom_right.y()
         )
 
         text = self.current_page.get_text("text", clip=rect).strip()
@@ -213,6 +223,7 @@ class DocumentViewer(QDialog):
         self.view.text_selected.connect(self._on_text_selected)
         self.view.prev_page_requested.connect(self._prev_page)
         self.view.next_page_requested.connect(self._next_page)
+        self.view.zoom_changed.connect(self._on_zoom_changed)
         self.stack.addWidget(self.view)
 
         self.text_view = QTextEdit()
@@ -325,7 +336,7 @@ class DocumentViewer(QDialog):
             from PyQt6.QtCore import QTimer
             QTimer.singleShot(0, self.view.fit_width)
 
-    def _render_page(self):
+    def _render_page(self, render_scale: float | None = None):
         if not self.is_pdf or not self.doc or self.page_idx >= len(self.doc):
             return
         self.page_label.setText(f"Page {self.page_idx + 1} of {len(self.doc)}")
@@ -333,14 +344,28 @@ class DocumentViewer(QDialog):
         page = self.doc[self.page_idx]
         from core.render_utils import render_page
         
-        # Apply the static zoom factor to view before rendering if it's new
-        if self.view.transform().m11() == 1.0:
-            self.view.scale(self.view.zoom_factor, self.view.zoom_factor)
-
-        qpixmap, scale, clip = render_page(page, self.view, self.view.devicePixelRatioF())
+        qpixmap, scale, clip = render_page(page, self.view, self.view.devicePixelRatioF(), self.view.BASE_DPI / 72.0)
         
         self.view.set_page(page, qpixmap, render_scale=scale, clip=clip)
         self.view.verticalScrollBar().setValue(0)
+
+    def _on_zoom_changed(self):
+        if not self.doc:
+            return
+        new_scale = self.view.get_render_scale()
+        if abs(new_scale - self.view._render_scale) / max(self.view._render_scale, 0.001) > 0.05:
+            h_bar = self.view.horizontalScrollBar()
+            v_bar = self.view.verticalScrollBar()
+            h_ratio = h_bar.value() / max(h_bar.maximum(), 1)
+            v_ratio = v_bar.value() / max(v_bar.maximum(), 1)
+
+            self._render_page(render_scale=new_scale)
+
+            def restore_scroll():
+                h_bar.setValue(int(h_ratio * h_bar.maximum()))
+                v_bar.setValue(int(v_ratio * v_bar.maximum()))
+            from PyQt6.QtCore import QTimer
+            QTimer.singleShot(0, restore_scroll)
 
     def _prev_page(self):
         if self.doc and self.page_idx > 0:
