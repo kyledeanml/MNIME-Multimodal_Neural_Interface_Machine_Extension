@@ -232,7 +232,7 @@ class MergeParticleOverlay(QWidget):
         min_dist = 60.0
 
         # Create stream particles (spread out so vortex activates immediately)
-        particle_count = 38
+        particle_count = 19
         self.particles = [
             StreamParticle(self.target, min_dist, max_dist, initial_scatter=True)
             for _ in range(particle_count)
