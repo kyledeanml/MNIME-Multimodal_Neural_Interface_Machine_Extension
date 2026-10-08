@@ -442,37 +442,24 @@ class MainWindow(QMainWindow):
         class WatermarkFrame(QFrame):
             def __init__(self, parent=None):
                 super().__init__(parent)
-                self._cached_pixmap = None
-
-            def resizeEvent(self, event):
-                super().resizeEvent(event)
-                self._cached_pixmap = None
 
             def paintEvent(self, event):
                 super().paintEvent(event)
-                from PyQt6.QtGui import QPainter, QFont, QPen, QColor, QPixmap
+                from PyQt6.QtGui import QPainter, QFont, QPen, QColor
                 from PyQt6.QtCore import Qt
                 
-                if self._cached_pixmap is None or self._cached_pixmap.size() != self.size():
-                    self._cached_pixmap = QPixmap(self.size())
-                    self._cached_pixmap.fill(Qt.GlobalColor.transparent)
-                    
-                    p = QPainter(self._cached_pixmap)
-                    p.setRenderHint(QPainter.RenderHint.TextAntialiasing)
-                    font = QFont("Segoe UI Black", 80, QFont.Weight.Black)
-                    font.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 15.0)
-                    p.setFont(font)
-                    p.setPen(QPen(QColor(255, 255, 255, 4)))
-                    
-                    text = "MNIME        " * 20
-                    y_offset = 80
-                    while y_offset < self.height() + 100:
-                        p.drawText(-100, y_offset, text)
-                        y_offset += 180
-                    p.end()
-
                 painter = QPainter(self)
-                painter.drawPixmap(0, 0, self._cached_pixmap)
+                painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
+                font = QFont("Segoe UI Black", 80, QFont.Weight.Black)
+                font.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 15.0)
+                painter.setFont(font)
+                painter.setPen(QPen(QColor(255, 255, 255, 4)))
+                
+                text = "MNIME        " * 20
+                y_offset = 80
+                while y_offset < self.height() + 100:
+                    painter.drawText(-100, y_offset, text)
+                    y_offset += 180
 
         self.container_frame = WatermarkFrame()
         self.container_frame.setMouseTracking(True)
@@ -1236,9 +1223,13 @@ class MainWindow(QMainWindow):
                 return
 
         # Trigger hyper-speed collapse of file particles into the merge button center!
-        if hasattr(self, 'particle_overlay') and self.current_mode != ToolMode.EDIT_IMAGE:
-            if len(self.file_items) <= 100:
-                self.particle_overlay.trigger_hyper_collapse()
+        if hasattr(self, 'particle_overlay'):
+            interactive_modes = {ToolMode.EDIT_IMAGE, ToolMode.NLP, ToolMode.REFERENCE}
+            if self.current_mode not in interactive_modes:
+                if len(self.file_items) <= 100:
+                    self.particle_overlay.trigger_hyper_collapse()
+            else:
+                self.particle_overlay.clear_all()
 
         if self.current_mode == ToolMode.EDIT_IMAGE:
             for item in self.file_items:
