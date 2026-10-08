@@ -574,7 +574,7 @@ def build_body(styles):
             "8.2  Run from Source",
             "8.3  Build Pipeline",
         ]),
-        ("9", "Keyboard Shortcuts & Tips", None),
+        ("9", "Operability & Tips", None),
         ("10", "Performance Notes", None),
         ("11", "Dependency Stack", None),
         ("12", "Error Handling & Validation", None),
@@ -979,7 +979,7 @@ def build_body(styles):
     story.append(Paragraph("7.2  Drop Zone", S["h2"]))
     story.append(Paragraph(
         "The right side of the main window features a <b>Drop Zone</b> centered on the MNIME Penteract "
-        "logo. Drag any supported file type directly onto the logo to queue it. A subtle drag-over "
+        "logo. Drag any supported file type and drop it anywhere in the main UI to queue it, not just the logo drop box. A subtle drag-over "
         "highlight provides real-time feedback. Alternatively, click the neon-outlined <b>ADD FILES</b> "
         "button to open the custom file browser dialog.",
         S["body"]
@@ -1114,14 +1114,14 @@ def build_body(styles):
     story.append(PageBreak())
 
     # ─────────────────────────────────────────────────────────────────────────
-    # SECTION 9 — KEYBOARD SHORTCUTS & TIPS
+    # SECTION 9 — OPERABILITY & TIPS
     # ─────────────────────────────────────────────────────────────────────────
-    story += section_header("9  Keyboard Shortcuts & Tips", S)
+    story += section_header("9  Operability & Tips", S)
 
     kb_data = [
-        ["Shortcut / Action", "Effect"],
+        ["Action", "Effect"],
         ["Ctrl + Mouse Scroll", "Zoom in/out in Document Reader and Edit UIs"],
-        ["Drag file onto logo", "Queue file for processing"],
+        ["Drag file anywhere in main UI", "Queue file for processing"],
         ["Drag card left/right", "Reorder files in the Gallery Carousel"],
         ["Double-click NLP panel", "Spawn magnetic translucent floating chat window"],
         ["Click NLP checkbox", "Toggle NLP master switch (loads/unloads model)"],

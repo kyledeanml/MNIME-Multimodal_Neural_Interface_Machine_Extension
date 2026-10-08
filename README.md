@@ -35,7 +35,7 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
   </a>
 </p>
 
-> **Specification Sheet & User Manual** — 14 sections covering all features, technical specs, architecture, NLP engine details, UI guide, installation, keyboard shortcuts, performance notes, dependency stack, error handling, and changelog.
+> **Specification Sheet & User Manual** — 14 sections covering all features, technical specs, architecture, NLP engine details, UI guide, installation, operability, performance notes, dependency stack, error handling, and changelog.
 
 ---
 
