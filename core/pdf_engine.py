@@ -493,7 +493,7 @@ class PDFEngine:
         output_files: List[str] = []
         os.makedirs(output_dir, exist_ok=True)
         base_name = os.path.splitext(pdf_item.file_name)[0]
-        dpi = max(36, min(int(dpi), 600))  # Bound memory use
+        dpi = max(36, min(int(dpi), 2400))  # Bound memory use
 
         try:
             import pymupdf
@@ -508,7 +508,7 @@ class PDFEngine:
                     page = render_doc[page_num]
                     rect = page.rect
                     current_zoom = zoom
-                    max_dim = 8192
+                    max_dim = 32768
                     if rect.width * current_zoom > max_dim:
                         current_zoom = max_dim / rect.width
                     if rect.height * current_zoom > max_dim:

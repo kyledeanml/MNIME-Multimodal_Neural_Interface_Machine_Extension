@@ -10,8 +10,8 @@ import os
 from ctypes import wintypes
 from typing import Callable, Optional, Tuple
 
-MAX_DPI = 300  # Upper bound for the raster resolution sent to the printer
-MAX_RASTER_PIXELS = 60_000_000  # Hard memory cap per page raster (~240 MB as BGRA)
+MAX_DPI = 1200  # Upper bound for the raster resolution sent to the printer
+MAX_RASTER_PIXELS = 240_000_000  # Hard memory cap per page raster (~960 MB as BGRA)
 
 
 class PrintCancelled(Exception):
