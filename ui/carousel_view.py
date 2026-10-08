@@ -262,12 +262,7 @@ class CarouselView(QWidget):
         self.center_layout = QVBoxLayout(self.center_container)
         self.center_layout.setContentsMargins(4, 4, 4, 4)
 
-        # Ambient glow
-        self.carousel_glow = QGraphicsDropShadowEffect(self)
-        self.carousel_glow.setBlurRadius(25)
-        self.carousel_glow.setColor(QColor(0, 210, 255, 50))
-        self.carousel_glow.setOffset(0, 0)
-        self.center_container.setGraphicsEffect(self.carousel_glow)
+        # Removed QGraphicsDropShadowEffect to prevent severe window flickering during system resize on frameless windows
 
         # Cards area (replaces QScrollArea)
         self.cards_area = ClippedCardsArea()
