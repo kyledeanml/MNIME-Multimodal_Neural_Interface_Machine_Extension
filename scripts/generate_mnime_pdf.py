@@ -39,7 +39,7 @@ PAGE_W, PAGE_H = A4
 MARGIN = 18 * mm
 CONTENT_W = PAGE_W - 2 * MARGIN
 
-OUTPUT_PATH = r"B:\Desktop\BASSD\BELCO\AAS-T_AISD\zFAL26\MNIME\MNIME_Spec_Manual.pdf"
+OUTPUT_PATH = r"C:\MNIME\MNIME_Spec_Manual.pdf"
 
 
 # ─── Custom Flowables ──────────────────────────────────────────────────────────
