@@ -25,8 +25,8 @@ class FileCard(QFrame):
     card_moved = pyqtSignal(int, int)        # from_index, to_index
     card_double_clicked = pyqtSignal(object) # FileItem
 
-    CARD_WIDTH = 145
-    CARD_HEIGHT = 180
+    CARD_WIDTH = 165
+    CARD_HEIGHT = 205
 
     def __init__(self, item: FileItem, index: int, parent=None):
         super().__init__(parent)
