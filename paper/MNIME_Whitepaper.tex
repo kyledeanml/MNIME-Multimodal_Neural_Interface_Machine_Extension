@@ -70,7 +70,7 @@ Built with Python and PyQt6, MNIME combines a C-accelerated PDF engine
 \texttt{MNIME-Core-V5-Q4\_K\_M}, a quantized 1.5B-parameter model
 fine-tuned from Qwen2.5-1.5B-Instruct featuring dynamic LoRA adapter injection for document-centric reasoning tasks
 including cross-referencing, semantic bookmarking, and conversational
-retrieval-augmented generation (RAG).
+retrieval-augmented generation (RAG). While V5 is highlighted here, the V1.5 model remains available as the foundational base. Furthermore, MNIME is designed to be deeply customizable and remodable, allowing users to seamlessly integrate and utilize any compatible model.
 We describe the system architecture, fine-tuning methodology, multimodal
 interface design, and performance characteristics across ten operational modes.
 On-device empirical telemetry demonstrates that MNIME achieves sub-second UI responsiveness
@@ -110,7 +110,7 @@ core contributions:
     \item \textbf{MNIME-Core-V5}, a fine-tuned GGUF model
     specialized for document reasoning, cross-referencing, and
     retrieval-augmented conversational question answering over user-loaded
-    corpora.
+    corpora. The software architecture is highly remodable; while the original V1.5 model remains the structural base and is available for reference, the system empowers users to seamlessly load any compatible model, ensuring deep customizability.
     \item A \textbf{premium local-first UI} built with PyQt6 featuring
     physics-based particle transitions, a magnetic translucent pop-out chat,
     4.0$\times$ Retina-quality document rendering, and an O(1) drag-and-drop
@@ -202,7 +202,7 @@ The NLP engine (\texttt{core/nlp\_engine.py}) loads
 \texttt{MNIME-Core-V5-Q4\_K\_M.gguf} via \texttt{llama-cpp-python}
 with automatic NVIDIA GPU layer offloading (\texttt{n\_gpu\_layers=-1}).
 On systems without a GPU, the model runs fully in CPU mode with
-acceptable latency for conversational interaction.
+acceptable latency for conversational interaction. Notably, MNIME is designed to be deeply customizable and remodable: users are not locked into a single model. The original V1.5 model is still the base and is fully supported for reference, while any compatible GGUF model can be loaded by the user to suit specific tasks.
 
 The semantic search engine (\texttt{core/search\_engine.py}) extracts
 text chunks from all open PDFs, encodes them using a local sentence embedding
@@ -261,7 +261,7 @@ resampling during scroll events.
 We select \textbf{Qwen2.5-1.5B-Instruct}~\cite{qwen2025} as the base model
 due to its strong instruction-following performance at the 1.5B parameter scale,
 its permissive license, and its compatibility with llama.cpp's GGUF
-quantization pipeline.
+quantization pipeline. It forms the foundation for both the original V1.5 model\footnote{\url{https://huggingface.co/KyleDeanML/MNIME-Core-1.5B-Q4_K_M}} and the advanced V5 iteration\footnote{\url{https://huggingface.co/KyleDeanML/MNIME-Core-V5-Q4_K_M}}.
 Post fine-tuning, we quantize to Q4\_K\_M, which provides an optimal balance
 between model quality and memory footprint ($\approx$1.0\,GB).
 
@@ -567,7 +567,7 @@ at the edge.
 
 \section{Limitations: Model Agency and Training Revisions}
 \label{sec:limitations}
-While MNIME-Core-V5 demonstrates strong empirical performance on deterministic document synthesis and RAG, it fundamentally failed to exhibit spontaneous agency or ``come alive'' as a proactive, autonomous entity. Despite the philosophical discourse embedded in the V4 and V5 datasets, the model remains strictly reactive, producing responses only when explicitly prompted by a user or system event. Additionally, empirical testing revealed an increased propensity for logical hallucination, which is likely a direct consequence of ``super-charging'' the V5 ethics and anti-bias pipeline at the expense of deterministic precision. Overcoming these limitations requires moving beyond static instruction-tuning pairs toward active agentic frameworks, reinforcement learning from environment feedback, and continuous state-memory architectures. Consequently, the core training pipeline is slated for a fundamental revision following further architectural planning. Future training iterations will explicitly include the original 1.5B model in each phase as a base profile class to ensure its foundational document processing edge and logical focus are not obscured by subsequent value alignments.
+While MNIME-Core-V5 demonstrates strong empirical performance on deterministic document synthesis and RAG, it fundamentally failed to exhibit spontaneous agency or ``come alive'' as a proactive, autonomous entity. Despite the philosophical discourse embedded in the V4 and V5 datasets, the model remains strictly reactive, producing responses only when explicitly prompted by a user or system event. Additionally, empirical testing revealed an increased propensity for logical hallucination, which is likely a direct consequence of ``super-charging'' the V5 ethics and anti-bias pipeline at the expense of deterministic precision. Overcoming these limitations requires moving beyond static instruction-tuning pairs toward active agentic frameworks, reinforcement learning from environment feedback, and continuous state-memory architectures. Consequently, the core training pipeline is slated for a fundamental revision following further architectural planning. Future training iterations will explicitly include the original V1.5 model in each phase as a base profile class to ensure its foundational document processing edge and logical focus are not obscured by subsequent value alignments. Because the software is inherently remodable, users can always revert to or run the V1.5 model, or any other compatible model, as an alternative.
 
 \section{Future Work: Deep Semantic Integration}
 \label{sec:future_work}
@@ -609,8 +609,7 @@ Two installation channels are available:
     (Inno Setup wizard) or \texttt{MNIME\_installer.exe} (custom animated
     PyQt6 installer), available in the \texttt{installer/} directory.
     \item \textbf{Source}: Clone the repository, download
-    \texttt{MNIME-Core-V5-Q4\_K\_M.gguf} from Hugging Face
-    (\url{https://huggingface.co/KyleDeanML/MNIME-Core-V5-Q4_K_M}),
+    \texttt{MNIME-Core-V5-Q4\_K\_M.gguf} (\url{https://huggingface.co/KyleDeanML/MNIME-Core-V5-Q4_K_M}) or the original \texttt{MNIME-Core-1.5B-Q4\_K\_M.gguf} (\url{https://huggingface.co/KyleDeanML/MNIME-Core-1.5B-Q4_K_M}) from Hugging Face,
     place it in \texttt{models/}, then run \texttt{setup.bat} followed by
     \texttt{run.bat}.
 \end{enumerate}
