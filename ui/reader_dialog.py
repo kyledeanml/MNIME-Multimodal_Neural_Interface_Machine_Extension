@@ -58,14 +58,18 @@ class ReaderPageView(QGraphicsView):
         self.pixmap_item.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
         # Scale the item so that 1 scene unit == 1 PDF point regardless of
         # how many pixels pymupdf put in the bitmap.
-        inv = 1.0 / (render_scale / self.devicePixelRatioF()) if render_scale > 0 else 1.0
-        self.pixmap_item.setScale(inv)
-        if clip:
-            self.pixmap_item.setPos(clip.x0, clip.y0)
-        self.scene().addItem(self.pixmap_item)
-        
-        # Scene rect in PDF-point coordinates always matches the full page
-        self.scene().setSceneRect(QRectF(0, 0, page.rect.width, page.rect.height))
+        if page:
+            inv = 1.0 / (render_scale / self.devicePixelRatioF()) if render_scale > 0 else 1.0
+            self.pixmap_item.setScale(inv)
+            if clip:
+                self.pixmap_item.setPos(clip.x0, clip.y0)
+            self.scene().addItem(self.pixmap_item)
+            # Scene rect in PDF-point coordinates always matches the full page
+            self.scene().setSceneRect(QRectF(0, 0, page.rect.width, page.rect.height))
+        else:
+            self.pixmap_item.setScale(1.0)
+            self.scene().addItem(self.pixmap_item)
+            self.scene().setSceneRect(QRectF(0, 0, pixmap.width() / pixmap.devicePixelRatio(), pixmap.height() / pixmap.devicePixelRatio()))
 
         if fit_view:
             QTimer.singleShot(10, self._fit_to_view)
@@ -357,7 +361,11 @@ class ReaderDialog(QDialog):
                 QMessageBox.critical(self, "Error", f"Failed to open PDF: {e}")
         elif file_item.extension in [".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff"]:
             self.page_label.setText("Image")
-            pixmap = QPixmap(file_item.file_path)
+            # Retina Image Loading
+            image = QImage(file_item.file_path)
+            # Make the image appear twice as sharp on high DPI screens
+            image.setDevicePixelRatio(self.view.devicePixelRatioF())
+            pixmap = QPixmap.fromImage(image)
             self.view.set_page(None, pixmap)
         else:
             self.page_label.setText("Preview not supported for this file type.")
