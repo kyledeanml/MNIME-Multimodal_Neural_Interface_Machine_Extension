@@ -51,7 +51,7 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
 - **Compress PDF**: Optimize and reduce PDF file size by compressing content streams and duplicate objects.
 - **PDF to DOCX**: Reconstruct PDF layouts into fully editable Word documents.
 - **Semantic Bookmarks**: Intelligently analyze PDF typography and leverage the bundled NLP engine to generate context-aware chapter summaries.
-
+- **Retina Image Viewer**: Integrated reader natively supports high-resolution image viewing (JPG, PNG, etc.) with automatic DPI scaling for perfectly crisp rendering on high-DPI displays.
 ### 2. Local Intelligence & RAG Engine
 - **Local NLP Engine**: Query across all open documents locally using the fine-tuned `MNIME-Core-V5-Q4_K_M.gguf` model with zero network traffic.
 - **LoRA Adapter Loading**: Load an optional LoRA adapter (`.gguf`) on top of the base model from the **LORA** button in the NLP view (right-click to remove). The model reloads in the background.
