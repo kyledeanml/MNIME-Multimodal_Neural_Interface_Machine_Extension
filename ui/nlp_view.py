@@ -199,7 +199,7 @@ class NLPQueryWorker(QThread):
 
             self.finished.emit(full_response.strip())
         except Exception as e:
-            self.finished.emit(f"Error: {e}")
+            self.finished.emit(f"Cognitive disruption: {e}")
 
 class FirstOrderScriptWorker(QThread):
     finished = pyqtSignal(str, str)
@@ -219,7 +219,7 @@ class FirstOrderScriptWorker(QThread):
                 full_response += chunk
             self.finished.emit("MNIME First-Order Script", full_response.strip())
         except Exception as e:
-            self.finished.emit("Error", str(e))
+            self.finished.emit("Synthesis Disruption", str(e))
 
 class NLPView(QWidget):
     start_over_clicked = pyqtSignal()
@@ -253,7 +253,7 @@ class NLPView(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         
-        self.status_label = QLabel("Drop files in carousel and click 'INDEX FILES' to start.")
+        self.status_label = QLabel("Awaiting document injection. Drop files to begin.")
         self.status_label.setStyleSheet("color: #8b949e; font-size: 13px;")
         
         self.progress_bar = QProgressBar()
@@ -382,7 +382,7 @@ class NLPView(QWidget):
 
     def start_indexing(self, file_items: List[FileItem]):
         if not file_items:
-            self.status_label.setText("No files to index.")
+            self.status_label.setText("No data provided for neural processing.")
             return
 
         self.start_over_btn.setEnabled(False)
@@ -441,10 +441,10 @@ class NLPView(QWidget):
     def _on_index_error(self, err: str):
         import html
         self.progress_bar.setVisible(False)
-        self.status_label.setText("Error during indexing.")
+        self.status_label.setText("Neural pathway disruption during indexing.")
         self.start_over_btn.setEnabled(True)
         safe_err = html.escape(str(err))
-        self._append_history(f"<div style='color:#ff5555'><b>Error:</b> {safe_err}</div><br>")
+        self._append_history(f"<div style='color:#ff5555'><b>MNIME (Disruption):</b> {safe_err}</div><br>")
 
     def _submit_query(self):
         import html

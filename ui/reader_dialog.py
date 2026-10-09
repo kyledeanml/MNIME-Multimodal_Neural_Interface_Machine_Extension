@@ -152,7 +152,7 @@ class ReaderDialog(QDialog):
             self.file_combo.setCurrentIndex(idx)
             self._on_file_selected(idx)
         else:
-            self.page_label.setText("No document loaded. Click 'Add Files' to open a PDF or image.")
+            self.page_label.setText("No external data loaded. Inject files to begin.")
 
     def _setup_ui(self):
         central_layout = QVBoxLayout(self)
@@ -338,7 +338,7 @@ class ReaderDialog(QDialog):
                 self.doc = None
             self.scene.clear()
             self.toc_tree.clear()
-            self.page_label.setText("No document loaded. Click 'Add Files' to open a PDF or image.")
+            self.page_label.setText("No external data loaded. Inject files to begin.")
 
     def _load_doc(self, file_item):
         if self.doc:
@@ -358,7 +358,7 @@ class ReaderDialog(QDialog):
                 self._load_toc()
                 self._render_page()
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to open PDF: {e}")
+                QMessageBox.critical(self, "Neural Interface Issue", f"Failed to access cognitive data: {e}")
         elif file_item.extension == ".txt":
             pdf_path = file_item.file_path + ".pdf"
             if not os.path.exists(pdf_path) or os.path.getmtime(pdf_path) < os.path.getmtime(file_item.file_path):
@@ -402,7 +402,7 @@ class ReaderDialog(QDialog):
                             
                     doc.build(story, onFirstPage=draw_background, onLaterPages=draw_background)
                 except Exception as e:
-                    QMessageBox.critical(self, "Error", f"Failed to convert TXT to PDF: {e}")
+                    QMessageBox.critical(self, "Neural Interface Issue", f"Synthesis conversion failed: {e}")
                     return
             try:
                 import pymupdf
@@ -411,7 +411,7 @@ class ReaderDialog(QDialog):
                 self._load_toc()
                 self._render_page()
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to open generated PDF: {e}")
+                QMessageBox.critical(self, "Neural Interface Issue", f"Failed to render generated sequence: {e}")
         elif file_item.extension in [".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff"]:
             self.page_label.setText("Image")
             # Retina Image Loading
@@ -421,7 +421,7 @@ class ReaderDialog(QDialog):
             pixmap = QPixmap.fromImage(image)
             self.view.set_page(None, pixmap)
         else:
-            self.page_label.setText("Preview not supported for this file type.")
+            self.page_label.setText("Data format unrecognized. Cognitive rendering offline.")
             self.scene.clear()
 
     def _load_toc(self):
