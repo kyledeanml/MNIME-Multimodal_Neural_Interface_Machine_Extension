@@ -551,10 +551,28 @@ class CarouselView(QWidget):
     # Drag glow helper
     # ------------------------------------------------------------------
     def _set_drag_style(self, active: bool):
-        if active:
-            self.carousel_glow.setColor(QColor(0, 210, 255, 180))
-        else:
-            self.carousel_glow.setColor(QColor(0, 210, 255, 50))
+        if hasattr(self, 'carousel_glow'):
+            if active:
+                self.carousel_glow.setColor(QColor(0, 210, 255, 180))
+            else:
+                self.carousel_glow.setColor(QColor(0, 210, 255, 50))
+        elif hasattr(self, 'center_container'):
+            if active:
+                self.center_container.setStyleSheet("""
+                    QWidget#center_container {
+                        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(0, 210, 255, 0.2), stop:1 rgba(10, 13, 20, 0.8));
+                        border: 2px solid #00d2ff;
+                        border-radius: 12px;
+                    }
+                """)
+            else:
+                self.center_container.setStyleSheet("""
+                    QWidget#center_container {
+                        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(16, 20, 30, 0.6), stop:1 rgba(10, 13, 20, 0.6));
+                        border: 1px solid #00d2ff;
+                        border-radius: 12px;
+                    }
+                """)
 
     # ------------------------------------------------------------------
     # OS drag-and-drop (inbound: files from Explorer/Desktop → carousel)
