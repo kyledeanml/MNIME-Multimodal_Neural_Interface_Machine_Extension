@@ -361,15 +361,32 @@ class ReaderDialog(QDialog):
                 QMessageBox.critical(self, "Error", f"Failed to open PDF: {e}")
         elif file_item.extension == ".txt":
             pdf_path = file_item.file_path + ".pdf"
-            if not os.path.exists(pdf_path):
+            if not os.path.exists(pdf_path) or os.path.getmtime(pdf_path) < os.path.getmtime(file_item.file_path):
                 try:
                     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-                    from reportlab.lib.styles import getSampleStyleSheet
+                    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
                     from reportlab.lib.pagesizes import letter
+                    from reportlab.lib.colors import HexColor
                     
-                    doc = SimpleDocTemplate(pdf_path, pagesize=letter)
+                    def draw_background(canvas, doc):
+                        canvas.saveState()
+                        canvas.setFillColor(HexColor("#0a0d14"))
+                        canvas.rect(0, 0, doc.pagesize[0], doc.pagesize[1], fill=1, stroke=0)
+                        canvas.restoreState()
+                    
+                    doc = SimpleDocTemplate(pdf_path, pagesize=letter,
+                                            leftMargin=50, rightMargin=50,
+                                            topMargin=50, bottomMargin=50)
                     styles = getSampleStyleSheet()
-                    style = styles["Normal"]
+                    
+                    mnime_style = ParagraphStyle(
+                        'MNIMEStyle',
+                        parent=styles["Normal"],
+                        fontName='Helvetica',
+                        fontSize=11,
+                        textColor=HexColor("#00e5ff"),
+                        leading=16,
+                    )
                     
                     with open(file_item.file_path, 'r', encoding='utf-8', errors='replace') as f:
                         text = f.read()
@@ -379,11 +396,11 @@ class ReaderDialog(QDialog):
                     story = []
                     for p in paragraphs:
                         if p.strip():
-                            story.append(Paragraph(p, style))
+                            story.append(Paragraph(p, mnime_style))
                         else:
                             story.append(Spacer(1, 12))
                             
-                    doc.build(story)
+                    doc.build(story, onFirstPage=draw_background, onLaterPages=draw_background)
                 except Exception as e:
                     QMessageBox.critical(self, "Error", f"Failed to convert TXT to PDF: {e}")
                     return

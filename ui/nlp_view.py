@@ -426,7 +426,7 @@ class NLPView(QWidget):
             safe_script = md.render(script_text)
         except Exception:
             safe_script = html.escape(script_text).replace("\n", "<br>")
-        self._append_history(f"<div style='color:#00e5ff'><b>MNIME (Auto-Summary):</b><br>{safe_script}</div><br><hr><br>")
+        self._append_history(f"<div style='color:#00e5ff'><b>MNIME:</b><br>{safe_script}</div><br><hr><br>")
         
         script_path = os.path.join(tempfile.gettempdir(), "MNIME_FirstOrder_Script.txt")
         with open(script_path, "w", encoding="utf-8") as f:
