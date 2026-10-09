@@ -11,7 +11,7 @@ from ui.cursor_fx import get_custom_cursor
 from typing import List
 from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QPushButton,
-    QLabel, QFrame, QGraphicsDropShadowEffect
+    QLabel, QFrame, QGraphicsDropShadowEffect, QLineEdit
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve, QRect, QTimer
 from PyQt6.QtGui import QColor, QPixmap, QPainter
@@ -81,6 +81,7 @@ class ClippedCardsArea(QWidget):
         """Replace the current card list and reposition everything."""
         # Detach old cards so they don't render twice
         for c in self._cards:
+            c.hide()
             c.setParent(None)
         self._cards = cards
         for c in self._cards:
@@ -271,6 +272,26 @@ class CarouselView(QWidget):
         self.center_layout.addWidget(self.cards_area, 1)
 
         self.clear_layout = QHBoxLayout()
+        
+        self.search_bar = QLineEdit()
+        self.search_bar.setPlaceholderText("Search files...")
+        self.search_bar.setFixedWidth(200)
+        self.search_bar.setStyleSheet("""
+            QLineEdit {
+                background-color: rgba(17, 21, 31, 0.6);
+                color: #b0c4de;
+                border: none;
+                border-radius: 10px;
+                padding: 4px 12px;
+                font-size: 12px;
+            }
+            QLineEdit:focus {
+                background-color: rgba(22, 36, 56, 0.8);
+            }
+        """)
+        self.search_bar.textChanged.connect(self._on_search_changed)
+        self.clear_layout.addWidget(self.search_bar)
+
         self.clear_layout.addStretch()
         
         self.badge_label = QLabel("0 FILES")
@@ -478,7 +499,7 @@ class CarouselView(QWidget):
             card.card_double_clicked.connect(self.card_double_clicked.emit)
             self.cards.append(card)
 
-        self.cards_area.set_cards(self.cards)
+        self._apply_filter()
 
     # ------------------------------------------------------------------
     # Card event handlers
@@ -500,7 +521,7 @@ class CarouselView(QWidget):
                     self.left_btn.setEnabled(False)
                     self.right_btn.setEnabled(False)
 
-                self.cards_area.set_cards(self.cards)
+                self._apply_filter()
                 self.file_removed.emit(item)
             except ValueError:
                 self.refresh_view()
@@ -518,8 +539,19 @@ class CarouselView(QWidget):
                 for i, c in enumerate(self.cards):
                     c.index = i
 
-            self.cards_area.set_cards(self.cards)
+            self._apply_filter()
             self.files_reordered.emit()
+
+    def _on_search_changed(self, text: str):
+        self._apply_filter()
+
+    def _apply_filter(self):
+        text = self.search_bar.text().lower() if hasattr(self, 'search_bar') else ""
+        if not text:
+            self.cards_area.set_cards(self.cards)
+        else:
+            filtered_cards = [c for c in self.cards if text in c.item.file_name.lower()]
+            self.cards_area.set_cards(filtered_cards)
 
     # ------------------------------------------------------------------
     # Scroll
