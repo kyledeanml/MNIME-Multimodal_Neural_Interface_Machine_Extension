@@ -143,9 +143,9 @@ class TabsBar(QWidget):
         
         from PyQt6.QtWidgets import QCheckBox
         from PyQt6.QtCore import QSettings
-        self.nlp_checkbox = QCheckBox("NLP")
+        self.nlp_checkbox = QCheckBox("Neural Interface Offline")
         self.nlp_checkbox.setStyleSheet("""
-            QCheckBox { color: #00e5ff; font-weight: bold; font-size: 11px; margin-right: 10px; min-width: 60px; }
+            QCheckBox { color: #00e5ff; font-weight: normal; font-size: 10px; margin-right: 10px; min-width: 170px; }
             QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #00d2ff; border-radius: 3px; background-color: #162438; }
             QCheckBox::indicator:checked { background-color: #00e5ff; }
         """)
@@ -180,22 +180,25 @@ class TabsBar(QWidget):
         # --- NLP checkbox: active light ---
         if is_loading:
             # Amber pulse while loading
+            self.nlp_checkbox.setText("Neural Interface Booting")
             self.nlp_checkbox.setStyleSheet("""
-                QCheckBox { color: #ffb300; font-weight: bold; font-size: 11px; margin-right: 10px; min-width: 60px; }
+                QCheckBox { color: #ffb300; font-weight: normal; font-size: 10px; margin-right: 10px; min-width: 170px; }
                 QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #ffb300; border-radius: 3px; background-color: #162438; }
                 QCheckBox::indicator:checked { background-color: #ffb300; }
             """)
         elif is_loaded:
             # Green when active
+            self.nlp_checkbox.setText("Neural Interface Active")
             self.nlp_checkbox.setStyleSheet("""
-                QCheckBox { color: #00e676; font-weight: bold; font-size: 11px; margin-right: 10px; min-width: 60px; }
+                QCheckBox { color: #00e676; font-weight: normal; font-size: 10px; margin-right: 10px; min-width: 170px; }
                 QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #00e676; border-radius: 3px; background-color: #162438; }
                 QCheckBox::indicator:checked { background-color: #00e676; }
             """)
         else:
             # Default cyan when off/unloaded
+            self.nlp_checkbox.setText("Neural Interface Offline")
             self.nlp_checkbox.setStyleSheet("""
-                QCheckBox { color: #00e5ff; font-weight: bold; font-size: 11px; margin-right: 10px; min-width: 60px; }
+                QCheckBox { color: #00e5ff; font-weight: normal; font-size: 10px; margin-right: 10px; min-width: 170px; }
                 QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #00d2ff; border-radius: 3px; background-color: #162438; }
                 QCheckBox::indicator:checked { background-color: #00e5ff; }
             """)
