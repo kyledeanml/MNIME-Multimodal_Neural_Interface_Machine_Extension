@@ -358,6 +358,11 @@ class CarouselView(QWidget):
         title_label.setStyleSheet("color: #b0c4de; font-family: 'Segoe UI', Arial; font-size: 26px; font-weight: 900; letter-spacing: 6px; background: transparent; border: none;")
         empty_layout.addWidget(title_label)
         
+        self.ghost_label = QLabel("NEURAL OFFLINE")
+        self.ghost_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.ghost_label.setStyleSheet("color: #485263; font-weight: bold; font-size: 11px; letter-spacing: 2px; background: transparent; border: none;")
+        empty_layout.addWidget(self.ghost_label)
+        
         # Spacer between typography and button
         empty_layout.addSpacing(10)
         
@@ -397,6 +402,23 @@ class CarouselView(QWidget):
         main_layout.addWidget(self.drop_zone_widget)
 
         self.refresh_view()
+
+        self.nlp_status_timer = QTimer(self)
+        self.nlp_status_timer.timeout.connect(self._update_nlp_ghost_text)
+        self.nlp_status_timer.start(1000)
+
+    def _update_nlp_ghost_text(self):
+        from core.nlp_engine import NLPEngine
+        engine = NLPEngine.get_instance()
+        if engine.is_loading:
+            self.ghost_label.setText("NEURAL BOOTING")
+            self.ghost_label.setStyleSheet("color: #ffb300; font-weight: bold; font-size: 11px; letter-spacing: 2px; background: transparent; border: none;")
+        elif engine.is_loaded:
+            self.ghost_label.setText("NEURAL ACTIVE")
+            self.ghost_label.setStyleSheet("color: #ff8c00; font-weight: bold; font-size: 11px; letter-spacing: 2px; background: transparent; border: none;")
+        else:
+            self.ghost_label.setText("NEURAL OFFLINE")
+            self.ghost_label.setStyleSheet("color: #485263; font-weight: bold; font-size: 11px; letter-spacing: 2px; background: transparent; border: none;")
 
     # ------------------------------------------------------------------
     # Public API

@@ -141,31 +141,20 @@ class TabsBar(QWidget):
             
         layout.addStretch()
         
-        from PyQt6.QtWidgets import QCheckBox, QVBoxLayout, QLabel, QWidget
+        from PyQt6.QtWidgets import QCheckBox
         from PyQt6.QtCore import QSettings
         
-        self.nlp_container = QWidget()
-        nlp_layout = QVBoxLayout(self.nlp_container)
-        nlp_layout.setContentsMargins(0, 0, 0, 0)
-        nlp_layout.setSpacing(2)
-        
-        self.nlp_checkbox = QCheckBox()
+        self.nlp_checkbox = QCheckBox("NLP")
         self.nlp_checkbox.setStyleSheet("""
+            QCheckBox { color: #00e5ff; font-weight: bold; font-size: 11px; margin-right: 10px; min-width: 50px; }
             QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #00d2ff; border-radius: 3px; background-color: #162438; }
-            QCheckBox::indicator:checked { background-color: #00e5ff; }
+            QCheckBox::indicator:checked { background-color: #ff8c00; border: 1px solid #ff8c00; }
         """)
-        
-        self.nlp_label = QLabel("NEURAL\nOFFLINE")
-        self.nlp_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.nlp_label.setStyleSheet("color: #00e5ff; font-weight: bold; font-size: 9px;")
-        
-        nlp_layout.addWidget(self.nlp_checkbox, alignment=Qt.AlignmentFlag.AlignCenter)
-        nlp_layout.addWidget(self.nlp_label, alignment=Qt.AlignmentFlag.AlignCenter)
         
         settings = QSettings("MNIME", "MNIMEApp")
         self.nlp_checkbox.setChecked(str(settings.value("nlp_enabled", "true")).lower() == "true")
         self.nlp_checkbox.toggled.connect(self._on_nlp_toggled)
-        layout.addWidget(self.nlp_container)
+        layout.addWidget(self.nlp_checkbox)
         
         for mode in right_tabs:
             _add_tab(mode)
@@ -192,25 +181,22 @@ class TabsBar(QWidget):
 
         # --- NLP checkbox: active light ---
         if is_loading:
-            self.nlp_label.setText("NEURAL\nBOOTING")
-            self.nlp_label.setStyleSheet("color: #ffb300; font-weight: bold; font-size: 9px;")
             self.nlp_checkbox.setStyleSheet("""
+                QCheckBox { color: #ffb300; font-weight: bold; font-size: 11px; margin-right: 10px; min-width: 50px; }
                 QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #ffb300; border-radius: 3px; background-color: #162438; }
-                QCheckBox::indicator:checked { background-color: #ffb300; }
+                QCheckBox::indicator:checked { background-color: #ffb300; border: 1px solid #ffb300; }
             """)
         elif is_loaded:
-            self.nlp_label.setText("NEURAL\nACTIVE")
-            self.nlp_label.setStyleSheet("color: #00e676; font-weight: bold; font-size: 9px;")
             self.nlp_checkbox.setStyleSheet("""
-                QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #00e676; border-radius: 3px; background-color: #162438; }
-                QCheckBox::indicator:checked { background-color: #00e676; }
+                QCheckBox { color: #ff8c00; font-weight: bold; font-size: 11px; margin-right: 10px; min-width: 50px; }
+                QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #ff8c00; border-radius: 3px; background-color: #162438; }
+                QCheckBox::indicator:checked { background-color: #ff8c00; border: 1px solid #ff8c00; }
             """)
         else:
-            self.nlp_label.setText("NEURAL\nOFFLINE")
-            self.nlp_label.setStyleSheet("color: #00e5ff; font-weight: bold; font-size: 9px;")
             self.nlp_checkbox.setStyleSheet("""
+                QCheckBox { color: #00e5ff; font-weight: bold; font-size: 11px; margin-right: 10px; min-width: 50px; }
                 QCheckBox::indicator { width: 14px; height: 14px; border: 1px solid #00d2ff; border-radius: 3px; background-color: #162438; }
-                QCheckBox::indicator:checked { background-color: #00e5ff; }
+                QCheckBox::indicator:checked { background-color: #00e5ff; border: 1px solid #00e5ff; }
             """)
 
         # --- RELOAD button border: glow cyan when not loaded, dim when loaded ---
