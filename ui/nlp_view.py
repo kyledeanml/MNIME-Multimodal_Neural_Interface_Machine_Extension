@@ -414,7 +414,6 @@ class NLPView(QWidget):
         self.start_over_btn.setEnabled(True)
         self._set_input_enabled(True)
         self.query_input.setFocus()
-        self._append_history("<div style='color:#00e5ff'><b>System:</b> First-Order Script generated. Ready for queries.</div><br>")
         
         import html
         import tempfile
