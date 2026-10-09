@@ -188,6 +188,25 @@ class NLPQueryWorker(QThread):
         except Exception as e:
             self.finished.emit(f"Error: {e}")
 
+class FirstOrderScriptWorker(QThread):
+    finished = pyqtSignal(str, str)
+
+    def __init__(self, vectorstore):
+        super().__init__()
+        self.vectorstore = vectorstore
+
+    def run(self):
+        try:
+            from core.search_engine import SearchEngine
+            context_docs = SearchEngine.search(self.vectorstore, "Abstract summary conclusion key points", k=5)
+            prompt = "Generate a highly structured first-order document synthesis and discussion script for this text. Include a brief summary and 3 key conversational expectations."
+            generator = NLPEngine.get_instance().generate_response_stream(prompt, context_docs, [])
+            full_response = ""
+            for chunk in generator:
+                full_response += chunk
+            self.finished.emit("MNIME First-Order Script", full_response.strip())
+        except Exception as e:
+            self.finished.emit("Error", str(e))
 
 class NLPView(QWidget):
     start_over_clicked = pyqtSignal()
@@ -358,11 +377,36 @@ class NLPView(QWidget):
     def _on_index_finished(self, vectorstore):
         self.vectorstore = vectorstore
         self.progress_bar.setVisible(False)
-        self.status_label.setText("Indexing complete! Ask a question below.")
+        self.status_label.setText("Generating First-Order Script...")
+        
+        self._script_worker = FirstOrderScriptWorker(vectorstore)
+        self._script_worker.finished.connect(self._on_script_generated)
+        self._script_worker.start()
+
+    def _on_script_generated(self, title, script_text):
+        self.status_label.setText("Indexing & Synthesis complete! Ask a question below.")
         self.start_over_btn.setEnabled(True)
         self._set_input_enabled(True)
         self.query_input.setFocus()
-        self._append_history("<div style='color:#00e5ff'><b>System:</b> Indexing complete. Ready for queries.</div><br>")
+        self._append_history("<div style='color:#00e5ff'><b>System:</b> First-Order Script generated. Ready for queries.</div><br>")
+        
+        import html
+        import tempfile
+        import os
+        
+        safe_script = html.escape(script_text).replace("\n", "<br>")
+        self._append_history(f"<div style='color:#00e5ff'><b>MNIME (Auto-Summary):</b><br>{safe_script}</div><br><hr><br>")
+        
+        script_path = os.path.join(tempfile.gettempdir(), "MNIME_FirstOrder_Script.txt")
+        with open(script_path, "w", encoding="utf-8") as f:
+            f.write("=== FIRST-ORDER DOCUMENT SYNTHESIS ===\n\n")
+            f.write(script_text)
+            
+        main_win = self.window()
+        if hasattr(main_win, '_add_files'):
+            main_win._add_files([script_path])
+        if hasattr(main_win, '_open_reader'):
+            main_win._open_reader(script_path)
 
     def _on_index_error(self, err: str):
         import html

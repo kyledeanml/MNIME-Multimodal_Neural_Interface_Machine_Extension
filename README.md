@@ -54,6 +54,7 @@ A modern, private, ultra-fast desktop interface with a fine-tuned local NLP engi
 - **Retina Image Viewer**: Integrated reader natively supports high-resolution image viewing (JPG, PNG, etc.) with automatic DPI scaling for perfectly crisp rendering on high-DPI displays.
 ### 2. Local Intelligence & RAG Engine
 - **Local NLP Engine**: Query across all open documents locally using the fine-tuned `MNIME-Core-V5-Q4_K_M.gguf` model with zero network traffic.
+- **First-Order Document Synthesis**: Automatically generates a foundational summary and discussion script for the active document the moment NLP mode is toggled, serving as a proactive reading companion. Engineered as a single-document pipeline to prevent context dilution and memory exhaustion.
 - **LoRA Adapter Loading**: Load an optional LoRA adapter (`.gguf`) on top of the base model from the **LORA** button in the NLP view (right-click to remove). The model reloads in the background.
 - **Semantic Search (RAG)**: Fast vector search powered by FAISS embeddings (`bge-small-en-v1.5`).
 - **Persistent Global Vector Store**: Every indexed document is also saved to a global FAISS store in `%LOCALAPPDATA%\MNIME\global_vector_store`. Chat queries pull relevant passages from it, so documents from earlier sessions can inform answers.

@@ -1184,7 +1184,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "No Files", "Please add at least one document before running this tool.")
             return
 
-        single_file_modes = [ToolMode.PDF_TO_JPG, ToolMode.SPLIT_PDF, ToolMode.COMPRESS_PDF, ToolMode.PDF_TO_DOCX, ToolMode.BOOKMARK]
+        single_file_modes = [ToolMode.PDF_TO_JPG, ToolMode.SPLIT_PDF, ToolMode.COMPRESS_PDF, ToolMode.PDF_TO_DOCX, ToolMode.BOOKMARK, ToolMode.NLP]
         if self.current_mode in single_file_modes and len(self.file_items) > 1:
             QMessageBox.information(
                 self,
@@ -1252,7 +1252,7 @@ class MainWindow(QMainWindow):
             self.carousel.hide()
             self.action_bar.hide()
             self.nlp_view.show()
-            self.nlp_view.start_indexing(self.file_items)
+            self.nlp_view.start_indexing([self.file_items[0]])
             return
             
         if self.current_mode == ToolMode.REFERENCE:
