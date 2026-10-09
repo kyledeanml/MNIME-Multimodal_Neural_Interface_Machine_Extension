@@ -50,6 +50,19 @@ class ExpandedNLPDialog(QDialog):
             QScrollBar::handle:vertical { background: #1f2737; min-height: 20px; border-radius: 5px; }
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; }
         """)
+        self.history_view.document().setDefaultStyleSheet("""
+            pre { background-color: rgba(22, 27, 34, 180); color: #e6edf3; padding: 10px; border-radius: 6px; font-family: Consolas, monospace; }
+            code { background-color: rgba(31, 36, 40, 180); color: #e6edf3; font-family: Consolas, monospace; }
+            p { line-height: 1.4; margin-top: 5px; margin-bottom: 5px; }
+            h1, h2, h3, h4, h5, h6 { color: #00e5ff; font-weight: bold; margin-top: 10px; margin-bottom: 5px; }
+            a { color: #00e5ff; }
+            table { border: 1px solid #30363d; border-collapse: collapse; margin-top: 5px; margin-bottom: 5px; }
+            th, td { border: 1px solid #30363d; padding: 5px; }
+            th { background-color: #162438; }
+            blockquote { border-left: 4px solid #00d2ff; color: #8b949e; margin-left: 0; padding-left: 10px; }
+            ul, ol { margin-left: 20px; margin-top: 5px; margin-bottom: 5px; }
+            li { margin-bottom: 5px; }
+        """)
         
         self.query_input = QLineEdit()
         self.query_input.setPlaceholderText("Ask a question...")
@@ -275,6 +288,19 @@ class NLPView(QWidget):
         self.history_view.setStyleSheet("""
             QTextBrowser { background-color: #0a0d14; color: #c9d1d9; border: 1px solid #1f2737; border-radius: 6px; padding: 10px; font-size: 14px; }
         """)
+        self.history_view.document().setDefaultStyleSheet("""
+            pre { background-color: #161b22; color: #e6edf3; padding: 10px; border-radius: 6px; font-family: Consolas, monospace; }
+            code { background-color: #1f2428; color: #e6edf3; font-family: Consolas, monospace; }
+            p { line-height: 1.4; margin-top: 5px; margin-bottom: 5px; }
+            h1, h2, h3, h4, h5, h6 { color: #00e5ff; font-weight: bold; margin-top: 10px; margin-bottom: 5px; }
+            a { color: #00e5ff; }
+            table { border: 1px solid #30363d; border-collapse: collapse; margin-top: 5px; margin-bottom: 5px; }
+            th, td { border: 1px solid #30363d; padding: 5px; }
+            th { background-color: #162438; }
+            blockquote { border-left: 4px solid #00d2ff; color: #8b949e; margin-left: 0; padding-left: 10px; }
+            ul, ol { margin-left: 20px; margin-top: 5px; margin-bottom: 5px; }
+            li { margin-bottom: 5px; }
+        """)
         self.history_view.setToolTip("Double click for expanded view")
         self.history_view.doubleClicked.connect(self._on_history_double_clicked)
         
@@ -394,7 +420,12 @@ class NLPView(QWidget):
         import tempfile
         import os
         
-        safe_script = html.escape(script_text).replace("\n", "<br>")
+        try:
+            from markdown_it import MarkdownIt
+            md = MarkdownIt("commonmark", {"breaks": True})
+            safe_script = md.render(script_text)
+        except Exception:
+            safe_script = html.escape(script_text).replace("\n", "<br>")
         self._append_history(f"<div style='color:#00e5ff'><b>MNIME (Auto-Summary):</b><br>{safe_script}</div><br><hr><br>")
         
         script_path = os.path.join(tempfile.gettempdir(), "MNIME_FirstOrder_Script.txt")
@@ -427,7 +458,18 @@ class NLPView(QWidget):
         self._set_input_enabled(False)
         self.status_label.setText("Generating answer...")
         
-        self._append_history("<div style='color:#00e5ff'><b>MNIME:</b> </div>")
+        self._append_history("<div style='color:#00e5ff'><b>MNIME:</b><br></div>")
+        
+        cursor = self.history_view.textCursor()
+        cursor.movePosition(cursor.MoveOperation.End)
+        self._stream_start_pos = cursor.position()
+        
+        if self.expanded_dialog and self.expanded_dialog.isVisible():
+            cursor_exp = self.expanded_dialog.history_view.textCursor()
+            cursor_exp.movePosition(cursor_exp.MoveOperation.End)
+            self._exp_stream_start_pos = cursor_exp.position()
+            
+        self._current_stream = ""
         
         # ── Normal Document Query Flow ──
         # 1. Semantic Search (open documents only)
@@ -452,9 +494,29 @@ class NLPView(QWidget):
         self.query_worker.start()
 
     def _on_query_chunk(self, chunk: str):
-        import html
-        safe_chunk = html.escape(chunk).replace("\n", "<br>").replace(" ", "&nbsp;")
-        self._insert_html_at_end(f"<span style='color:#00e5ff'>{safe_chunk}</span>")
+        self._current_stream += chunk
+        try:
+            from markdown_it import MarkdownIt
+            md = MarkdownIt("commonmark", {"breaks": True})
+            html_content = md.render(self._current_stream)
+        except Exception:
+            import html
+            html_content = html.escape(self._current_stream).replace("\n", "<br>")
+            
+        styled_html = f"<div style='color:#00e5ff'>{html_content}</div>"
+        
+        cursor = self.history_view.textCursor()
+        cursor.setPosition(self._stream_start_pos)
+        cursor.movePosition(cursor.MoveOperation.End, cursor.MoveMode.KeepAnchor)
+        cursor.removeSelectedText()
+        cursor.insertHtml(styled_html)
+        
+        if self.expanded_dialog and self.expanded_dialog.isVisible():
+            cursor_exp = self.expanded_dialog.history_view.textCursor()
+            cursor_exp.setPosition(self._exp_stream_start_pos)
+            cursor_exp.movePosition(cursor_exp.MoveOperation.End, cursor_exp.MoveMode.KeepAnchor)
+            cursor_exp.removeSelectedText()
+            cursor_exp.insertHtml(styled_html)
 
     def _on_query_response(self, response: str):
         self.conversation_history.append({"role": "assistant", "content": response})

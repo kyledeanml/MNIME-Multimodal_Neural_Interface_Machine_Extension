@@ -359,6 +359,42 @@ class ReaderDialog(QDialog):
                 self._render_page()
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to open PDF: {e}")
+        elif file_item.extension == ".txt":
+            pdf_path = file_item.file_path + ".pdf"
+            if not os.path.exists(pdf_path):
+                try:
+                    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+                    from reportlab.lib.styles import getSampleStyleSheet
+                    from reportlab.lib.pagesizes import letter
+                    
+                    doc = SimpleDocTemplate(pdf_path, pagesize=letter)
+                    styles = getSampleStyleSheet()
+                    style = styles["Normal"]
+                    
+                    with open(file_item.file_path, 'r', encoding='utf-8', errors='replace') as f:
+                        text = f.read()
+                        
+                    text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                    paragraphs = text.split('\n')
+                    story = []
+                    for p in paragraphs:
+                        if p.strip():
+                            story.append(Paragraph(p, style))
+                        else:
+                            story.append(Spacer(1, 12))
+                            
+                    doc.build(story)
+                except Exception as e:
+                    QMessageBox.critical(self, "Error", f"Failed to convert TXT to PDF: {e}")
+                    return
+            try:
+                import pymupdf
+                self.doc = pymupdf.open(pdf_path)
+                self.page_idx = 0
+                self._load_toc()
+                self._render_page()
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to open generated PDF: {e}")
         elif file_item.extension in [".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff"]:
             self.page_label.setText("Image")
             # Retina Image Loading
