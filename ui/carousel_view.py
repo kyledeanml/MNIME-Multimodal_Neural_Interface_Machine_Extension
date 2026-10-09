@@ -349,7 +349,7 @@ class CarouselView(QWidget):
         empty_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         empty_layout.setSpacing(10)
 
-        cloud_icon = AnimatedLogoWidget(275, self.empty_zone)
+        cloud_icon = AnimatedLogoWidget(260, self.empty_zone)
         empty_layout.addWidget(cloud_icon)
         
         # Add MNIME Typography under logo
