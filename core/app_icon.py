@@ -261,9 +261,10 @@ def _draw_logo_pixmap(size: int = 64, rotation: float = 0.0, is_tray: bool = Fal
     
     # The happy little neon green file swirling in its own independent arching orbit!
     # Calculate an XZ circular orbit (Z-depth)
+    orbit_radius = radius * (0.70 if is_tray else 0.52)
     happy_z = math.cos(rotation * 2.7)
-    happy_x = center.x() + radius * 0.70 * math.sin(rotation * 2.7)
-    happy_y = center.y() + radius * 0.70 * math.sin(rotation * 1.4) * math.cos(rotation * 0.9)
+    happy_x = center.x() + orbit_radius * math.sin(rotation * 2.7)
+    happy_y = center.y() + orbit_radius * math.sin(rotation * 1.4) * math.cos(rotation * 0.9)
     
     base_size = radius * (0.35 if is_tray else 0.22)
     depth_scale = 1.0 + (happy_z * 0.35) # Scale based on depth for 3D perspective
